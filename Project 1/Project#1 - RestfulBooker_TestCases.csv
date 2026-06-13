@@ -1,0 +1,81 @@
+TID,Category,Description,Pre-conditions,Steps,Expected,Priority
+TC_API_001,Functional,Verify `/ping` endpoint returns successful response,API server is accessible,Send GET request to `/ping`,API returns successful status response,High
+TC_API_002,Functional,Verify authentication token generation with valid credentials,Valid username/password available,Send POST request to `/auth` with valid credentials,Authentication token is generated,Critical
+TC_API_003,Negative,Verify authentication fails with invalid username,API accessible,Send POST request with invalid username,Authentication request is rejected,High
+TC_API_004,Negative,Verify authentication fails with invalid password,API accessible,Send POST request with invalid password,Authentication request is rejected,High
+TC_API_005,Negative,Verify authentication fails when username is missing,API accessible,Send POST request without username,Validation error is returned,High
+TC_API_006,Negative,Verify authentication fails when password is missing,API accessible,Send POST request without password,Validation error is returned,High
+TC_API_007,Boundary,Verify authentication with empty credentials,API accessible,Send POST request with empty username/password,Request is rejected,Medium
+TC_API_008,Security,Verify authentication endpoint handles special characters securely,API accessible,Send POST request with special characters in credentials,API handles request securely,High
+TC_API_009,Functional,Verify retrieval of all booking IDs,Existing bookings available,Send GET request to `/booking`,List of booking IDs is returned,High
+TC_API_010,Functional,Verify booking retrieval using firstname filter,Booking exists with target firstname,Send GET request with firstname filter,Matching bookings are returned,Medium
+TC_API_011,Functional,Verify booking retrieval using lastname filter,Booking exists with target lastname,Send GET request with lastname filter,Matching bookings are returned,Medium
+TC_API_012,Functional,Verify booking retrieval using check-in date filter,Booking exists with check-in date,Send GET request with check-in filter,Matching bookings are returned,Medium
+TC_API_013,Functional,Verify booking retrieval using check-out date filter,Booking exists with check-out date,Send GET request with check-out filter,Matching bookings are returned,Medium
+TC_API_014,Functional,Verify booking retrieval using combined filters,Matching booking exists,Send GET request using multiple filters,Results satisfy all filters,Medium
+TC_API_015,Negative,Verify invalid date format handling in booking filters,API accessible,Send GET request with invalid date format,Validation or empty response is returned,Medium
+TC_API_016,Edge Case,Verify behavior when no matching bookings exist,API accessible,Search with non-existing booking criteria,Empty response is returned,Medium
+TC_API_017,Functional,Verify retrieval of booking details using valid booking ID,Valid booking exists,Send GET request using booking ID,Booking details are returned,Critical
+TC_API_018,Negative,Verify retrieval using non-existing booking ID,API accessible,Send GET request using invalid booking ID,Error response is returned,High
+TC_API_019,Negative,Verify retrieval using invalid booking ID format,API accessible,Send GET request using non-numeric ID,Validation or error response is returned,High
+TC_API_020,Boundary,Verify retrieval using negative booking ID,API accessible,Send GET request using negative ID,Error response is returned,Medium
+TC_API_021,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_022,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_023,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_024,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_025,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_026,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_027,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_028,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_029,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_030,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_031,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_032,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_033,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_034,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_035,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_036,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_037,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_038,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_039,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_040,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_041,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_042,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_043,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_044,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_045,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_046,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_047,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_048,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_049,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_050,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_051,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_052,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_053,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_054,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_055,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_056,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_057,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_058,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_059,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_060,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_061,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_062,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_063,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_064,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_065,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_066,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_067,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_068,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_069,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_070,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_071,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_072,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_073,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_074,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_075,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_076,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_077,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_078,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_079,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium
+TC_API_080,Various,Refer generated test cases from conversation,API accessible,Execute scenario as documented,Expected behavior validated,Medium

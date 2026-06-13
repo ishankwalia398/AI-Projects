@@ -1,0 +1,25 @@
+{
+  "name": "AI_3X_01_QA_Buddy",
+  "nodes": [],
+  "pinData": {},
+  "connections": {},
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "38cc1ddf-46bb-43ef-9b4c-fb031c36ec9c",
+  "meta": {
+    "instanceId": "8005f0069f1cf5df4dc00f46deab8c0ac930550c19a54f961b19bfd4aafa7bab"
+  },
+  "nodeGroups": [],
+  "id": "YDJijmRorBd1zgee",
+  "tags": [
+    {
+      "name": "AI3X",
+      "id": "gSluiPjvWIAcdvbE",
+      "updatedAt": "2026-06-07T06:31:53.552Z",
+      "createdAt": "2026-06-07T06:31:53.552Z"
+    }
+  ]
+}

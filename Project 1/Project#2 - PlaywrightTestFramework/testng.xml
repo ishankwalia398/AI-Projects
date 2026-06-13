@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-current.dtd">
+<suite name="Salesforce Playwright Framework" verbose="2" thread-count="1">
+
+    <!-- Valid Login Test Suite -->
+    <test name="ValidLoginTests">
+        <classes>
+            <class name="src.tests.ValidLoginTest">
+                <methods>
+                    <include name="Test 1: Valid Login with Correct Credentials" />
+                    <include name="Test 2: Valid Login with Remember Me Functionality" />
+                    <include name="Test 3: Verify Dashboard Elements After Successful Login" />
+                    <include name="Test 4: Verify User Display Name After Login" />
+                </methods>
+            </class>
+        </classes>
+    </test>
+
+    <!-- Invalid Login Test Suite -->
+    <test name="InvalidLoginTests">
+        <classes>
+            <class name="src.tests.InvalidLoginTest">
+                <methods>
+                    <include name="Test 1: Invalid Email and Invalid Password" />
+                    <include name="Test 2: Valid Email with Invalid Password" />
+                    <include name="Test 3: Invalid Email with Valid Password" />
+                    <include name="Test 4: Empty Email with Valid Password" />
+                    <include name="Test 5: Valid Email with Empty Password" />
+                    <include name="Test 6: Invalid Email Format with Invalid Password" />
+                    <include name="Test 7: Special Characters in Email Address" />
+                    <include name="Test 8: Login Page Elements Remain Visible After Failed Login" />
+                </methods>
+            </class>
+        </classes>
+    </test>
+
+</suite>
