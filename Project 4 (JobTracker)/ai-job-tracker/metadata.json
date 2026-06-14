@@ -1,6 +1,0 @@
-{
-  "name": "AI Job Tracker",
-  "description": "A premium, feature-rich Job Application Tracker featuring a Kanban board, advanced analytics, calendar events, and AI-enabled insights, cover letter generation, and resume-JD match scoring.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
