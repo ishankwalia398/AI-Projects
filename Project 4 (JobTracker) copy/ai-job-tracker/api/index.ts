@@ -31,7 +31,7 @@ async function getAICompletion(prompt: string, systemInstruction?: string, jsonS
       messages.push({ role: 'user', content: prompt });
 
       const requestBody: any = {
-        model: 'grok-2-latest',
+        model: 'grok-beta',
         messages,
         temperature: 0.7,
       };
