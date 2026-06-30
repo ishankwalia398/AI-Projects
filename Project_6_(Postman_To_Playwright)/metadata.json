@@ -1,0 +1,6 @@
+{
+  "name": "Postman Playwright Converter",
+  "description": "Convert Postman collections and environment variables into high-quality Playwright scripts and custom n8n workflow flows with OTP verification handling.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

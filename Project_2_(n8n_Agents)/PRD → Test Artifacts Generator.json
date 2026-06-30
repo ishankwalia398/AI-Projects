@@ -1,0 +1,405 @@
+{
+  "name": "PRD → Test Artifacts Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "model": "nvidia/nemotron-3-nano-30b-a3b:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -1888,
+        272
+      ],
+      "id": "2cfc5892-01ef-4286-9865-ee226d537b4b",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "MyW75lat9u9ua1FV",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1",
+              "name": "output",
+              "value": "=✅ All test artifacts have been generated successfully!\n\n📄 **Test Plan** saved to: /tmp/test_plan.md\n📊 **Test Cases** saved to: /tmp/test_cases.csv\n🎭 **Playwright Scripts** saved to: /tmp/playwright_scripts.md\n\nYou can now download these files from the n8n server.",
+              "type": "string"
+            },
+            {
+              "id": "0755b43f-9221-412d-ad6f-8680d177e607",
+              "name": "",
+              "value": "data",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "114426ea-46fb-4059-a978-45c76b160960",
+      "name": "Format Chat Response",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -944,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Based on these test cases:\n\n{{ $(\"Generate Test Cases\").item.json.output }}\n\nGenerate Playwright test scripts in JavaScript/TypeScript format. Include:\n- Test setup and teardown\n- Page object patterns where appropriate\n- Proper assertions\n- Comments explaining each test\n\nReturn ONLY the code in markdown format with proper code blocks.",
+        "options": {
+          "systemMessage": "You are a test automation expert specializing in Playwright. Generate production-ready Playwright test scripts with best practices. Return the scripts in markdown format with code blocks.",
+          "maxIterations": 5
+        }
+      },
+      "id": "ca92444b-371d-4923-9e5a-45a6ce14b805",
+      "name": "Generate Playwright Scripts",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -1440,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Based on this test plan:\n\n{{ $(\"Generate Test Plan\").item.json.output }}\n\nGenerate detailed test cases in CSV format with these columns:\nTest ID,Test Scenario,Test Steps,Expected Result,Priority,Status\n\nReturn ONLY the CSV content with header row, no additional text or markdown formatting.",
+        "options": {
+          "systemMessage": "You are a QA expert. Generate test cases in CSV format. Return only raw CSV content with proper escaping for commas and quotes. No markdown code blocks or explanations.",
+          "maxIterations": 5
+        }
+      },
+      "id": "c512bf81-b9ab-4fc8-a63f-4aae63eb9f84",
+      "name": "Generate Test Cases",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -1728,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "id": "6c208945-0d91-40d7-9efb-c14cd7eb040f",
+      "name": "Conversation Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        -1600,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Create a comprehensive test plan in Markdown format based on this PRD:\n\n{{ $json.data }}\n\nInclude:\n- Test Objectives\n- Scope\n- Test Strategy\n- Test Scenarios\n- Entry/Exit Criteria\n- Deliverables\n\nReturn ONLY the markdown content, no additional text.",
+        "options": {
+          "systemMessage": "You are a QA expert. Generate detailed test plans in Markdown format. Return only the markdown content without any wrapper text or explanations.",
+          "maxIterations": 5
+        }
+      },
+      "id": "2ab47eeb-9dfa-49ef-b098-1e822fa0600b",
+      "name": "Generate Test Plan",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -2016,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "data0",
+        "options": {
+          "joinPages": true
+        }
+      },
+      "id": "ffb3e2cc-e32a-4c35-8f84-c1d4a0788aac",
+      "name": "Read PRD",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -2176,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -1056,
+        -352
+      ],
+      "id": "87d913f4-58ff-4c36-9307-54c0fc0ee796",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "options": {
+          "allowFileUploads": true
+        }
+      },
+      "id": "9aa94150-60f8-4977-8434-3b20de28376a",
+      "name": "PRD Upload via Chat",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -2352,
+        -48
+      ],
+      "webhookId": "prd-test-artifacts-gen"
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "output",
+        "binaryPropertyName": "data1",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        -1776,
+        -256
+      ],
+      "id": "10939bde-7ef1-454f-965d-e6b0a00082a4",
+      "name": "Save Test Plan(.md)"
+    },
+    {
+      "parameters": {
+        "binaryPropertyName": "data2",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        -1488,
+        -192
+      ],
+      "id": "ad7988ad-55b9-49f2-a478-8c4ee5190129",
+      "name": "Save Test Cases (.CSV)"
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "output",
+        "binaryPropertyName": "data3",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        -1200,
+        -192
+      ],
+      "id": "b806274f-b2f7-4a0f-bbc0-9c068b513d19",
+      "name": "Save Scripts (.md)"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Playwright Scripts",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Generate Test Cases",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Generate Test Plan",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Playwright Scripts": {
+      "main": [
+        [
+          {
+            "node": "Save Scripts (.md)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Test Cases": {
+      "main": [
+        [
+          {
+            "node": "Generate Playwright Scripts",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Save Test Cases (.CSV)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conversation Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Generate Playwright Scripts",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Generate Test Cases",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Generate Test Plan",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Test Plan": {
+      "main": [
+        [
+          {
+            "node": "Generate Test Cases",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Save Test Plan(.md)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read PRD": {
+      "main": [
+        [
+          {
+            "node": "Generate Test Plan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Chat Response": {
+      "main": [
+        []
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Format Chat Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PRD Upload via Chat": {
+      "main": [
+        [
+          {
+            "node": "Read PRD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Test Plan(.md)": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Test Cases (.CSV)": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Save Scripts (.md)": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "66356f5c-293b-4acb-a86a-c4f74705823f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c87a3f4031af7f1aad769e6e2a41c59fb338be3b340573b655c12fb338022b97"
+  },
+  "nodeGroups": [],
+  "id": "fB96y9yrn1arC3si",
+  "tags": [
+    {
+      "name": "Automation",
+      "id": "lUKKNWaApvEeBDS3",
+      "updatedAt": "2026-06-12T19:30:36.801Z",
+      "createdAt": "2026-06-12T19:30:36.801Z"
+    },
+    {
+      "name": "PRD",
+      "id": "om2s3fGHXO9skOrs",
+      "updatedAt": "2026-06-12T19:30:36.779Z",
+      "createdAt": "2026-06-12T19:30:36.779Z"
+    },
+    {
+      "name": "QA",
+      "id": "qX7kNIDPsQLyoAsf",
+      "updatedAt": "2026-06-12T19:30:36.756Z",
+      "createdAt": "2026-06-12T19:30:36.756Z"
+    }
+  ]
+}

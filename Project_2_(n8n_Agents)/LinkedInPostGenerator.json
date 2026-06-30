@@ -1,0 +1,482 @@
+{
+  "name": "postGenerator",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "id": "d2b9e638-99de-4430-827b-8df82be8d13e",
+      "name": "Daily at 9 AM",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        240,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "Generate one interesting and engaging content topic based on these keywords: QA, MCP, RAG, LLM, AI Agents, n8n, LangFlow, Crew AI, DeepEval, LangChain, AI Harness, LLM Eval. Return ONLY the topic title as a single line of text, nothing else.",
+        "options": {
+          "systemMessage": "You are a content topic generator. Generate one topic title based on the provided keywords. Return only the topic title, no explanations or additional text."
+        }
+      },
+      "id": "70a330ea-528c-46c1-bc73-c97698e482d7",
+      "name": "Agent 1 - Topic Generator",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        464,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {
+          "maxTokensToSample": 4096,
+          "temperature": 0.7
+        }
+      },
+      "id": "1ccc0685-bd74-4cfe-9eda-d95a4776fcea",
+      "name": "Groq Model - Topic Generator",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        544,
+        624
+      ],
+      "credentials": {
+        "groqApi": {
+          "id": "EtfvzoDQn1nKqeTP",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "date",
+              "name": "Date",
+              "value": "={{ $now.toFormat(\"yyyy-MM-dd\") }}",
+              "type": "string"
+            },
+            {
+              "id": "topic",
+              "name": "Topic",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8ea68a2d-9e7f-41ec-9104-2a564ed87014",
+      "name": "Format Topic for Sheet",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        816,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "url",
+          "value": "https://docs.google.com/spreadsheets/d/1_9NCRW9o08KJ-grrkkhUkqvpugg6nLociQUOv4dZkjg/edit?usp=sharing"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_9NCRW9o08KJ-grrkkhUkqvpugg6nLociQUOv4dZkjg/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "296becfb-74af-422c-9eef-fd9ee62aaa96",
+      "name": "Write Topic to Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1040,
+        400
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "i9u17AmQp0YrIBGK",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "url",
+          "value": "https://docs.google.com/spreadsheets/d/1_9NCRW9o08KJ-grrkkhUkqvpugg6nLociQUOv4dZkjg/edit?usp=sharing"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_9NCRW9o08KJ-grrkkhUkqvpugg6nLociQUOv4dZkjg/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "0badaf02-9474-49ed-a4ba-2419ed124d9f",
+      "name": "Read Today's Topic",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1264,
+        400
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "i9u17AmQp0YrIBGK",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Write a professional and engaging LinkedIn post about this topic: {{ $json.Topic }}. The post should be informative, include relevant hashtags, and be optimized for LinkedIn engagement. Keep it concise (200-300 words).",
+        "options": {
+          "systemMessage": "You are a professional content writer specializing in LinkedIn posts. Create engaging, informative content that drives engagement."
+        }
+      },
+      "id": "86185a89-21ec-4dcd-bef5-2b6bff477c4e",
+      "name": "Agent 2 - Content Writer",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1712,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "date",
+              "name": "Date",
+              "value": "={{ $(\"Read Today's Topic\").item.json.Date }}",
+              "type": "string"
+            },
+            {
+              "id": "linkedinPost",
+              "name": "LinkedIn POST",
+              "value": "={{ $(\"Agent 2 - Content Writer\").item.json.output }}",
+              "type": "string"
+            },
+            {
+              "id": "status",
+              "name": "Status",
+              "value": "Generated",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ba867073-c597-4365-9c94-bf2119a99dc4",
+      "name": "Format Content for Update",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2064,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "url",
+          "value": "https://docs.google.com/spreadsheets/d/1_9NCRW9o08KJ-grrkkhUkqvpugg6nLociQUOv4dZkjg/edit?usp=sharing"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_9NCRW9o08KJ-grrkkhUkqvpugg6nLociQUOv4dZkjg/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "Date"
+          ],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Topic",
+              "displayName": "Topic",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "LinkedIn Post",
+              "displayName": "LinkedIn Post",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "LinkedIn POST",
+              "displayName": "LinkedIn POST",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "8fe12430-c2db-4835-ab89-09e4e2e27224",
+      "name": "Agent 4 - Sheet Updater",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2288,
+        400
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "i9u17AmQp0YrIBGK",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {
+          "maxTokensToSample": 4096,
+          "temperature": 0.7
+        }
+      },
+      "id": "4d3e9509-4b6f-4dc5-8954-6b1ed4374cd7",
+      "name": "Groq Model - Content Writer",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        1792,
+        624
+      ],
+      "credentials": {
+        "groqApi": {
+          "id": "EtfvzoDQn1nKqeTP",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "id": "aab0cdab-9e2a-46de-926e-d8d37ff5385f",
+      "name": "Wait Before Content Writer",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1488,
+        400
+      ],
+      "webhookId": "c973ba67-13e7-437c-9f3a-210ad40b8be7"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Daily at 9 AM": {
+      "main": [
+        [
+          {
+            "node": "Agent 1 - Topic Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agent 1 - Topic Generator": {
+      "main": [
+        [
+          {
+            "node": "Format Topic for Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Model - Topic Generator": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agent 1 - Topic Generator",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Topic for Sheet": {
+      "main": [
+        [
+          {
+            "node": "Write Topic to Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Topic to Sheet": {
+      "main": [
+        [
+          {
+            "node": "Read Today's Topic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Today's Topic": {
+      "main": [
+        [
+          {
+            "node": "Wait Before Content Writer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agent 2 - Content Writer": {
+      "main": [
+        [
+          {
+            "node": "Format Content for Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Content for Update": {
+      "main": [
+        [
+          {
+            "node": "Agent 4 - Sheet Updater",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Model - Content Writer": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agent 2 - Content Writer",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait Before Content Writer": {
+      "main": [
+        [
+          {
+            "node": "Agent 2 - Content Writer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "5b9dae1c-09c4-4ac5-be7a-2e42d42f5725",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c87a3f4031af7f1aad769e6e2a41c59fb338be3b340573b655c12fb338022b97"
+  },
+  "nodeGroups": [],
+  "id": "lkHX8G6cpphhAOFc",
+  "tags": []
+}

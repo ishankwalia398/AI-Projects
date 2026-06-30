@@ -1,0 +1,8 @@
+node_modules/
+dist/
+npm-cache/
+.vercel/
+.DS_Store
+.env
+.env.local
+scratch/

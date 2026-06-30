@@ -1,0 +1,6 @@
+{
+  "name": "AI Global Career and Resume Suite",
+  "description": "An end-to-end global career progression platform featuring resumes ATS optimization, multi-region job search with visa sponsor filters, tailored cover/motivation letters, screen cheat-sheets, and an interactive Kanban job tracker.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
