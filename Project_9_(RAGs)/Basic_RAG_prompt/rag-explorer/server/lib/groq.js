@@ -1,6 +1,6 @@
-// Groq chat completion using a currently supported model.
+// Groq chat completion. "OpenGPT 120B" => openai/gpt-oss-120b, OpenAI-compatible API.
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions'
-const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile'
+const GROQ_MODEL = process.env.GROQ_MODEL || 'openai/gpt-oss-120b'
 
 const SYSTEM_PROMPT =
   'You are a precise assistant answering questions about a Product Requirements Document (PRD). ' +

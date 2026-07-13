@@ -1,0 +1,151 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --color-bg-primary: #030712;
+  --color-bg-secondary: #090d16;
+  --color-bg-card: #0d111d;
+  --color-bg-card-hover: #131827;
+  --color-bg-elevated: #161b2e;
+  --color-border-subtle: #1e2438;
+  --color-border-active: #2a3050;
+
+  --color-neon-emerald: #34d399;
+  --color-neon-emerald-dim: #10b981;
+  --color-neon-violet: #a78bfa;
+  --color-neon-violet-dim: #7c3aed;
+  --color-neon-amber: #fbbf24;
+  --color-neon-amber-dim: #f59e0b;
+  --color-neon-cyan: #22d3ee;
+  --color-neon-rose: #fb7185;
+
+  --color-text-primary: #f1f5f9;
+  --color-text-secondary: #94a3b8;
+  --color-text-muted: #64748b;
+  --color-text-accent: #a78bfa;
+
+  --color-badge-green-bg: rgba(52, 211, 153, 0.12);
+  --color-badge-green-border: rgba(52, 211, 153, 0.3);
+  --color-badge-green-text: #34d399;
+  --color-badge-violet-bg: rgba(167, 139, 250, 0.12);
+  --color-badge-violet-border: rgba(167, 139, 250, 0.3);
+  --color-badge-violet-text: #a78bfa;
+  --color-badge-amber-bg: rgba(251, 191, 36, 0.12);
+  --color-badge-amber-border: rgba(251, 191, 36, 0.3);
+  --color-badge-amber-text: #fbbf24;
+
+  --color-progress-bg: #1a2040;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-bg-secondary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-active);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+/* Glow animations */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 4px rgba(52, 211, 153, 0.3); }
+  50% { box-shadow: 0 0 12px rgba(52, 211, 153, 0.6); }
+}
+
+@keyframes dot-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-dot-pulse {
+  animation: dot-pulse 1.5s ease-in-out infinite;
+}
+
+/* Custom utility classes */
+.bg-gradient-card {
+  background: linear-gradient(135deg, var(--color-bg-card) 0%, var(--color-bg-secondary) 100%);
+}
+
+.border-glow-emerald {
+  border-color: var(--color-neon-emerald);
+  box-shadow: 0 0 8px rgba(52, 211, 153, 0.2);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #a78bfa 0%, #34d399 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Drop zone styling */
+.drop-zone {
+  transition: all 0.2s ease;
+}
+.drop-zone:hover,
+.drop-zone.dragover {
+  border-color: var(--color-neon-violet);
+  background: rgba(167, 139, 250, 0.05);
+  box-shadow: 0 0 16px rgba(167, 139, 250, 0.1);
+}
+
+/* Pipeline step */
+.pipeline-step {
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+.pipeline-step:hover {
+  transform: translateY(-2px);
+}
+.pipeline-step.active {
+  border-color: var(--color-neon-emerald);
+  box-shadow: 0 0 16px rgba(52, 211, 153, 0.15);
+}
+
+/* Tab styling */
+.tab-btn {
+  transition: all 0.2s ease;
+}
+.tab-btn.active {
+  color: var(--color-neon-violet);
+  border-bottom-color: var(--color-neon-violet);
+}
+
+/* Progress steps */
+.progress-step {
+  transition: all 0.3s ease;
+}
+.progress-step.completed {
+  color: var(--color-neon-emerald);
+}
+.progress-step.active-step {
+  color: var(--color-neon-amber);
+  animation: dot-pulse 1s ease-in-out infinite;
+}

@@ -1,17 +1,16 @@
-import dotenv from 'dotenv'
+import 'dotenv/config'
+import express from 'express'
+import cors from 'cors'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-dotenv.config({ path: path.resolve(__dirname, '..', '.env') })
-import express from 'express'
-import cors from 'cors'
 import { listPdfs, extractPdf } from './lib/pdf.js'
 import { chunkText } from './lib/chunk.js'
 import { embedTexts, embedInfo } from './lib/embed.js'
 import { getCollection, resetCollection, storeChunks, retrieve, countChunks, pingChroma } from './lib/chroma.js'
 import { generateAnswer, groqInfo } from './lib/groq.js'
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const DATA_DIR = path.resolve(__dirname, '..', process.env.DATA_DIR || '../data')
 const CHUNK_SIZE = Number(process.env.CHUNK_SIZE || 1200)
 const CHUNK_OVERLAP = Number(process.env.CHUNK_OVERLAP || 200)

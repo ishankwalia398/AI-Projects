@@ -9,7 +9,7 @@ PDF  →  Chunk  →  Nomic Embed  →  ChromaDB  →  Retrieve top-4  →  Groq
 - **Source doc:** the VWO PRD in `../data/` (any `*.pdf` you drop there is ingested).
 - **Embeddings:** `nomic-embed-text` via **local Ollama** — no API key, runs offline.
 - **Vector store:** a **local ChromaDB** server (cosine similarity).
-- **LLM:** **Groq** `llama-3.3-70b-versatile` for the final answer.
+- **LLM:** **Groq** `openai/gpt-oss-120b` ("OpenGPT 120B") for the final answer.
 
 The UI shows the real chunks, a slice of an actual embedding vector, the top-4 retrieved
 passages with similarity scores, and the exact augmented prompt sent to the LLM.
@@ -110,7 +110,7 @@ Similarity shown in the UI is `1 − cosineDistance`, clamped to `[0,1]`.
 | Var | Default | Purpose |
 |-----|---------|---------|
 | `GROQ_API_KEY` | — | **required** — your Groq key |
-| `GROQ_MODEL` | `llama-3.3-70b-versatile` | the LLM |
+| `GROQ_MODEL` | `openai/gpt-oss-120b` | the LLM |
 | `EMBED_MODEL` | `nomic-embed-text` | Ollama embed model |
 | `OLLAMA_URL` | `http://localhost:11434` | local Ollama |
 | `CHROMA_URL` | `http://localhost:8000` | local ChromaDB server |
