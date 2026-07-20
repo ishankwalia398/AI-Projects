@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QABuddy.AI - Architecture & Backend Documentation</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #0a0a0a;
+            color: #e5e5e5;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container { max-width: 1400px; margin: 0 auto; }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            padding: 40px 20px;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        h1 {
+            font-size: 3.5em;
+            font-weight: 800;
+            background: linear-gradient(135deg, #d97706 0%, #ea580c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            font-size: 1.3em;
+            color: #a8a8a8;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-bottom: 20px;
+        }
+
+        .tagline {
+            font-size: 1.2em;
+            color: #e5e5e5;
+            max-width: 800px;
+            margin: 20px auto;
+            line-height: 1.8;
+        }
+
+        .tagline strong {
+            color: #ea580c;
+            font-weight: 700;
+        }
+
+        .live-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: #ea580c;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .live-link:hover {
+            background: #c2410c;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(234, 88, 12, 0.3);
+        }
+
+        /* Section Headers */
+        .section-header {
+            font-size: 2.5em;
+            color: #ffffff;
+            margin: 60px 0 30px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .section-header::before {
+            content: attr(data-number) '·';
+            color: #ea580c;
+            font-size: 1.2em;
+        }
+
+        /* Cards */
+        .card {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: #3a3a3a;
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .card-title {
+            font-size: 1.5em;
+            color: #ea580c;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .card-content {
+            color: #b8b8b8;
+            font-size: 1.05em;
+            line-height: 1.8;
+        }
+
+        /* Grid Layouts */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        /* Flow Diagram */
+        .flow-section {
+            background: #1a1a1a;
+            border: 2px solid #2a2a2a;
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 50px;
+        }
+
+        .flow-title {
+            font-size: 1.8em;
+            color: #ea580c;
+            margin-bottom: 30px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .flow-step {
+            background: #0a0a0a;
+            border: 1px solid #3a3a3a;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .flow-step-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .flow-number {
+            width: 40px;
+            height: 40px;
+            background: #ea580c;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2em;
+        }
+
+        .flow-step-title {
+            font-size: 1.3em;
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .flow-step-content {
+            margin-left: 55px;
+            color: #b8b8b8;
+            line-height: 1.7;
+        }
+
+        .arrow-down {
+            text-align: center;
+            color: #ea580c;
+            font-size: 2em;
+            margin: 10px 0;
+        }
+
+        /* Architecture Diagram */
+        .arch-diagram {
+            background: #1a1a1a;
+            border: 2px solid #2a2a2a;
+            border-radius: 16px;
+            padding: 40px;
+            margin: 40px 0;
+        }
+
+        .arch-box {
+            background: #0a0a0a;
+            border: 1px solid #3a3a3a;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .arch-box-title {
+            font-size: 1.3em;
+            color: #ea580c;
+            margin-bottom: 15px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .arch-component {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            font-size: 0.95em;
+            color: #d4d4d4;
+        }
+
+        /* Tech Stack Table */
+        .tech-table {
+            width: 100%;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 30px 0;
+        }
+
+        .tech-table th {
+            background: #0a0a0a;
+            color: #ea580c;
+            padding: 15px;
+            text-align: left;
+            font-weight: 700;
+            border-bottom: 2px solid #2a2a2a;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            letter-spacing: 0.05em;
+        }
+
+        .tech-table td {
+            padding: 20px 15px;
+            border-bottom: 1px solid #2a2a2a;
+            color: #d4d4d4;
+        }
+
+        .tech-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .tech-table tr:hover {
+            background: #0a0a0a;
+        }
+
+        .tech-layer {
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .tech-choice {
+            color: #ea580c;
+            font-weight: 600;
+        }
+
+        .tech-hosted {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #9ca3af;
+        }
+
+        /* Code Blocks */
+        .code-block {
+            background: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 10px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #86efac;
+            overflow-x: auto;
+            line-height: 1.6;
+            margin: 20px 0;
+        }
+
+        .code-block .comment {
+            color: #6b7280;
+            font-style: italic;
+        }
+
+        .code-block .keyword {
+            color: #c084fc;
+        }
+
+        /* Lists */
+        .feature-list {
+            list-style: none;
+            margin: 20px 0;
+        }
+
+        .feature-list li {
+            padding: 12px 15px;
+            margin: 8px 0;
+            background: #0a0a0a;
+            border-left: 3px solid #ea580c;
+            border-radius: 6px;
+            color: #d4d4d4;
+        }
+
+        .feature-list li::before {
+            content: "✓ ";
+            color: #ea580c;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        /* Tags */
+        .tag {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .tag-orange {
+            background: rgba(234, 88, 12, 0.2);
+            color: #ea580c;
+            border: 1px solid rgba(234, 88, 12, 0.3);
+        }
+
+        .tag-green {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .tag-blue {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .tag-purple {
+            background: rgba(168, 85, 247, 0.2);
+            color: #a855f7;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+        }
+
+        /* Comparison Table */
+        .comparison-box {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .comparison-col h3 {
+            color: #ea580c;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+        }
+
+        .comparison-item {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            color: #d4d4d4;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 60px 20px 40px;
+            border-top: 1px solid #2a2a2a;
+            margin-top: 80px;
+            color: #6b7280;
+        }
+
+        footer a {
+            color: #ea580c;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 { font-size: 2em; }
+            .section-header { font-size: 1.8em; }
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+            .comparison-box { grid-template-columns: 1fr; }
+            .tech-table { font-size: 0.85em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>QABuddy.AI ✦</h1>
+            <p class="subtitle">Backend & Architecture</p>
+            <p class="tagline">
+                A <strong>citation-backed</strong> hybrid-RAG chatbot that answers any question about
+                your QA organization's frameworks, test cases, JIRA bugs, PRDs, meeting notes, Jenkins logs, and more.
+            </p>
+            <p style="color: #9ca3af; margin-top: 10px;">
+                Knowledge sources: Selenium/Playwright frameworks • 5K test cases • JIRA tickets • PRDs/SRS/BRD/FRD • Company docs • Meeting notes • Lucid charts • Jenkins logs
+            </p>
+            <a href="https://app-webqabuddy-ishank-w-project.vercel.app" target="_blank" class="live-link">
+                Open live app ↗
+            </a>
+        </header>
+
+        <!-- Section 1: How We Built the Backend -->
+        <h2 class="section-header" data-number="1">How We Built the Backend</h2>
+
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-title">🔄 Ingestion Pipeline</div>
+                <div class="card-content">
+                    <p><strong>Phase 1 (Current):</strong> Hourly Vercel Cron triggers <code>/api/cron</code> → Loader/Parser reads 10 source folders + JIRA MCP (JQL) → Chunker splits by content type → BGE-M3 embedding (dense + sparse) → Vector DB upsert + Metadata store.</p>
+                    <br>
+                    <p><strong>Phase 2 (Planned):</strong> Real-time webhooks from GitHub, JIRA, Figma → instant ingestion without waiting for hourly job.</p>
+                    <ul class="feature-list" style="margin-top: 15px;">
+                        <li>10 knowledge source folders</li>
+                        <li>Parallel embedding jobs</li>
+                        <li>Incremental upserts</li>
+                        <li>Metadata tracking for citations</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">🔍 Retrieval Pipeline</div>
+                <div class="card-content">
+                    <p>Question → <strong>Understand/Rewrite</strong> (query expansion) → <strong>Parallel Search</strong> (Dense vectors + BM25 keyword) → <strong>Merge</strong> (Reciprocal Rank Fusion) → <strong>Cross-Encoder Rerank</strong> (BGE-Reranker-v2-M3) → <strong>Context Assembly</strong> (top 6 chunks) → <strong>LLM Answer</strong> with inline citations.</p>
+                    <br>
+                    <div style="margin-top: 15px;">
+                        <span class="tag tag-orange">Hybrid Search</span>
+                        <span class="tag tag-green">Dense + Sparse</span>
+                        <span class="tag tag-blue">Reranking</span>
+                        <span class="tag tag-purple">Citations</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-3">
+            <div class="card">
+                <div class="card-title">✂️ Chunking Strategy</div>
+                <div class="card-content">
+                    <ul class="feature-list">
+                        <li><strong>Code:</strong> By function/class (~300-500 tokens)</li>
+                        <li><strong>CSV:</strong> 10-row groups with header</li>
+                        <li><strong>JIRA:</strong> Per ticket (split if >800 tokens)</li>
+                        <li><strong>PDFs:</strong> ~500 tokens by heading</li>
+                        <li><strong>Meeting notes:</strong> By speaker turn (~600 tokens)</li>
+                        <li><strong>Jenkins logs:</strong> By build/stage (~400 tokens)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">🎯 JIRA MCP Integration</div>
+                <div class="card-content">
+                    <p>JQL queries run hourly via Vercel Cron. Tickets are normalized, chunked by field (summary, description, comments), embedded with ticket_key metadata for citation.</p>
+                    <br>
+                    <div class="code-block">
+                        <span class="comment">// Example JQL</span><br>
+                        project = VWO AND updated >= -7d<br>
+                        ORDER BY updated DESC
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">📊 Metadata Store</div>
+                <div class="card-content">
+                    <p>Postgres (Neon) tracks source paths, ticket IDs, line ranges, timestamps for every chunk. Enables precise citation links back to original content.</p>
+                    <br>
+                    <ul class="feature-list">
+                        <li>Source file path</li>
+                        <li>Line number ranges</li>
+                        <li>JIRA ticket keys</li>
+                        <li>Last updated timestamp</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Query-Time Flow -->
+        <h2 class="section-header" data-number="2">Query-Time Flow</h2>
+
+        <div class="flow-section">
+            <div class="flow-title">🔄 How an Answer is Fetched</div>
+
+            <div class="flow-step">
+                <div class="flow-step-header">
+                    <div class="flow-number">1</div>
+                    <div class="flow-step-title">Understand</div>
+                </div>
+                <div class="flow-step-content">
+                    User question is analyzed and rewritten into multiple search variants to improve recall. Example: "What is KAN-1002?" → ["KAN-1002 bug details", "ticket KAN-1002 status", "JIRA KAN-1002"]
+                </div>
+            </div>
+
+            <div class="arrow-down">▼</div>
+
+            <div class="flow-step">
+                <div class="flow-step-header">
+                    <div class="flow-number">2</div>
+                    <div class="flow-step-title">Search</div>
+                </div>
+                <div class="flow-step-content">
+                    <strong>Parallel execution:</strong>
+                    <br>• <strong>Dense Vector Search:</strong> BGE-M3 embeddings find semantically similar chunks
+                    <br>• <strong>BM25 Keyword Search:</strong> Sparse vectors catch exact matches (ticket IDs, method names, exceptions)
+                    <br>Both searches run simultaneously against Qdrant, fetching top 20 candidates each.
+                </div>
+            </div>
+
+            <div class="arrow-down">▼</div>
+
+            <div class="flow-step">
+                <div class="flow-step-header">
+                    <div class="flow-number">3</div>
+                    <div class="flow-step-title">Rank</div>
+                </div>
+                <div class="flow-step-content">
+                    <strong>Reciprocal Rank Fusion</strong> merges dense + sparse results. Then <strong>BGE-Reranker-v2-M3</strong> (cross-encoder) rescores all candidates against the original question → top 6 chunks selected.
+                </div>
+            </div>
+
+            <div class="arrow-down">▼</div>
+
+            <div class="flow-step">
+                <div class="flow-step-header">
+                    <div class="flow-number">4</div>
+                    <div class="flow-step-title">Answer</div>
+                </div>
+                <div class="flow-step-content">
+                    LLM (<strong>Llama 3.3 70B</strong> via Groq) receives the 6 chunks as context + original question → generates answer with inline citations. Each citation links to source file, line number, or JIRA ticket.
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Overall Architecture -->
+        <h2 class="section-header" data-number="3">Overall Architecture</h2>
+
+        <div class="arch-diagram">
+            <div class="arch-box">
+                <div class="arch-box-title">☁️ Vercel (Serverless)</div>
+                <div class="arch-component">
+                    <strong>Next.js 14 App Router</strong><br>
+                    • Frontend: React + TailwindCSS + Lucide icons<br>
+                    • API Routes: /api/chat, /api/ingest, /api/cron, /api/health, /api/stats
+                </div>
+                <div class="arch-component">
+                    <strong>Vercel Cron</strong><br>
+                    • Schedule: Hourly (0 * * * *)<br>
+                    • Triggers: /api/cron for re-ingestion
+                </div>
+            </div>
+
+            <div style="text-align: center; color: #ea580c; font-size: 2em; margin: 20px 0;">↕</div>
+
+            <div class="arch-box">
+                <div class="arch-box-title">🌐 External Services</div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
+                    <div class="arch-component">
+                        <strong>Qdrant Cloud</strong><br>
+                        • Vector DB (dense + sparse)<br>
+                        • Collection: qabuddy<br>
+                        • Payload filtering for sources
+                    </div>
+                    <div class="arch-component">
+                        <strong>Groq API</strong><br>
+                        • Model: Llama 3.3 70B Versatile<br>
+                        • OpenAI-compatible endpoint<br>
+                        • Ultra-fast inference
+                    </div>
+                    <div class="arch-component">
+                        <strong>Neon Postgres</strong><br>
+                        • Metadata store<br>
+                        • Source paths, ticket IDs, timestamps<br>
+                        • Serverless, Vercel-optimized
+                    </div>
+                    <div class="arch-component">
+                        <strong>BGE-M3 Embeddings</strong><br>
+                        • Dense + sparse vectors<br>
+                        • 8K context window<br>
+                        • External inference endpoint
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="comparison-box">
+            <div class="comparison-col">
+                <h3>Before (Phase 0)</h3>
+                <div class="comparison-item">❌ No centralized QA knowledge base</div>
+                <div class="comparison-item">❌ Manual search across repos, JIRA, Confluence</div>
+                <div class="comparison-item">❌ New joiners take weeks to ramp up</div>
+                <div class="comparison-item">❌ Same questions asked repeatedly in Slack</div>
+                <div class="comparison-item">❌ Jenkins failure RCA takes hours</div>
+                <div class="comparison-item">❌ Test case coverage gaps invisible</div>
+            </div>
+            <div class="comparison-col">
+                <h3>After (Phase 1)</h3>
+                <div class="comparison-item" style="border-left: 3px solid #22c55e;">✓ Single chatbot interface for all QA knowledge</div>
+                <div class="comparison-item" style="border-left: 3px solid #22c55e;">✓ Instant answers with source citations</div>
+                <div class="comparison-item" style="border-left: 3px solid #22c55e;">✓ New joiners productive in days</div>
+                <div class="comparison-item" style="border-left: 3px solid #22c55e;">✓ Self-service Q&A reduces Slack noise</div>
+                <div class="comparison-item" style="border-left: 3px solid #22c55e;">✓ Jenkins RCA in minutes via log search</div>
+                <div class="comparison-item" style="border-left: 3px solid #22c55e;">✓ Test plan gaps auto-detected</div>
+            </div>
+        </div>
+
+        <!-- Section 4: Tech Stack -->
+        <h2 class="section-header" data-number="4">Technologies & Implementation Details</h2>
+
+        <table class="tech-table">
+            <thead>
+                <tr>
+                    <th>Layer</th>
+                    <th>Choice</th>
+                    <th>Hosted</th>
+                    <th>Why</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="tech-layer">Frontend + API</td>
+                    <td class="tech-choice">Next.js 14 App Router</td>
+                    <td class="tech-hosted">Vercel</td>
+                    <td>Native fit, zero-config deploys, serverless functions, edge caching</td>
+                </tr>
+                <tr>
+                    <td class="tech-layer">Embedding Model</td>
+                    <td class="tech-choice">BAAI/bge-m3</td>
+                    <td class="tech-hosted">External inference</td>
+                    <td>Dense + sparse + ColBERT in one model, 8K context, multilingual</td>
+                </tr>
+                <tr>
+                    <td class="tech-layer">Vector Database</td>
+                    <td class="tech-choice">Qdrant</td>
+                    <td class="tech-hosted">Qdrant Cloud</td>
+                    <td>Native sparse vectors, payload filtering, managed, sub-50ms search</td>
+                </tr>
+                <tr>
+                    <td class="tech-layer">Keyword Search</td>
+                    <td class="tech-choice">BM25 (Qdrant sparse)</td>
+                    <td class="tech-hosted">Qdrant Cloud</td>
+                    <td>Exact-match for ticket IDs, exceptions, method names, no extra DB</td>
+                </tr>
+                <tr>
+                    <td class="tech-layer">Reranker</td>
+                    <td class="tech-choice">BAAI/bge-reranker-v2-m3</td>
+                    <td class="tech-hosted">External inference</td>
+                    <td>Cross-encoder rescores merged candidates, +15% accuracy boost</td>
+                </tr>
+                <tr>
+                    <td class="tech-layer">LLM</td>
+                    <td class="tech-choice">Llama 3.3 70B Versatile</td>
+                    <td class="tech-hosted">Groq</td>
+                    <td>OpenAI-compatible API, 800+ tokens/sec, free tier, high quality</td>
+                </tr>
+                <tr>
+                    <td class="tech-layer">Metadata Store</td>
+                    <td class="tech-choice">Postgres</td>
+                    <td class="tech-hosted">Neon (serverless)</td>
+                    <td>Free tier, Vercel-optimized, tracks citations, auto-scales to zero</td>
+                </tr>
+                <tr>
+                    <td class="tech-layer">Scheduling</td>
+                    <td class="tech-choice">Vercel Cron</td>
+                    <td class="tech-hosted">Vercel</td>
+                    <td>Free, simple, triggers /api/cron hourly, no external orchestrator</td>
+                </tr>
+                <tr>
+                    <td class="tech-layer">JIRA Integration</td>
+                    <td class="tech-choice">JIRA REST API + MCP</td>
+                    <td class="tech-hosted">Atlassian Cloud</td>
+                    <td>JQL queries pull tickets, normalize fields, chunk, embed, cite by key</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Section 5: The 10 Knowledge Sources -->
+        <h2 class="section-header" data-number="5">The 10 Knowledge Sources</h2>
+
+        <div class="grid-3">
+            <div class="card">
+                <div class="card-title">1️⃣ Selenium Framework</div>
+                <div class="card-content">
+                    ATB13xSeleniumAdvanceFramework (Pramod Dutta) • Page Object Model • Enterprise patterns • Config/utils/fixtures
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">2️⃣ Playwright Framework</div>
+                <div class="card-content">
+                    Advance-Playwright-Framework • Module pattern • 8-layer architecture • TypeScript best practices
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">3️⃣ Test Cases</div>
+                <div class="card-content">
+                    5,000+ rows in CSV/XLSX • Functional, regression, smoke • Step-by-step scenarios • Test data matrix
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">4️⃣ JIRA Tickets</div>
+                <div class="card-content">
+                    Via JQL + JIRA MCP • Bugs, stories, epics • Comments, attachments • Hourly sync
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">5️⃣ Company Docs</div>
+                <div class="card-content">
+                    QA process guides • Standards • Checklists • Best practices • PDF + Markdown
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">6️⃣ Figma Designs</div>
+                <div class="card-content">
+                    <span class="tag tag-blue">Phase 2</span> UI mockups • Design specs • Component library • Exported as text/JSON
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">7️⃣ Meeting Notes</div>
+                <div class="card-content">
+                    Sprint planning • Retrospectives • Transcripts • Decisions & action items • Chunked by speaker
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">8️⃣ Lucid Charts</div>
+                <div class="card-content">
+                    Flow diagrams • Architecture diagrams • Exported to text descriptions • Workflow docs
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">9️⃣ PRD / SRS / BRD / FRD</div>
+                <div class="card-content">
+                    Product requirements • System specs • Business reqs • Functional reqs • PDF chunking by heading
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">🔟 Jenkins Logs</div>
+                <div class="card-content">
+                    Build logs • Test results • Console output • Chunked by build/stage • RCA support
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 6: Deployment & Configuration -->
+        <h2 class="section-header" data-number="6">Deployment & Configuration</h2>
+
+        <div class="card">
+            <div class="card-title">🚀 Vercel Deployment</div>
+            <div class="card-content">
+                <p><strong>Deployment method:</strong> Vercel CLI with token-based auth (non-interactive)</p>
+                <div class="code-block" style="margin-top: 15px;">
+vercel deploy --token=$VERCEL_TOKEN --prod
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Environment variables</strong> (set via Vercel dashboard or CLI):</p>
+                <div class="code-block" style="margin-top: 10px;">
+QDRANT_URL=https://...cloud.qdrant.io<br>
+QDRANT_API_KEY=eyJ...<br>
+QDRANT_COLLECTION=qabuddy<br>
+<br>
+GROQ_API_KEY=gsk_...<br>
+LLM_BASE_URL=https://api.groq.com/openai/v1<br>
+LLM_MODEL=llama-3.3-70b-versatile<br>
+<br>
+POSTGRES_URL=postgresql://neondb_owner:...@ep-...neon.tech/neondb<br>
+<br>
+<span class="comment"># Optional for securing cron</span><br>
+CRON_SECRET=your_random_secret
+                </div>
+
+                <p style="margin-top: 20px;"><strong>vercel.json configuration:</strong></p>
+                <div class="code-block" style="margin-top: 10px;">
+{<br>
+  <span class="keyword">"crons"</span>: [<br>
+    { <span class="keyword">"path"</span>: "/api/cron", <span class="keyword">"schedule"</span>: "0 * * * *" }<br>
+  ],<br>
+  <span class="keyword">"functions"</span>: {<br>
+    "app/api/chat/route.ts": { <span class="keyword">"maxDuration"</span>: 60 },<br>
+    "app/api/ingest/route.ts": { <span class="keyword">"maxDuration"</span>: 300 },<br>
+    "app/api/cron/route.ts": { <span class="keyword">"maxDuration"</span>: 300 }<br>
+  }<br>
+}
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-2" style="margin-top: 30px;">
+            <div class="card">
+                <div class="card-title">📂 Project Structure</div>
+                <div class="card-content">
+                    <div class="code-block">
+qabuddy-ai/<br>
+├── app/                    <span class="comment"># Next.js App Router</span><br>
+│   ├── page.tsx            <span class="comment"># Main chat UI</span><br>
+│   ├── architecture/page.tsx<br>
+│   └── api/                <span class="comment"># API routes</span><br>
+│       ├── chat/route.ts<br>
+│       ├── ingest/route.ts<br>
+│       ├── cron/route.ts<br>
+│       ├── health/route.ts<br>
+│       └── stats/route.ts<br>
+├── knowledge_base/         <span class="comment"># 10 source folders</span><br>
+├── lib/                    <span class="comment"># Core logic</span><br>
+│   ├── llm.ts<br>
+│   └── clients/<br>
+│       └── qdrant.ts<br>
+├── diagrams/               <span class="comment"># Mermaid flows</span><br>
+├── vercel.json<br>
+└── .env
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">🔒 Security & Best Practices</div>
+                <div class="card-content">
+                    <ul class="feature-list">
+                        <li>All secrets in Vercel Environment Variables</li>
+                        <li>Never commit .env to git</li>
+                        <li>CRON_SECRET protects /api/cron endpoint</li>
+                        <li>CORS configured for production domain</li>
+                        <li>Rate limiting on /api/chat (10 req/min)</li>
+                        <li>Input sanitization for user queries</li>
+                        <li>Citation validation before rendering</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            <p>
+                <strong>QABuddy.AI</strong> • Built with Next.js, Qdrant, Groq, and Neon<br>
+                Deployed on <a href="https://vercel.com" target="_blank">Vercel</a> •
+                <a href="https://app-webqabuddy-ishank-w-project.vercel.app" target="_blank">Live Application ↗</a>
+            </p>
+            <p style="margin-top: 20px; font-size: 0.9em;">
+                <code>llm: openai/gpt-oss-120b</code> • <code>embed: BAAI/bge-m3</code> • <code>vector-db: Qdrant</code> • <code>metadata: Postgres</code>
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

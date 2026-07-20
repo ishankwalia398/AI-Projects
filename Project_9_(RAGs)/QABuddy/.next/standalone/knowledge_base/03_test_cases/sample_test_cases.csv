@@ -1,0 +1,11 @@
+ID,TestCaseName,Module,Preconditions,Steps,ExpectedResult,Priority,Status,AutomationStatus
+TC001,Verify Login with Valid Credentials,Authentication,User exists in system,"1. Navigate to login page 2. Enter valid username 3. Enter valid password 4. Click Login button",User is redirected to dashboard,High,Active,Automated
+TC002,Verify Login with Invalid Password,Authentication,User exists in system,"1. Navigate to login page 2. Enter valid username 3. Enter invalid password 4. Click Login button",Error message 'Invalid credentials' is displayed,High,Active,Automated
+TC003,Verify Forgot Password Flow,Authentication,User has registered email,"1. Click 'Forgot Password' 2. Enter registered email 3. Click Submit",Password reset email is sent,Medium,Active,Manual
+TC004,Verify Account Lockout After 3 Failed Attempts,Authentication,User exists in system,"1. Enter invalid password 3 times",Account is locked for 30 minutes,High,Active,Automated
+TC005,Verify Checkout with Valid Credit Card,E-Commerce,User is logged in with items in cart,"1. Go to cart 2. Click Checkout 3. Enter valid CC 4. Click Pay",Order is confirmed with success message,High,Active,Automated
+TC006,Verify Checkout with Invalid Credit Card,E-Commerce,User is logged in with items in cart,"1. Go to cart 2. Click Checkout 3. Enter invalid CC 4. Click Pay",Payment error is displayed,High,Active,Automated
+TC007,Verify Product Search,Product Catalog,Products exist in catalog,"1. Enter search term 2. Click Search",Relevant products are displayed,Medium,Active,Automated
+TC008,Verify Add to Cart,Product Catalog,Product is in stock,"1. Navigate to product 2. Click 'Add to Cart'",Product appears in cart with correct quantity,High,Active,Automated
+TC009,Verify Remove from Cart,Product Catalog,Product is in cart,"1. Go to cart 2. Click 'Remove' on product",Product is removed from cart,Medium,Active,Automated
+TC010,Verify Order History,Order Management,User has past orders,"1. Navigate to 'My Orders'",Past orders are displayed with correct details,Low,Active,Manual

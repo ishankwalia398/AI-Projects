@@ -1,0 +1,13 @@
+flowchart TD
+    A[User Question] --> B[Understand / Rewrite]
+    B --> C[Parallel Search]
+    C --> D[Dense Vector Search<br/>BGE-M3]
+    C --> E[BM25 Sparse Search<br/>Qdrant]
+    D --> F[Merge Results]
+    E --> F
+    F --> G[Cross-Encoder Rerank<br/>bge-reranker-v2-m3]
+    G --> H[Top 6 Chunks]
+    H --> I[Context Assembly]
+    I --> J[LLM Generation<br/>gpt-oss-120b]
+    J --> K[Cited Answer]
+    K --> L[User]

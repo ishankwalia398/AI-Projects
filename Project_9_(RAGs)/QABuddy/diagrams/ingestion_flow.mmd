@@ -1,0 +1,19 @@
+flowchart TD
+    A[Vercel Cron<br/>Hourly Trigger] --> B[Load Sources]
+    B --> C[10 Knowledge Folders]
+    B --> D[JIRA MCP<br/>JQL Queries]
+    C --> E[Parse & Chunk]
+    D --> E
+    E --> F[Code: by function/class]
+    E --> G[CSV: 10-row groups]
+    E --> H[PDF: by heading ~500 tokens]
+    E --> I[JIRA: per ticket]
+    F --> J[Embed with BGE-M3]
+    G --> J
+    H --> J
+    I --> J
+    J --> K[Dense + Sparse Vectors]
+    K --> L[Upsert to Qdrant]
+    K --> M[Metadata to Postgres]
+    L --> N[Vector DB Ready]
+    M --> N
