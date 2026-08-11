@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-# Command wrapper for Automation Report Analysis
-# Usage: rca <path_to_report.zip> [output_directory]
-
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-python3 "$SCRIPT_DIR/analyze_report.py" "$@"
