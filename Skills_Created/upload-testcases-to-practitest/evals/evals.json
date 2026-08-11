@@ -1,0 +1,23 @@
+{
+  "skill_name": "upload-testcases-to-practitest",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "hey can you take this excel file from my downloads and push it to practitest? its called TVOD_PPV_Change_Management_STP_BYG_Backend_TestCases.xlsx. upload to project 'Kaltura Backend QA' (ID 891023). the columns are already named properly so just use the standard mapping",
+      "expected_output": "Skill successfully parses the Excel file (handling multi-row format with TC_ID grouping), confirms the project target, maps columns correctly, validates all test cases have required fields, uploads all test cases to PractiTest, and reports exactly how many were uploaded with sample IDs/names",
+      "files": []
+    },
+    {
+      "id": 1,
+      "prompt": "i have this csv with like 15 test cases i need in practitest, but some of them might be missing the test name column because my PM is always sloppy with these exports. file path is C:\\temp\\api_tests.csv. can you check it first and let me know if there are any issues before uploading? target is project 238471",
+      "expected_output": "Skill parses the CSV, identifies any test cases missing required fields (name), reports the specific rows with issues, asks the user what to do with incomplete test cases (skip or provide names), and only uploads after user confirms the approach. Does not invent placeholder names.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Upload test_scenarios.xlsx to PT. Each row is one full test case (not multi-row). Project is 'Mobile App Testing' and i want them in the 'Sprint 23' test set. Priority column should map to PT priority field, and there's a custom field called 'API_Endpoint' that should go into custom field ---f-89234",
+      "expected_output": "Skill parses single-row format Excel, confirms project and test set, maps the Priority field correctly, maps the custom field API_Endpoint to the specified custom field ID, uploads all test cases with correct field mappings, and reports success with test IDs and the test set they were added to",
+      "files": []
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "skill_name": "PostmanToPlaywright",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Convert my Postman collection to Playwright. Collection: C:\\Users\\ishank.walia\\Downloads\\Playback.postman_collection.json Environment: C:\\Users\\ishank.walia\\Downloads\\PRD1 (LAB).postman_environment.json",
+      "expected_output": "Complete Playwright project with organized test files matching the Postman folder structure (PreRequisite, VOD/Movie/TVOD, VOD/Movie/SVOD, etc.), environment.ts with all variables, helpers.ts with JWT generation, proper TypeScript test files with converted assertions and sequential execution",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "I have API tests in Postman that I need to migrate to Playwright for my automation framework. The collection is at C:\\Users\\ishank.walia\\Downloads\\Playback.postman_collection.json and environment at C:\\Users\\ishank.walia\\Downloads\\PRD1 (LAB).postman_environment.json. Make sure all the pre-request JWT logic and test assertions are preserved.",
+      "expected_output": "Playwright test suite with JWT generation utility functions extracted, all test assertions converted to expect() statements, pre-request scripts converted to beforeEach hooks or inline logic, maintains variable chaining between tests",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "hey can you take this postman stuff and turn it into playwright tests? i need them organized properly and everything should just work when i run npm test. collection = C:\\Users\\ishank.walia\\Downloads\\Playback.postman_collection.json, env = C:\\Users\\ishank.walia\\Downloads\\PRD1 (LAB).postman_environment.json",
+      "expected_output": "Ready-to-run Playwright project with package.json, playwright.config.ts, organized test files, all dependencies listed, clear instructions for running tests with 'npm install' and 'npx playwright test'",
+      "files": []
+    }
+  ]
+}

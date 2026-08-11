@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply transition-colors duration-300;
+  }
+}
+
+@layer components {
+  .glass-effect {
+    background-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .glass-effect-dark {
+    background-color: rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .glossy-card {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .glossy-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom right, rgba(255, 255, 255, 0.2), transparent, transparent);
+    pointer-events: none;
+  }
+
+  .glossy-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top left, rgba(168, 85, 247, 0.1), transparent, rgba(236, 72, 153, 0.1));
+    pointer-events: none;
+  }
+}

@@ -18,3 +18,6 @@ Thumbs.db
 
 # Build artifacts
 Project_9_(RAGs)/QABuddy/.next/
+
+# Excluded portfolio creator workspace
+Project_10_(Portfolio_Creator)/
