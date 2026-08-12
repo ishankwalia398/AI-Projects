@@ -1,0 +1,24 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "qa-portfolio/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "qa-portfolio/dist"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/qa-portfolio/dist/index.html"
+    }
+  ],
+  "buildCommand": "cd qa-portfolio && npm install && npm run build",
+  "outputDirectory": "qa-portfolio/dist",
+  "framework": null
+}
