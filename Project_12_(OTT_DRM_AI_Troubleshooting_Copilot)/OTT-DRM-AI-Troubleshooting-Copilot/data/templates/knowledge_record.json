@@ -1,0 +1,11 @@
+{
+  "id": "kb-unique-slug",
+  "title": "One precise troubleshooting fact",
+  "topic": "Widevine|FairPlay|PlayReady|DASH|HLS|HDCP|Codec|CDN|ABR",
+  "tags": ["search phrase", "error code", "platform"],
+  "source_type": "vendor documentation summary|standard summary|internal runbook",
+  "source_url": "https://authoritative-source.example/page",
+  "verified_at": "YYYY-MM-DD",
+  "content": "A self-contained, paraphrased fact card of roughly 80-250 words. Include the condition, observable evidence, implication, and one discriminating test. Do not copy whole source pages."
+}
+

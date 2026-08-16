@@ -1,0 +1,4 @@
+Vercel CLI 59.1.3 (Node.js 24.16.0)
+Deploying ott-drm-copilot
+Error: The `functions` property cannot be used in conjunction with the `builds` property. Please remove one of them.
+Learn More: https://vercel.link/functions-and-builds

@@ -1,0 +1,2 @@
+"""Vercel FastAPI entrypoint package."""
+

@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07110f">
+  <meta name="description" content="Evidence-first OTT playback and DRM incident diagnostics.">
+  <title>OTT DRM AI Troubleshooting Copilot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="ambient-grid" aria-hidden="true"></div>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#top" aria-label="OTT DRM Copilot home">
+        <span class="brand-mark"><span></span></span>
+        <span class="brand-copy"><strong>OTT / DRM</strong><small>AI COPILOT</small></span>
+      </a>
+
+      <nav class="primary-nav" aria-label="Primary navigation">
+        <p class="nav-label">Workspace</p>
+        <a class="nav-item active" href="#diagnose" aria-current="page"><span class="nav-icon">⌁</span><span>Diagnose</span><kbd>01</kbd></a>
+        <a class="nav-item" href="#results"><span class="nav-icon">◫</span><span>Report</span><kbd>02</kbd></a>
+        <a class="nav-item" href="#knowledge"><span class="nav-icon">◇</span><span>Knowledge</span><kbd>03</kbd></a>
+        <p class="nav-label secondary">Intelligence</p>
+        <div class="nav-status"><span class="status-dot"></span><span>Rule engine</span><em>READY</em></div>
+        <div class="nav-status"><span class="status-dot" id="rag-dot"></span><span>RAG index</span><em id="rag-nav-label">CHECKING</em></div>
+        <div class="nav-status"><span class="status-dot muted" id="ai-dot"></span><span>AI analysis</span><em id="ai-nav-label">CHECKING</em></div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="security-stamp"><span class="stamp-icon">⌾</span><div><strong>Redacted mode</strong><small>Never paste secrets or tokens</small></div></div>
+        <span class="build-label">FORENSIC CONSOLE · V1.2.1</span>
+      </div>
+    </aside>
+
+    <div class="main-frame">
+      <header class="topbar" id="top">
+        <button class="menu-button" id="menu-button" type="button" aria-label="Open navigation" aria-expanded="false">☰</button>
+        <div class="breadcrumb"><span>OPERATIONS</span><i>/</i><strong>PLAYBACK FORENSICS</strong></div>
+        <div class="topbar-right">
+          <div class="system-health"><span class="pulse-dot"></span><span>Systems operational</span></div>
+          <time id="utc-clock" datetime="">00:00:00 UTC</time>
+        </div>
+      </header>
+
+      <main class="console-main" id="diagnose">
+        <section class="hero-panel">
+          <div class="hero-kicker"><span>INCIDENT TRIAGE</span><i></i><span>NEW INVESTIGATION</span></div>
+          <div class="hero-grid">
+            <div>
+              <h1>Find the signal.<br><span>Isolate the failure.</span></h1>
+              <p>Correlate device capability, DRM policy, manifest data, license responses, and player telemetry in one evidence-first investigation.</p>
+            </div>
+            <div class="hero-telemetry" aria-label="Diagnostic capabilities">
+              <div><span>DRM</span><strong>03</strong><small>systems</small></div>
+              <div><span>INPUTS</span><strong>06</strong><small>signals</small></div>
+              <div><span>RAG</span><strong id="hero-rag-label">PINECONE</strong><small>vector index</small></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="workspace-grid">
+          <form id="incident-form" class="incident-console">
+            <div class="console-header">
+              <div><span class="micro-label">CASE INPUT</span><h2>Incident evidence</h2></div>
+              <div class="case-actions"><button class="text-button" type="button" id="load-example">Load example</button><button class="text-button" type="button" id="clear-form">Clear</button></div>
+            </div>
+
+            <div class="progress-track" aria-label="Investigation sections">
+              <button class="track-step active" type="button" data-target="failure-report"><span>01</span><b>Failure</b></button><i></i>
+              <button class="track-step" type="button" data-target="policy-capability"><span>02</span><b>Policy</b></button><i></i>
+              <button class="track-step" type="button" data-target="technical-evidence"><span>03</span><b>Evidence</b></button>
+            </div>
+
+            <section class="form-section" id="failure-report">
+              <div class="section-heading"><span class="section-index">01</span><div><h3>Failure report</h3><p>Describe what failed and where the behavior diverges.</p></div><span class="section-state required">REQUIRED</span></div>
+              <label class="field wide-field"><span>Incident summary <em>*</em></span><textarea id="summary" required rows="3">4K playback works on Chrome but shows a black screen on Android TV.</textarea></label>
+              <div class="field-grid four-column">
+                <label class="field"><span>Platform</span><input id="platform" value="Android TV" autocomplete="off"></label>
+                <label class="field"><span>Device / model</span><input id="device_model" value="Lab Android TV device" autocomplete="off"></label>
+                <label class="field"><span>Player / version</span><input id="player" value="Media3 / ExoPlayer" autocomplete="off"></label>
+                <label class="field"><span>DRM system</span><select id="drm_system"><option>Widevine</option><option>FairPlay</option><option>PlayReady</option><option>Unknown</option></select></label>
+              </div>
+            </section>
+
+            <section class="form-section" id="policy-capability">
+              <div class="section-heading"><span class="section-index">02</span><div><h3>Policy &amp; capability</h3><p>Compare the device-reported state with content requirements.</p></div><span class="section-state">SIGNAL MATRIX</span></div>
+              <div class="comparison-labels"><span>Observed on device</span><span>Required by policy</span></div>
+              <div class="field-grid four-column paired-grid">
+                <label class="field"><span>Security level</span><select id="security_level"><option>L3</option><option>L1</option><option>L2</option><option>Unknown</option></select></label>
+                <label class="field policy-field"><span>Security level</span><select id="required_security_level"><option>L1</option><option>L3</option><option>Unknown</option></select></label>
+                <label class="field"><span>HDCP version</span><select id="hdcp_version"><option>Unknown</option><option>1.4</option><option selected>2.2</option><option>2.3</option></select></label>
+                <label class="field policy-field"><span>HDCP version</span><select id="required_hdcp"><option>2.2</option><option>1.4</option><option>Unknown</option></select></label>
+              </div>
+              <div class="field-grid four-column compact-row">
+                <label class="field"><span>Requested quality</span><select id="requested_resolution"><option>4K/UHD</option><option>1080p</option><option>720p</option><option>Unknown</option></select></label>
+                <label class="field"><span>Codec</span><input id="codec" value="HEVC/H.265" autocomplete="off"></label>
+                <label class="field"><span>License HTTP</span><select id="license_status_code"><option value="">Not supplied</option><option>200</option><option>401</option><option>403</option><option>500</option><option>503</option></select></label>
+                <label class="ai-switch" id="ai-switch-label"><input type="checkbox" id="use_ai" disabled><span class="switch-track"><i></i></span><span><b>AI explanation</b><small id="ai-field-status">Checking availability</small></span></label>
+              </div>
+            </section>
+
+            <section class="form-section" id="technical-evidence">
+              <div class="section-heading"><span class="section-index">03</span><div><h3>Technical evidence</h3><p>Add redacted raw signals to increase diagnostic confidence.</p></div><span class="section-state optional">OPTIONAL</span></div>
+              <div class="evidence-grid">
+                <label class="field code-field"><span>Manifest text <small>MPD / M3U8</small></span><textarea id="manifest_text" rows="6" placeholder="Paste redacted manifest text…" spellcheck="false"></textarea></label>
+                <label class="field code-field"><span>Player / CDM logs <small>REDACTED</small></span><textarea id="player_logs" rows="6" spellcheck="false">Widevine: L3
+video error: black screen after license acquisition</textarea></label>
+              </div>
+              <div class="field-grid two-column compact-row">
+                <label class="field"><span>Redacted license response</span><input id="license_response" placeholder="Response summary or error code" autocomplete="off"></label>
+                <label class="field"><span>Investigator notes</span><input id="notes" placeholder="Reproduction notes or known changes" autocomplete="off"></label>
+              </div>
+            </section>
+
+            <footer class="submit-dock">
+              <div class="privacy-note"><span>⌾</span><p><strong>Redacted inputs only</strong><small>Exclude tokens, cookies, private keys, PII, and full license payloads.</small></p></div>
+              <button class="analyze-button" type="submit" id="analyze-button"><span>Run forensic analysis</span><i>→</i></button>
+            </footer>
+          </form>
+
+          <aside class="intelligence-rail">
+            <section class="rail-card signal-card">
+              <div class="rail-heading"><span class="micro-label">LIVE INPUT</span><span class="live-pill"><i></i> MONITORING</span></div><h3>Signal matrix</h3>
+              <div class="signal-list">
+                <div class="signal-item"><span>Device context</span><b id="signal-device" class="good">PRESENT</b></div>
+                <div class="signal-item"><span>DRM policy</span><b id="signal-policy" class="warning">MISMATCH</b></div>
+                <div class="signal-item"><span>Manifest data</span><b id="signal-manifest">MISSING</b></div>
+                <div class="signal-item"><span>License response</span><b id="signal-license">MISSING</b></div>
+                <div class="signal-item"><span>Player telemetry</span><b id="signal-logs" class="good">PRESENT</b></div>
+              </div>
+              <div class="readiness"><div><span>Evidence readiness</span><strong id="readiness-value">60%</strong></div><div class="readiness-bar"><i id="readiness-bar" style="width:60%"></i></div><small id="readiness-copy">Enough signal for a preliminary diagnosis</small></div>
+            </section>
+
+            <section class="rail-card process-card">
+              <div class="rail-heading"><span class="micro-label">ANALYSIS PIPELINE</span><span>04 STAGES</span></div>
+              <ol class="pipeline">
+                <li><span>01</span><div><strong>Parse evidence</strong><small>Manifest, logs &amp; response</small></div></li>
+                <li><span>02</span><div><strong>Compare policy</strong><small>Capability against entitlement</small></div></li>
+                <li><span>03</span><div><strong>Retrieve context</strong><small>Known incidents &amp; DRM guidance</small></div></li>
+                <li><span>04</span><div><strong>Rank root causes</strong><small>Evidence-weighted probability</small></div></li>
+              </ol>
+            </section>
+
+            <section class="rail-card tip-card"><span class="tip-symbol">!</span><div><span class="micro-label">INVESTIGATOR NOTE</span><p>A successful license response does not guarantee output protection or a secure decoder path.</p></div></section>
+          </aside>
+        </section>
+
+        <section id="results" class="results-panel hidden" aria-live="polite" aria-busy="false"></section>
+
+        <section class="knowledge-strip" id="knowledge">
+          <div><span class="micro-label">KNOWLEDGE COVERAGE</span><h2>Built for the OTT failure surface.</h2></div>
+          <div class="knowledge-tags" aria-label="Knowledge topics"><span>WIDEVINE</span><span>FAIRPLAY</span><span>PLAYREADY</span><span>MPEG-DASH</span><span>HLS</span><span>HDCP</span><span>CENC</span><span>PSSH</span><span>ABR</span><span>CDN</span></div>
+        </section>
+      </main>
+
+      <footer class="app-footer"><span>OTT DRM AI TROUBLESHOOTING COPILOT</span><span>Evidence over assumption.</span></footer>
+    </div>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="/app.js"></script>
+</body>
+</html>

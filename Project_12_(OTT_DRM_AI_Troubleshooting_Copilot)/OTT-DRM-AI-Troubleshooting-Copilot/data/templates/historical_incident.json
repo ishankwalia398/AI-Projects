@@ -1,0 +1,11 @@
+{
+  "id": "inc-YYYY-NNN",
+  "title": "Platform + symptom + confirmed cause",
+  "topic": "DRM/area",
+  "tags": ["platform", "drm", "error code", "root cause"],
+  "source_type": "redacted production incident",
+  "source_url": "internal://ticket/REDACTED-ID",
+  "verified_at": "YYYY-MM-DD",
+  "content": "Symptom: ... Evidence: ... Ruled out: ... Confirmed root cause: ... Confirmation test: ... Fix: ... Never include customer PII, secrets, tokens, cookies, or raw license payloads."
+}
+

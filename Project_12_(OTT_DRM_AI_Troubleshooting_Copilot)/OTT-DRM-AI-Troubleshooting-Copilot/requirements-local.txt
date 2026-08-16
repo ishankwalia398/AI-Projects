@@ -1,0 +1,4 @@
+-r requirements.txt
+streamlit>=1.38,<2
+pandas>=2.2,<3
+pytest>=8.2,<9

@@ -1,0 +1,3 @@
+profile_id,platform,device_model,os_version,player_version,drm_system,drm_version,security_level,max_resolution,max_hdcp,video_codecs,secure_decoder,hdr_formats,test_asset_id,test_result,source,verified_at,notes
+lab-device-001,Android TV,REPLACE_ME,REPLACE_ME,REPLACE_ME,Widevine,REPLACE_ME,L1,2160p,2.2,"AVC|HEVC Main10",yes,HDR10,synthetic-asset-uhd,pass,measured lab test,YYYY-MM-DD,"Record how every claim was measured"
+
