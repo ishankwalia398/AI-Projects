@@ -1,0 +1,9 @@
+﻿{
+  "name": "my-portfolio-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "cd qa-portfolio && npm install && npm run build",
+    "dev": "cd qa-portfolio && npm run dev"
+  }
+}
