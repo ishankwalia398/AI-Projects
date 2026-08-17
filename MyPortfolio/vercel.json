@@ -1,7 +1,12 @@
 {
   "version": 2,
-  "root": "qa-portfolio",
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "framework": "vite"
+  "buildCommand": "cd qa-portfolio && npm install && npm run build",
+  "outputDirectory": "qa-portfolio/dist",
+  "framework": "vite",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
 }
