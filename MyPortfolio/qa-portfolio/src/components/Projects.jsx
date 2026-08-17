@@ -36,6 +36,8 @@ function Projects() {
     {
       category: "RAG Applications",
       items: [
+        { name: "OTT DRM AI Troubleshooting Copilot", description: "AI-powered troubleshooting for OTT DRM systems" },
+        { name: "AI QA Failure Investigator", description: "Intelligent analysis and investigation of QA test failures" },
         { name: "Basic RAG (N8N)", description: "Retrieval-augmented generation with n8n" },
         { name: "Basic RAG (Vibe Coding)", description: "RAG implementation using prompt engineering" },
         { name: "QA Buddy with RAG", description: "Context-aware QA assistant" },
@@ -45,12 +47,12 @@ function Projects() {
     {
       category: "QA Skills Showcase",
       items: [
+        { name: "Portfolio Builder", description: "AI-powered professional portfolio creation tool" },
         { name: "Software Test Plan Generator", description: "Automated STP generation from requirements" },
         { name: "Test Case Generator", description: "Intelligent test case creation" },
         { name: "Practitest Integration", description: "Upload test cases to Practitest automatically" },
         { name: "Postman to Playwright Converter", description: "API test migration tool" },
-        { name: "Automation Report Analyzer", description: "Analyzes test execution reports" },
-        { name: "Portfolio Builder", description: "AI-powered professional portfolio creation tool" }
+        { name: "Automation Report Analyzer", description: "Analyzes test execution reports" }
       ]
     }
   ]
