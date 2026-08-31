@@ -16,5 +16,9 @@ Thumbs.db
 # Local tooling metadata
 .commandcode/
 
+# Generated app artifacts
+**/.next/
+**/knowledge_base/
+
 # Ignore nested standalone repo
 Project_11_(QA_Failure_Investigator)/
