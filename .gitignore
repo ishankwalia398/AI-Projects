@@ -15,6 +15,7 @@ Thumbs.db
 
 # Local tooling metadata
 .commandcode/
+.serena/
 
 # Generated app artifacts
 **/.next/
