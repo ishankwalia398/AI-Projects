@@ -1,0 +1,4 @@
+analysis: Fetch one approved ticket and produce a validated RequirementAnalysis.
+test_plan: Produce the exact ordered 12-section TestPlan.
+test_cases: Produce a validated, fully traceable TestCaseSuite.
+playwright: Produce a validated PlaywrightBundle for eligible test cases only.
