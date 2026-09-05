@@ -16,9 +16,9 @@ def test_hello_world():
         ),
         LLMTestCase(
             input="What is 4+3?",
-            actual_output="1",
-            expected_output="1",
-            context=["arithmetic subtraction operation"],
+            actual_output="7",
+            expected_output="7",
+            context=["arithmetic addition operation"],
         ),
     ]
 
