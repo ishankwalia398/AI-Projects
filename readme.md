@@ -17,6 +17,7 @@ A collection of AI, QA automation, agent, and career-tooling projects built whil
 - **Project 12 - OTT DRM Troubleshooting Copilot**: AI-assisted troubleshooting for OTT and DRM workflows.
 - **Project 13 - CrewAI Agent**: A simple CrewAI test-analyst agent.
 - **Project 14 - CrewAI QA Pipeline**: A containerized CrewAI pipeline for QA workflows.
+- **Project 15 - DeepEval Answer Relevancy Test**: A DeepEval metric test for evaluating answer relevancy.
 - **MyPortfolio**: Portfolio content and the portfolio site.
 
 ## Reusable Skills
@@ -52,5 +53,6 @@ AI-Projects/
 ├── Project_12_(OTT_DRM_AI_Troubleshooting_Copilot)/
 ├── Project_13_Simple_CrewAI_Agent/
 ├── Project_14_CrewAI_QA_Pipeline/
+├── Project_15_DeepEval(AnswerRelevancy_Test)/
 └── Skills_Created/
 ```
