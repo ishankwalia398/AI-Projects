@@ -1,0 +1,23 @@
+[
+  {
+    "id": "TC-001",
+    "kind": "test_cases",
+    "title": "Promotion expiry test gaps",
+    "text": "TC-88 tests one hour before expiry and one hour after. Exact equality was missing. Add three cases at -1, 0 and +1 milliseconds. Checkout total must remain integer minor units.",
+    "source": "synthetic://checkout/test_cases/001"
+  },
+  {
+    "id": "TC-002",
+    "kind": "test_cases",
+    "title": "Inventory reservation contention / test_cases",
+    "text": "TC-204: Seed isolated SKU with stock=1. Send two concurrent POST reservations using different keys. Assert statuses [201,409] and GET stock=0. Replay the winning key and assert same reservation ID.",
+    "source": "synthetic://inventory/test_cases/002"
+  },
+  {
+    "id": "TC-003",
+    "kind": "test_cases",
+    "title": "Tenant cache isolation / test_cases",
+    "text": "TC-311: Create synthetic tenants north and south with userId=42 and different displayNames. Warm north, fetch south, compare full body; reverse order and test cache expiry.",
+    "source": "synthetic://identity/test_cases/003"
+  }
+]

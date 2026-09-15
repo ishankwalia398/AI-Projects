@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>QA Sherlock · Real Data Investigation</title>
+  <link rel="stylesheet" href="/assets/app.css"><script src="/config.js"></script><script src="/assets/app.js" defer></script>
+</head>
+<body>
+  <header class="nav"><a class="brand" href="/">✧ <span>QA SHERLOCK</span></a><div class="nav-actions"><a class="demo-link" href="/demo/">Open saved demo</a><button id="theme-toggle" class="icon-button" type="button" aria-label="Switch to dark mode"><svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg><svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15.5A8.5 8.5 0 0 1 8.5 4 8.5 8.5 0 1 0 20 15.5Z"/></svg></button></div></header>
+  <main>
+    <section class="hero"><div class="eyebrow">REAL-DATA INVESTIGATION WORKSPACE</div><h1>Bring the failure.<br><em>Sherlock finds the trail.</em></h1><p>Upload a Playwright report and the evidence your team already has. Six specialist agents correlate requirements, source, logs, incidents, defects, and release context.</p><div id="status" class="status-row" aria-live="polite"><span class="pulse"></span> Checking integrations…</div></section>
+    <form id="investigation-form" class="workspace">
+      <section class="panel"><div class="step"><span>01</span><div><h2>Test failure</h2><p>Required · Playwright JSON report</p></div></div><label class="dropzone" id="failure-zone"><input id="failure" type="file" accept=".json,application/json" required><strong>Choose Playwright report</strong><span>or drop the JSON file here · max 10 MB</span></label><div id="failure-list" class="file-list"></div></section>
+      <section class="panel"><div class="step"><span>02</span><div><h2>Supporting evidence</h2><p>Required · up to 30 UTF-8 files, 15 MB total</p></div></div><label class="dropzone" id="evidence-zone"><input id="evidence" type="file" multiple accept=".json,.csv,.md,.txt,.log,.yaml,.yml,.xml,.feature,.ts,.tsx,.js,.jsx,.py,.java,.kt,.go,.cs,.html,.css,.sql" required><strong>Choose evidence files</strong><span>requirements, logs, code, API specs, incidents, release notes</span></label><div id="evidence-list" class="file-list"></div></section>
+      <section class="panel settings"><div class="step"><span>03</span><div><h2>Investigation options</h2><p>Use your configured services</p></div></div><label class="field"><span>Jira issue <small>optional</small></span><input id="jira-key" type="text" placeholder="SHOP-142" pattern="[A-Za-z][A-Za-z0-9_]*-[0-9]+"></label><label class="switch"><input id="use-pinecone" type="checkbox" checked><span></span><div><strong>Pinecone retrieval</strong><small>Index into a unique namespace for this run</small></div></label><label class="switch"><input id="run-evaluation" type="checkbox" checked><span></span><div><strong>DeepEval scoring</strong><small>Judge groundedness and regression usefulness</small></div></label></section>
+      <section class="submit-panel"><div><span class="agents">6 AGENTS</span><strong>Evidence stays in this runtime and your configured services.</strong><small>Uploaded files are saved under runs/&lt;run-id&gt;/input. Demo files are never modified.</small></div><button id="submit" class="primary" type="submit"><span>Start investigation</span><b>→</b></button></section>
+      <div id="message" class="message" role="status" aria-live="polite"></div><section id="result" class="result" hidden></section>
+    </form>
+  </main>
+  <footer><span>QA Sherlock · evidence-led defect investigation</span><span>Review generated conclusions and tests before action.</span></footer>
+</body></html>

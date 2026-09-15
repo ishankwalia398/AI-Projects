@@ -1,0 +1,23 @@
+[
+  {
+    "id": "INC-001",
+    "kind": "incidents",
+    "title": "Promotion checkout incident 2026-09-01",
+    "text": "Between 12:00:00 and 12:00:02 UTC checkout rejected 38 promotion quotes. Only expiring codes affected. Payment authorization unaffected. Cache reset did not change observed failures.",
+    "source": "synthetic://checkout/incidents/001"
+  },
+  {
+    "id": "INC-002",
+    "kind": "incidents",
+    "title": "Inventory reservation contention / incidents",
+    "text": "INC-002 2026-08-29 09:10Z: four oversold SKUs during sale. 12 orders backordered. Rate rose after stock-service 3.2 rollout; rollback stopped new oversells. Existing orders required manual reconciliation.",
+    "source": "synthetic://inventory/incidents/002"
+  },
+  {
+    "id": "INC-003",
+    "kind": "incidents",
+    "title": "Tenant cache isolation / incidents",
+    "text": "INC-003 2026-08-30: synthetic monitor found cross-tenant displayName after profile cache rollout. Feature flag disabled pending review. No verified production personal-data exposure in this dataset.",
+    "source": "synthetic://identity/incidents/003"
+  }
+]

@@ -1,0 +1,23 @@
+[
+  {
+    "id": "AC-001",
+    "kind": "acceptance_criteria",
+    "title": "Promotion boundary acceptance",
+    "text": "Given a 20 percent coupon expiring at 2026-09-01T12:00:00.000Z, quotes at -1ms and equal expiry return 200 and total 8000; +1ms returns 422 PROMO_EXPIRED.",
+    "source": "synthetic://checkout/acceptance_criteria/001"
+  },
+  {
+    "id": "AC-002",
+    "kind": "acceptance_criteria",
+    "title": "Inventory reservation contention / acceptance_criteria",
+    "text": "AC1: stock=1 and two concurrent requests yields one 201, one 409. AC2: replaying a successful idempotency key leaves stock unchanged. AC3: stock never becomes negative.",
+    "source": "synthetic://inventory/acceptance_criteria/002"
+  },
+  {
+    "id": "AC-003",
+    "kind": "acceptance_criteria",
+    "title": "Tenant cache isolation / acceptance_criteria",
+    "text": "Warm tenant A profile for user 42, request tenant B user 42, assert B displayName and roles. Repeat in reverse order. Missing tenant claim returns 401.",
+    "source": "synthetic://identity/acceptance_criteria/003"
+  }
+]

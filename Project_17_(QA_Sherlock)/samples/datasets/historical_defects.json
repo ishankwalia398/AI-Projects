@@ -1,0 +1,23 @@
+[
+  {
+    "id": "BUG-001",
+    "kind": "historical_defects",
+    "title": "SHOP-89 gift-card inclusive boundary",
+    "text": "A prior gift-card defect rejected valid credit at equality due to >= comparison. Fix changed condition to > with an exact-boundary regression. Similarity supports a hypothesis, not proof.",
+    "source": "synthetic://checkout/historical_defects/001"
+  },
+  {
+    "id": "BUG-002",
+    "kind": "historical_defects",
+    "title": "Inventory reservation contention / historical_defects",
+    "text": "INV-117 resolved in 3.0: a read-modify-write stock decrement caused oversell under contention. Fix used SELECT FOR UPDATE in one transaction; no evidence yet that the same code path is deployed in 3.2.",
+    "source": "synthetic://inventory/historical_defects/002"
+  },
+  {
+    "id": "BUG-003",
+    "kind": "historical_defects",
+    "title": "Tenant cache isolation / historical_defects",
+    "text": "AUTH-209 resolved 5.5: permission cache used subject without tenant prefix. Fix keyed tenantId:subject. Profile cache is a separate implementation and needs independent confirmation.",
+    "source": "synthetic://identity/historical_defects/003"
+  }
+]

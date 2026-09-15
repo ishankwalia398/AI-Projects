@@ -1,0 +1,1 @@
+{"name":"qa-sherlock-demo","private":true,"scripts":{"test:regression":"playwright test","build":"node scripts/build-demo.mjs"},"devDependencies":{"@playwright/test":"^1.55.0"}}

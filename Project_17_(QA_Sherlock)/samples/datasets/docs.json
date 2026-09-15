@@ -1,0 +1,23 @@
+[
+  {
+    "id": "DOC-001",
+    "kind": "docs",
+    "title": "Checkout clock and fixture guide",
+    "text": "Production checkout takes now from the server clock. Local fixture API accepts now explicitly for deterministic tests. POST /test-support/promotions {expiresAt} returns {code}. POST /checkout/quote {code,subtotal,now} returns {total} or {error}. Test support must never be enabled in production.",
+    "source": "synthetic://checkout/docs/001"
+  },
+  {
+    "id": "DOC-002",
+    "kind": "docs",
+    "title": "Inventory reservation contention / docs",
+    "text": "Reservation design: lock SKU row, check available quantity, insert reservation and decrement in one transaction. Release reservation on timeout. Idempotency records expire after 24 hours.",
+    "source": "synthetic://inventory/docs/002"
+  },
+  {
+    "id": "DOC-003",
+    "kind": "docs",
+    "title": "Tenant cache isolation / docs",
+    "text": "Identity profile cache key contract: tenantId + userId + schemaVersion. Token middleware validates tenant claim before lookup. Cache values are immutable DTOs; TTL 60s.",
+    "source": "synthetic://identity/docs/003"
+  }
+]

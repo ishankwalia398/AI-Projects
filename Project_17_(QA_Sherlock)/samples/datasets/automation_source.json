@@ -1,0 +1,23 @@
+[
+  {
+    "id": "SRC-001",
+    "kind": "automation_source",
+    "title": "PromotionValidator source at commit b7a19f2",
+    "text": "checkout/PromotionValidator.ts:42 at b7a19f2: if (now >= expiresAt) throw new PromoExpired(); return subtotal * 0.8; Deployed commit must be confirmed. Playwright checkout expiry assertion expected HTTP 200 but received 422.",
+    "source": "synthetic://checkout/automation_source/001"
+  },
+  {
+    "id": "SRC-002",
+    "kind": "automation_source",
+    "title": "Inventory reservation contention / automation_source",
+    "text": "stock/ReserveService.java:67: int available=repository.read(sku); if(available>=quantity){repository.decrement(sku,quantity);} Release 3.2 removed @Transactional from reserve().",
+    "source": "synthetic://inventory/automation_source/002"
+  },
+  {
+    "id": "SRC-003",
+    "kind": "automation_source",
+    "title": "Tenant cache isolation / automation_source",
+    "text": "identity/ProfileCache.ts:31: const key = `profile:${userId}`; cache.get(key). The key omits tenantId. Middleware correctly extracts tenantId from verified token.",
+    "source": "synthetic://identity/automation_source/003"
+  }
+]

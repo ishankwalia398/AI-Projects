@@ -1,0 +1,23 @@
+[
+  {
+    "id": "REQ-001",
+    "kind": "requirements",
+    "title": "Promotion expiry contract",
+    "text": "Checkout promotions remain valid when now <= expiresAt. A 20 percent promotion on subtotal 10000 yields total 8000. Times use UTC millisecond precision.",
+    "source": "synthetic://checkout/requirements/001"
+  },
+  {
+    "id": "REQ-002",
+    "kind": "requirements",
+    "title": "Inventory reservation contention / requirements",
+    "text": "Inventory reservations must never oversell. With one item and two concurrent distinct requests, exactly one succeeds and one returns 409. Retrying the same idempotency key returns the original reservation.",
+    "source": "synthetic://inventory/requirements/002"
+  },
+  {
+    "id": "REQ-003",
+    "kind": "requirements",
+    "title": "Tenant cache isolation / requirements",
+    "text": "Every profile read must be tenant isolated. Identical userId values across tenants must never share displayName, permissions or cached profile objects.",
+    "source": "synthetic://identity/requirements/003"
+  }
+]

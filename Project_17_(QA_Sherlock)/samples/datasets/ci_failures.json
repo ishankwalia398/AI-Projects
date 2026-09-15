@@ -1,0 +1,23 @@
+[
+  {
+    "id": "CI-001",
+    "kind": "ci_failures",
+    "title": "checkout-expiry CI run 8812",
+    "text": "Pipeline checkout-api run 8812, release 2.14, commit b7a19f2. Chromium checkout expiry test failed on first and retry attempts: expected 200 received 422 PROMO_EXPIRED. 117 passed, 1 failed. Trace is referenced but not analyzed.",
+    "source": "synthetic://checkout/ci_failures/001"
+  },
+  {
+    "id": "CI-002",
+    "kind": "ci_failures",
+    "title": "Inventory reservation contention / ci_failures",
+    "text": "Build stock-321 / Java17 / commit 7d12abc: concurrentReservation test expected one 409 but got [201,201]; 240 passed, 1 failed. Retries disabled to preserve race evidence.",
+    "source": "synthetic://inventory/ci_failures/002"
+  },
+  {
+    "id": "CI-003",
+    "kind": "ci_failures",
+    "title": "Tenant cache isolation / ci_failures",
+    "text": "Identity pipeline 588 / commit 91abcee: tenantIsolation test expected South User, received North User after warming cache. Test passes with profileCacheEnabled=false.",
+    "source": "synthetic://identity/ci_failures/003"
+  }
+]

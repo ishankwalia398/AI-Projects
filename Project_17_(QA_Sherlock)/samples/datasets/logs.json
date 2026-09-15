@@ -1,0 +1,23 @@
+[
+  {
+    "id": "LOG-001",
+    "kind": "logs",
+    "title": "Checkout expiry request trace req-71",
+    "text": "2026-09-01T12:00:00.000Z request_id=req-71 service=checkout code=SAVE20 now=2026-09-01T12:00:00.000Z expiresAt=2026-09-01T12:00:00.000Z status=422 error=PROMO_EXPIRED subtotal=10000 release=2.14",
+    "source": "synthetic://checkout/logs/001"
+  },
+  {
+    "id": "LOG-002",
+    "kind": "logs",
+    "title": "Inventory reservation contention / logs",
+    "text": "09:10:01.001 req=inv-a sku=SYN-42 read=1; 09:10:01.002 req=inv-b sku=SYN-42 read=1; 09:10:01.005 req=inv-a stock=0 status=201; 09:10:01.006 req=inv-b stock=-1 status=201.",
+    "source": "synthetic://inventory/logs/002"
+  },
+  {
+    "id": "LOG-003",
+    "kind": "logs",
+    "title": "Tenant cache isolation / logs",
+    "text": "10:03:00 tenant=north sub=42 cache=miss key=profile:42; 10:03:01 tenant=south sub=42 cache=hit key=profile:42 returnedTenant=north request=auth-91.",
+    "source": "synthetic://identity/logs/003"
+  }
+]

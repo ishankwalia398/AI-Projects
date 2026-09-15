@@ -1,0 +1,23 @@
+[
+  {
+    "id": "CFG-001",
+    "kind": "service_configuration",
+    "title": "Checkout release clock configuration",
+    "text": "checkout 2.14: TZ=UTC, clockPrecision=millisecond, promoCacheTtlSeconds=30. NTP offset observed +0.3ms. Compare request and database clocks during investigation; configuration alone cannot exclude skew.",
+    "source": "synthetic://checkout/service_configuration/001"
+  },
+  {
+    "id": "CFG-002",
+    "kind": "service_configuration",
+    "title": "Inventory reservation contention / service_configuration",
+    "text": "stock-service: isolation=READ_COMMITTED, workers=8, reservationTimeout=300s. Row-level lock setting was removed from reserve query. Synthetic load concurrency=2 reproduces.",
+    "source": "synthetic://inventory/service_configuration/002"
+  },
+  {
+    "id": "CFG-003",
+    "kind": "service_configuration",
+    "title": "Tenant cache isolation / service_configuration",
+    "text": "profileCacheEnabled=true; ttl=60s; redisDatabase=4 shared across tenants. JWT issuer and audience validation remain enabled. Cache namespace contains schema version but not tenant.",
+    "source": "synthetic://identity/service_configuration/003"
+  }
+]

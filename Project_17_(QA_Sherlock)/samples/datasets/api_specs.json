@@ -1,0 +1,23 @@
+[
+  {
+    "id": "API-001",
+    "kind": "api_specs",
+    "title": "Checkout quote API schema",
+    "text": "POST /checkout/quote requires code:string and subtotal:integer minor units. Local-only now:date-time injects clock. Responses: 200 {total:integer}; 422 {error:PROMO_EXPIRED}; 404 {error:UNKNOWN_CODE}. Promo rate 20 percent. Equality is accepted.",
+    "source": "synthetic://checkout/api_specs/001"
+  },
+  {
+    "id": "API-002",
+    "kind": "api_specs",
+    "title": "Inventory reservation contention / api_specs",
+    "text": "POST /reservations {sku,quantity} plus Idempotency-Key. 201 {reservationId}; 409 {error:OUT_OF_STOCK}. GET /stock/{sku} returns {available:integer}. No external payments occur during reservation.",
+    "source": "synthetic://inventory/api_specs/002"
+  },
+  {
+    "id": "API-003",
+    "kind": "api_specs",
+    "title": "Tenant cache isolation / api_specs",
+    "text": "GET /profile requires bearer JWT with tenantId and sub. 200 {tenantId,userId,displayName,roles}. 401 for missing tenant. Tenant is derived from verified token, never query parameters.",
+    "source": "synthetic://identity/api_specs/003"
+  }
+]

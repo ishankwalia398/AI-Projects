@@ -1,0 +1,296 @@
+{
+  "summary": "Checkout rejects a valid 20% promotion at the inclusive expiry boundary.",
+  "root_cause": "Probable off-by-one comparison in PromotionValidator: now >= expiresAt rejects equality, contrary to the inclusive requirement.",
+  "confidence": 0.88,
+  "claims": [
+    {
+      "text": "The contract accepts a promotion when now equals expiresAt.",
+      "evidence_ids": [
+        "REQ-001"
+      ]
+    },
+    {
+      "text": "The failed checkout recorded equal timestamps and PROMO_EXPIRED.",
+      "evidence_ids": [
+        "LOG-001"
+      ]
+    },
+    {
+      "text": "Release 2.14 introduced the >= comparison; a previous coupon bug used the same boundary pattern.",
+      "evidence_ids": [
+        "SRC-001",
+        "REL-001",
+        "BUG-001"
+      ]
+    }
+  ],
+  "alternatives": [
+    "Clock skew: compare application and database clocks before concluding.",
+    "Stale promotion cache: invalidate cache and repeat with a fresh promotion."
+  ],
+  "next_steps": [
+    "Confirm the deployed commit matches source evidence.",
+    "Replace >= with > if product confirms the inclusive contract.",
+    "Run before, equal, and after expiry regression checks in isolated staging."
+  ],
+  "regression_test": "import { test, expect } from '@playwright/test';\n\n// Requires the documented local fixture API; generated test is not executed automatically.\nfor (const offsetMs of [-1, 0, 1]) {\n  test(`promotion expiry boundary ${offsetMs}ms`, async ({ request }) => {\n    const seed = await request.post('/test-support/promotions', { data: { expiresAt: '2026-09-01T12:00:00.000Z' } });\n    expect(seed.ok()).toBeTruthy();\n    const { code } = await seed.json();\n    const now = new Date(Date.parse('2026-09-01T12:00:00.000Z') + offsetMs).toISOString();\n    const response = await request.post('/checkout/quote', { data: { code, subtotal: 10000, now } });\n    expect(response.status()).toBe(offsetMs <= 0 ? 200 : 422);\n    const body = await response.json();\n    if (offsetMs <= 0) expect(body.total).toBe(8000);\n    else expect(body.error).toBe('PROMO_EXPIRED');\n  });\n}\n",
+  "mode": "OFFLINE DEMO \u00b7 fixture analysis \u00b7 no LLM calls",
+  "evidence": [
+    {
+      "id": "LOG-001",
+      "kind": "logs",
+      "title": "Checkout expiry request trace req-71",
+      "text": "2026-09-01T12:00:00.000Z request_id=req-71 service=checkout code=SAVE20 now=2026-09-01T12:00:00.000Z expiresAt=2026-09-01T12:00:00.000Z status=422 error=PROMO_EXPIRED subtotal=10000 release=2.14",
+      "source": "synthetic://checkout/logs/001",
+      "score": 0.3488
+    },
+    {
+      "id": "AC-001",
+      "kind": "acceptance_criteria",
+      "title": "Promotion boundary acceptance",
+      "text": "Given a 20 percent coupon expiring at 2026-09-01T12:00:00.000Z, quotes at -1ms and equal expiry return 200 and total 8000; +1ms returns 422 PROMO_EXPIRED.",
+      "source": "synthetic://checkout/acceptance_criteria/001",
+      "score": 0.2791
+    },
+    {
+      "id": "CI-001",
+      "kind": "ci_failures",
+      "title": "checkout-expiry CI run 8812",
+      "text": "Pipeline checkout-api run 8812, release 2.14, commit b7a19f2. Chromium checkout expiry test failed on first and retry attempts: expected 200 received 422 PROMO_EXPIRED. 117 passed, 1 failed. Trace is referenced but not analyzed.",
+      "source": "synthetic://checkout/ci_failures/001",
+      "score": 0.2791
+    },
+    {
+      "id": "SRC-001",
+      "kind": "automation_source",
+      "title": "PromotionValidator source at commit b7a19f2",
+      "text": "checkout/PromotionValidator.ts:42 at b7a19f2: if (now >= expiresAt) throw new PromoExpired(); return subtotal * 0.8; Deployed commit must be confirmed. Playwright checkout expiry assertion expected HTTP 200 but received 422.",
+      "source": "synthetic://checkout/automation_source/001",
+      "score": 0.2326
+    },
+    {
+      "id": "TC-001",
+      "kind": "test_cases",
+      "title": "Promotion expiry test gaps",
+      "text": "TC-88 tests one hour before expiry and one hour after. Exact equality was missing. Add three cases at -1, 0 and +1 milliseconds. Checkout total must remain integer minor units.",
+      "source": "synthetic://checkout/test_cases/001",
+      "score": 0.1628
+    },
+    {
+      "id": "API-001",
+      "kind": "api_specs",
+      "title": "Checkout quote API schema",
+      "text": "POST /checkout/quote requires code:string and subtotal:integer minor units. Local-only now:date-time injects clock. Responses: 200 {total:integer}; 422 {error:PROMO_EXPIRED}; 404 {error:UNKNOWN_CODE}. Promo rate 20 percent. Equality is accepted.",
+      "source": "synthetic://checkout/api_specs/001",
+      "score": 0.1395
+    },
+    {
+      "id": "INC-001",
+      "kind": "incidents",
+      "title": "Promotion checkout incident 2026-09-01",
+      "text": "Between 12:00:00 and 12:00:02 UTC checkout rejected 38 promotion quotes. Only expiring codes affected. Payment authorization unaffected. Cache reset did not change observed failures.",
+      "source": "synthetic://checkout/incidents/001",
+      "score": 0.1163
+    },
+    {
+      "id": "JIRA-001",
+      "kind": "jira_stories",
+      "title": "SHOP-142 inclusive checkout promotion",
+      "text": "As a shopper I can apply SAVE20 through its expiry instant. Priority High; component checkout; release 2.14. Owner Payments QA. Linked requirement REQ-001.",
+      "source": "synthetic://checkout/jira_stories/001",
+      "score": 0.1163
+    },
+    {
+      "id": "REQ-001",
+      "kind": "requirements",
+      "title": "Promotion expiry contract",
+      "text": "Checkout promotions remain valid when now <= expiresAt. A 20 percent promotion on subtotal 10000 yields total 8000. Times use UTC millisecond precision.",
+      "source": "synthetic://checkout/requirements/001",
+      "score": 0.1163
+    },
+    {
+      "id": "DOC-001",
+      "kind": "docs",
+      "title": "Checkout clock and fixture guide",
+      "text": "Production checkout takes now from the server clock. Local fixture API accepts now explicitly for deterministic tests. POST /test-support/promotions {expiresAt} returns {code}. POST /checkout/quote {code,subtotal,now} returns {total} or {error}. Test support must never be enabled in production.",
+      "source": "synthetic://checkout/docs/001",
+      "score": 0.093
+    },
+    {
+      "id": "LOG-002",
+      "kind": "logs",
+      "title": "Inventory reservation contention / logs",
+      "text": "09:10:01.001 req=inv-a sku=SYN-42 read=1; 09:10:01.002 req=inv-b sku=SYN-42 read=1; 09:10:01.005 req=inv-a stock=0 status=201; 09:10:01.006 req=inv-b stock=-1 status=201.",
+      "source": "synthetic://inventory/logs/002",
+      "score": 0.093
+    },
+    {
+      "id": "BUG-001",
+      "kind": "historical_defects",
+      "title": "SHOP-89 gift-card inclusive boundary",
+      "text": "A prior gift-card defect rejected valid credit at equality due to >= comparison. Fix changed condition to > with an exact-boundary regression. Similarity supports a hypothesis, not proof.",
+      "source": "synthetic://checkout/historical_defects/001",
+      "score": 0.0698
+    },
+    {
+      "id": "CI-002",
+      "kind": "ci_failures",
+      "title": "Inventory reservation contention / ci_failures",
+      "text": "Build stock-321 / Java17 / commit 7d12abc: concurrentReservation test expected one 409 but got [201,201]; 240 passed, 1 failed. Retries disabled to preserve race evidence.",
+      "source": "synthetic://inventory/ci_failures/002",
+      "score": 0.0698
+    },
+    {
+      "id": "REL-001",
+      "kind": "release_notes",
+      "title": "Checkout release 2.14 changes",
+      "text": "Release 2.14 commit b7a19f2 unified promotion validation. PromotionValidator comparison changed from now > expiresAt to now >= expiresAt. Canary only tested non-boundary quotes. No requirement change recorded.",
+      "source": "synthetic://checkout/release_notes/001",
+      "score": 0.0698
+    },
+    {
+      "id": "BUG-002",
+      "kind": "historical_defects",
+      "title": "Inventory reservation contention / historical_defects",
+      "text": "INV-117 resolved in 3.0: a read-modify-write stock decrement caused oversell under contention. Fix used SELECT FOR UPDATE in one transaction; no evidence yet that the same code path is deployed in 3.2.",
+      "source": "synthetic://inventory/historical_defects/002",
+      "score": 0.0465
+    },
+    {
+      "id": "CFG-001",
+      "kind": "service_configuration",
+      "title": "Checkout release clock configuration",
+      "text": "checkout 2.14: TZ=UTC, clockPrecision=millisecond, promoCacheTtlSeconds=30. NTP offset observed +0.3ms. Compare request and database clocks during investigation; configuration alone cannot exclude skew.",
+      "source": "synthetic://checkout/service_configuration/001",
+      "score": 0.0465
+    },
+    {
+      "id": "CI-003",
+      "kind": "ci_failures",
+      "title": "Tenant cache isolation / ci_failures",
+      "text": "Identity pipeline 588 / commit 91abcee: tenantIsolation test expected South User, received North User after warming cache. Test passes with profileCacheEnabled=false.",
+      "source": "synthetic://identity/ci_failures/003",
+      "score": 0.0465
+    },
+    {
+      "id": "INC-002",
+      "kind": "incidents",
+      "title": "Inventory reservation contention / incidents",
+      "text": "INC-002 2026-08-29 09:10Z: four oversold SKUs during sale. 12 orders backordered. Rate rose after stock-service 3.2 rollout; rollback stopped new oversells. Existing orders required manual reconciliation.",
+      "source": "synthetic://inventory/incidents/002",
+      "score": 0.0465
+    },
+    {
+      "id": "TC-002",
+      "kind": "test_cases",
+      "title": "Inventory reservation contention / test_cases",
+      "text": "TC-204: Seed isolated SKU with stock=1. Send two concurrent POST reservations using different keys. Assert statuses [201,409] and GET stock=0. Replay the winning key and assert same reservation ID.",
+      "source": "synthetic://inventory/test_cases/002",
+      "score": 0.0465
+    },
+    {
+      "id": "AC-002",
+      "kind": "acceptance_criteria",
+      "title": "Inventory reservation contention / acceptance_criteria",
+      "text": "AC1: stock=1 and two concurrent requests yields one 201, one 409. AC2: replaying a successful idempotency key leaves stock unchanged. AC3: stock never becomes negative.",
+      "source": "synthetic://inventory/acceptance_criteria/002",
+      "score": 0.0233
+    },
+    {
+      "id": "API-002",
+      "kind": "api_specs",
+      "title": "Inventory reservation contention / api_specs",
+      "text": "POST /reservations {sku,quantity} plus Idempotency-Key. 201 {reservationId}; 409 {error:OUT_OF_STOCK}. GET /stock/{sku} returns {available:integer}. No external payments occur during reservation.",
+      "source": "synthetic://inventory/api_specs/002",
+      "score": 0.0233
+    },
+    {
+      "id": "API-003",
+      "kind": "api_specs",
+      "title": "Tenant cache isolation / api_specs",
+      "text": "GET /profile requires bearer JWT with tenantId and sub. 200 {tenantId,userId,displayName,roles}. 401 for missing tenant. Tenant is derived from verified token, never query parameters.",
+      "source": "synthetic://identity/api_specs/003",
+      "score": 0.0233
+    },
+    {
+      "id": "INC-003",
+      "kind": "incidents",
+      "title": "Tenant cache isolation / incidents",
+      "text": "INC-003 2026-08-30: synthetic monitor found cross-tenant displayName after profile cache rollout. Feature flag disabled pending review. No verified production personal-data exposure in this dataset.",
+      "source": "synthetic://identity/incidents/003",
+      "score": 0.0233
+    },
+    {
+      "id": "LOG-003",
+      "kind": "logs",
+      "title": "Tenant cache isolation / logs",
+      "text": "10:03:00 tenant=north sub=42 cache=miss key=profile:42; 10:03:01 tenant=south sub=42 cache=hit key=profile:42 returnedTenant=north request=auth-91.",
+      "source": "synthetic://identity/logs/003",
+      "score": 0.0233
+    },
+    {
+      "id": "REL-003",
+      "kind": "release_notes",
+      "title": "Tenant cache isolation / release_notes",
+      "text": "5.8 commit 91abcee introduced shared Redis profile cache. Per-tenant process-local cache was removed. Release tests used globally unique subjects, masking key collisions.",
+      "source": "synthetic://identity/release_notes/003",
+      "score": 0.0233
+    },
+    {
+      "id": "SRC-003",
+      "kind": "automation_source",
+      "title": "Tenant cache isolation / automation_source",
+      "text": "identity/ProfileCache.ts:31: const key = `profile:${userId}`; cache.get(key). The key omits tenantId. Middleware correctly extracts tenantId from verified token.",
+      "source": "synthetic://identity/automation_source/003",
+      "score": 0.0233
+    },
+    {
+      "id": "TC-003",
+      "kind": "test_cases",
+      "title": "Tenant cache isolation / test_cases",
+      "text": "TC-311: Create synthetic tenants north and south with userId=42 and different displayNames. Warm north, fetch south, compare full body; reverse order and test cache expiry.",
+      "source": "synthetic://identity/test_cases/003",
+      "score": 0.0233
+    }
+  ],
+  "failures": [
+    {
+      "title": "checkout / accept promotion at inclusive expiry boundary",
+      "file": "tests/checkout.spec.ts",
+      "project": "chromium",
+      "status": "failed",
+      "retry": 0,
+      "outcome": "unexpected",
+      "error": "Checkout promotion expiry: expected 200 received 422 PROMO_EXPIRED at 2026-09-01T12:00:00.000Z SAVE20 subtotal 10000",
+      "attachments": [
+        {
+          "name": "trace",
+          "path": "artifacts/trace.zip",
+          "contentType": "application/zip"
+        }
+      ]
+    },
+    {
+      "title": "checkout / accept promotion at inclusive expiry boundary",
+      "file": "tests/checkout.spec.ts",
+      "project": "chromium",
+      "status": "failed",
+      "retry": 1,
+      "outcome": "unexpected",
+      "error": "Checkout promotion expiry: expected 200 received 422 PROMO_EXPIRED at 2026-09-01T12:00:00.000Z SAVE20 subtotal 10000",
+      "attachments": [
+        {
+          "name": "trace",
+          "path": "artifacts/trace.zip",
+          "contentType": "application/zip"
+        }
+      ]
+    }
+  ],
+  "events": [],
+  "evaluation": {
+    "status": "not_run",
+    "reason": "Offline demo",
+    "metrics": []
+  }
+}

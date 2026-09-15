@@ -1,0 +1,23 @@
+[
+  {
+    "id": "REL-001",
+    "kind": "release_notes",
+    "title": "Checkout release 2.14 changes",
+    "text": "Release 2.14 commit b7a19f2 unified promotion validation. PromotionValidator comparison changed from now > expiresAt to now >= expiresAt. Canary only tested non-boundary quotes. No requirement change recorded.",
+    "source": "synthetic://checkout/release_notes/001"
+  },
+  {
+    "id": "REL-002",
+    "kind": "release_notes",
+    "title": "Inventory reservation contention / release_notes",
+    "text": "3.2 release 7d12abc moved transactions to controller layer; internal reservation worker still invokes service directly. Load validation used only sequential requests.",
+    "source": "synthetic://inventory/release_notes/002"
+  },
+  {
+    "id": "REL-003",
+    "kind": "release_notes",
+    "title": "Tenant cache isolation / release_notes",
+    "text": "5.8 commit 91abcee introduced shared Redis profile cache. Per-tenant process-local cache was removed. Release tests used globally unique subjects, masking key collisions.",
+    "source": "synthetic://identity/release_notes/003"
+  }
+]

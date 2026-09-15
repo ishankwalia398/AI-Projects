@@ -1,0 +1,23 @@
+[
+  {
+    "id": "JIRA-001",
+    "kind": "jira_stories",
+    "title": "SHOP-142 inclusive checkout promotion",
+    "text": "As a shopper I can apply SAVE20 through its expiry instant. Priority High; component checkout; release 2.14. Owner Payments QA. Linked requirement REQ-001.",
+    "source": "synthetic://checkout/jira_stories/001"
+  },
+  {
+    "id": "JIRA-002",
+    "kind": "jira_stories",
+    "title": "Inventory reservation contention / jira_stories",
+    "text": "INV-204: Reserve the final warehouse item safely during flash sales. Component stock-service; priority Critical; owner Warehouse Engineering; target 3.2. Linked incident INC-002.",
+    "source": "synthetic://inventory/jira_stories/002"
+  },
+  {
+    "id": "JIRA-003",
+    "kind": "jira_stories",
+    "title": "Tenant cache isolation / jira_stories",
+    "text": "AUTH-311: Isolate profile cache by tenant. Security priority P1; owner Identity; affected 5.8; detected in synthetic two-tenant environment. Customer impact not confirmed.",
+    "source": "synthetic://identity/jira_stories/003"
+  }
+]

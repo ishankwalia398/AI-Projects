@@ -1,0 +1,25 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "qa-sherlock"
+version = "0.2.0"
+description = "Evidence-led autonomous defect investigation"
+requires-python = ">=3.11,<3.15"
+dependencies = []
+
+[project.optional-dependencies]
+live = ["crewai>=1.0,<2", "openai>=1.80,<3", "pinecone>=7,<9", "mcp>=1.12,<2", "deepeval>=3,<4", "python-dotenv>=1,<2"]
+dev = ["pytest>=8,<10"]
+
+[project.scripts]
+qa-sherlock = "qa_sherlock.cli:main"
+qa-sherlock-web = "qa_sherlock.web_server:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/qa_sherlock"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

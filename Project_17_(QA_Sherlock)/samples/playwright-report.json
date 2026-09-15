@@ -1,0 +1,54 @@
+{
+  "suites": [
+    {
+      "title": "checkout",
+      "file": "tests/checkout.spec.ts",
+      "specs": [
+        {
+          "title": "accept promotion at inclusive expiry boundary",
+          "file": "tests/checkout.spec.ts",
+          "tests": [
+            {
+              "projectName": "chromium",
+              "status": "unexpected",
+              "results": [
+                {
+                  "status": "failed",
+                  "retry": 0,
+                  "errors": [
+                    {
+                      "message": "Checkout promotion expiry: expected 200 received 422 PROMO_EXPIRED at 2026-09-01T12:00:00.000Z SAVE20 subtotal 10000"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "path": "artifacts/trace.zip",
+                      "contentType": "application/zip"
+                    }
+                  ]
+                },
+                {
+                  "status": "failed",
+                  "retry": 1,
+                  "errors": [
+                    {
+                      "message": "Checkout promotion expiry: expected 200 received 422 PROMO_EXPIRED at 2026-09-01T12:00:00.000Z SAVE20 subtotal 10000"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "path": "artifacts/trace.zip",
+                      "contentType": "application/zip"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

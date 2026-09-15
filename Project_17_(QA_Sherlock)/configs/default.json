@@ -1,0 +1,8 @@
+{
+  "primary": {"base_url": "https://api.commandcode.ai/provider/v1", "model": "Qwen/Qwen3.8-27B", "key_env": "COMMANDCODE_API_KEY", "verification": "documented Command Code catalog 2026-09-05; upstream Groq routing not verified"},
+  "fallback": {"base_url": "https://generativelanguage.googleapis.com/v1beta/openai", "model": "gemini-3.6-flash", "key_env": "GEMINI_API_KEY"},
+  "judge": {"base_url": "https://api.deepseek.com", "model": "deepseek-v4-flash", "key_env": "DEEPSEEK_API_KEY"},
+  "pinecone": {"host_env": "PINECONE_HOST", "namespace": "qa-sherlock-demo", "top_k": 12},
+  "jira": {"mcp_tool": "getJiraIssue", "mcp_arguments": {"issueIdOrKey": "{issue_key}", "cloudId": "SET_YOUR_CLOUD_ID"}, "timeout_seconds": 20},
+  "evaluation_threshold": 0.7
+}
