@@ -1,4 +1,4 @@
-import { FaGithub, FaLinkedin, FaEnvelope, FaPhone, FaMapMarkerAlt } from 'react-icons/fa'
+import { FaGithub, FaLinkedin, FaEnvelope, FaPhone, FaMapMarkerAlt, FaGlobe } from 'react-icons/fa'
 import './Contact.css'
 
 function Contact() {
@@ -38,6 +38,13 @@ function Contact() {
               <span className="contact-value">linkedin.com/in/ishankwalia</span>
             </div>
           </a>
+          <a href="https://ishank-walia.vercel.app/" target="_blank" rel="noopener noreferrer" className="contact-link">
+            <FaGlobe className="contact-icon" />
+            <div>
+              <span className="contact-label">Portfolio</span>
+              <span className="contact-value">ishank-walia.vercel.app</span>
+            </div>
+          </a>
           <a href="https://github.com/ishankwalia398" target="_blank" rel="noopener noreferrer" className="contact-link">
             <FaGithub className="contact-icon" />
             <div>
@@ -54,9 +61,6 @@ function Contact() {
           </div>
         </div>
       </div>
-      <footer className="footer">
-        <p>© 2026 Ishank Walia. Built with React. Deployed on Vercel.</p>
-      </footer>
     </section>
   )
 }

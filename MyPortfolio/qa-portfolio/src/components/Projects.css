@@ -58,6 +58,19 @@
   border-radius: 8px;
   border: 1px solid var(--border);
   transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.project-card h4 svg {
+  color: var(--accent-primary);
+  font-size: 0.75rem;
+  margin-left: 0.35rem;
+}
+
+.project-status {
+  color: var(--text-secondary);
+  text-align: center;
+  padding: 1rem 0;
 }
 
 .project-card:hover {

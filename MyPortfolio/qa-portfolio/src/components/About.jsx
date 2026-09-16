@@ -20,6 +20,7 @@ function About() {
             I'm passionate about leveraging <strong>AI agents</strong>, <strong>LLMs</strong>, and <strong>intelligent
             automation</strong> to revolutionize quality engineering. I build AI-powered tools for test case generation,
             defect analysis, and regression optimization using <strong>n8n</strong>, <strong>Langflow</strong>,
+            <strong>Langchain</strong>, <strong>CrewAI</strong>, <strong>Eval</strong>, <strong>DeepEval</strong>,
             <strong>Playwright</strong>, and <strong>RAG</strong>.
           </p>
         </div>
