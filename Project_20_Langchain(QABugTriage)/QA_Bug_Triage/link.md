@@ -1,0 +1,1 @@
+https://qa-bug-triage-lc.vercel.app/

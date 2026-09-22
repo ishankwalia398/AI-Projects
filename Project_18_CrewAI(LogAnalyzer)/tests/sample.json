@@ -1,0 +1,12 @@
+[
+  {
+    "timestamp": "2026-09-21T09:42:13Z",
+    "session_id": "sample-session",
+    "message": "ERROR 503 upstream service unavailable",
+    "status": 503,
+    "request": { "method": "GET", "url": "https://example.test/orders" },
+    "response": { "status": 503, "body": "Service Unavailable" },
+    "request_headers": { "Authorization": "Bearer sample-secret" },
+    "response_headers": { "Retry-After": "30" }
+  }
+]

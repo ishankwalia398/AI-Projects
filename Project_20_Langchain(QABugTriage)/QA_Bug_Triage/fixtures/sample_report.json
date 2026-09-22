@@ -1,0 +1,48 @@
+{
+  "id": "synthetic-npvr-demo",
+  "model": "Illustrative sample · no AI call",
+  "createdAt": "2026-09-21T00:00:00Z",
+  "durationMs": 0,
+  "ticket": {
+    "key": "DEMO-1042",
+    "title": "nPVR playback remains available after subscription cancellation",
+    "description": "SYNTHETIC TEST FIXTURE. Environment: isolated demo environment. Register a test user, create a household, add a device, grant an nPVR subscription, log in on the device, record a live test program, finish the recording, force-cancel the subscription, and request GPC for the recording. Actual: the test recording is playable. Expected: the response contains ServiceNotAllowed. Revocation timing, GPC contract and active-playback policy are not supplied.",
+    "status": "Open", "priority": "Not set", "components": ["nPVR", "Playback entitlement"], "source": "demo",
+    "warnings": ["Synthetic illustrative report. No private Jira ticket was fetched or analyzed."]
+  },
+  "triage": {
+    "severity": "High", "priority": "P1", "category": "Security",
+    "summary": "The reported playback path appears to allow access after the required subscription is cancelled.",
+    "severityReason": "Potential authorization bypass on a core playback path. Actual entitlement policy and revocation timing must be confirmed before final classification.",
+    "priorityReason": "Provisional P1 because the scenario concerns access control. Production exposure, impact and release timing are unknown.",
+    "categoryReason": "The stated expected behavior denies playback access with ServiceNotAllowed, while the observed flow allows it.",
+    "evidence": ["force-cancel the subscription, and request GPC for the recording", "Actual: the test recording is playable.", "Expected: the response contains ServiceNotAllowed."],
+    "missingInformation": ["Cancellation acknowledgement and effective revocation timestamp", "GPC request/response contract and trace", "Policy for recordings created before cancellation and already-active playback", "Whether this affects other devices or households"]
+  },
+  "rca": {
+    "status": "Hypothesis",
+    "conclusion": "The playback authorization path may use stale or insufficient entitlement information. The report alone cannot establish a root cause.",
+    "hypotheses": [
+      { "cause": "Playback authorization does not revalidate the current nPVR entitlement.", "confidence": 55, "evidence": "The fixture reports successful playback after force cancellation. No authorization trace is supplied.", "killTest": "Inspect the GPC authorization decision using the captured correlation ID. If it checks the correct effective entitlement and denies access, investigate downstream enforcement instead." },
+      { "cause": "A warm entitlement cache still permits playback after cancellation.", "confidence": 30, "evidence": "The same logged-in device is used before and after cancellation; this is compatible with stale state but does not prove it.", "killTest": "Compare fresh and existing sessions after confirmed revocation under the documented propagation policy. If both evaluate current cancelled entitlement, the stale-cache explanation is weakened." },
+      { "cause": "A previously issued playback grant remains valid under an unclear revocation policy.", "confidence": 15, "evidence": "A recording existed before cancellation, but grant issuance and reuse are unknown.", "killTest": "Compare a new GPC grant request with reuse of a pre-cancellation grant. If no prior grant is reused, reject this explanation for the reproduction." }
+    ],
+    "investigationSteps": ["Capture cancellation acknowledgement, effective entitlement state and GPC timestamps for the synthetic user/household/device.", "Trace the GPC authorization decision and identify its entitlement source, cache age and token issuance time.", "Compare a fresh session and existing session after the documented revocation boundary.", "Confirm policy for existing recordings and active streams with the product owner before interpreting token behavior."],
+    "blastRadius": ["Other devices sharing the same household entitlement", "Playback flows sharing the same authorization service or cache"],
+    "limitations": ["No implementation, entitlement trace or GPC contract was supplied.", "Confidence values are subjective estimates, not measured probabilities.", "No production scope, monetary loss or definitive root cause has been established."]
+  },
+  "strategy": {
+    "missingTest": "A subscription-revocation-to-playback authorization check would cover the reported flow. Existing suite coverage is unknown.",
+    "verification": "Repeat the fixture through force cancellation. Once the documented revocation condition is met, request GPC and assert the exact ServiceNotAllowed response error and denial of new playback access.",
+    "tests": [
+      { "id": "NPVR-01", "title": "Reject new playback access after force cancellation", "layer": "API", "type": "Verification", "steps": ["Create a user, household and device and grant the nPVR subscription.", "Log in, record a live test program and stop or finish recording.", "Force-cancel the subscription and verify cancellation acknowledgement and effective entitlement state.", "When the documented revocation condition is met, request GPC for the recording."], "expected": "The response contains exactly ServiceNotAllowed and no usable new playback access is granted.", "rationale": "Checks the authorization boundary directly. Obtain the actual GPC contract before implementing assertions." },
+      { "id": "NPVR-02", "title": "Allow playback for a currently entitled user", "layer": "API", "type": "Regression", "steps": ["Create the same recording fixture while keeping the subscription active.", "Request GPC with the entitled device session."], "expected": "Playback authorization succeeds according to the documented contract.", "rationale": "Positive control prevents an overly broad deny-all fix." },
+      { "id": "NPVR-03", "title": "Evaluate fresh and existing sessions after revocation", "layer": "API", "type": "Regression", "steps": ["Create the recording and retain the existing device session.", "Cancel the subscription and wait for the documented effective revocation condition.", "Compare GPC decisions in the existing session and a fresh session."], "expected": "Both sessions deny new playback access with ServiceNotAllowed once the policy applies.", "rationale": "Targets stale device or session entitlement state." },
+      { "id": "NPVR-04", "title": "Check the documented revocation boundary", "layer": "API", "type": "Boundary", "steps": ["Obtain the documented revocation/propagation policy and a controllable clock or polling contract.", "Request GPC immediately before, at and after the defined effective boundary."], "expected": "Authorization follows the documented policy; at and after effective revocation, new access is denied. No numeric TTL is assumed.", "rationale": "Tests time and cache boundaries without inventing requirements." },
+      { "id": "NPVR-05", "title": "Prevent cross-household entitlement reuse", "layer": "API", "type": "Negative", "steps": ["Use two isolated households with one active and one cancelled nPVR subscription.", "Request the cancelled household's recording using each authorized test identity according to the ownership contract."], "expected": "The cancelled household cannot inherit another household's entitlement; ownership and authorization checks remain enforced.", "rationale": "Checks the scope of entitlement decisions." },
+      { "id": "NPVR-06", "title": "Restore access only after valid re-subscription", "layer": "E2E", "type": "Regression", "steps": ["Verify the cancelled state denies new playback.", "Re-subscribe the synthetic household and wait for documented entitlement activation.", "Attempt playback through the client."], "expected": "Access is restored only when activation and recording-retention policy allow it.", "rationale": "Covers the complete user-visible state transition." }
+    ],
+    "manualChecks": ["Confirm the intended policy for pre-existing recordings, token reuse and already-active streams.", "Review the user-facing message when ServiceNotAllowed is returned."],
+    "exitCriteria": ["The reported cancellation-to-GPC verification passes.", "Entitled playback remains functional.", "Fresh/warm session, revocation boundary and scope regressions pass.", "The product owner confirms the revocation and existing-recording policy."]
+  }
+}
