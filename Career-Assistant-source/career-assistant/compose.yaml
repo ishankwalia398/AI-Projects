@@ -1,0 +1,44 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: career
+      POSTGRES_USER: career
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in your environment}
+    volumes: ["postgres-data:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U career"]
+      interval: 5s
+      retries: 12
+  qdrant:
+    image: qdrant/qdrant:v1.16.0
+    volumes: ["qdrant-data:/qdrant/storage"]
+  migrate:
+    build: ./backend
+    env_file: .env
+    command: ["python", "-c", "from app.db import migrate; migrate()"]
+    volumes: ["private-files:/app/data/files"]
+    depends_on:
+      postgres: {condition: service_healthy}
+  api:
+    build: ./backend
+    env_file: .env
+    ports: ["127.0.0.1:8000:8000"]
+    volumes: ["private-files:/app/data/files"]
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+      qdrant: {condition: service_started}
+    restart: unless-stopped
+  worker:
+    build: ./backend
+    command: ["python", "-m", "app.worker"]
+    env_file: .env
+    volumes: ["private-files:/app/data/files"]
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+      qdrant: {condition: service_started}
+    restart: unless-stopped
+volumes:
+  postgres-data:
+  qdrant-data:
+  private-files:
