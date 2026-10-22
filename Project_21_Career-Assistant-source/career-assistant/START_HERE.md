@@ -9,6 +9,6 @@ This download contains frontend and backend source, a built frontend, tests, dep
 3. Register your own account and upload your resume. No real credentials are included.
 4. Configure the services you need using `.env.example`. AI, live sources, email and hosted infrastructure require their own credentials/configuration.
 
-Validation: 56 backend tests and 7 frontend logic tests passed; TypeScript and the production frontend build passed. The built frontend is in `frontend/dist` and needs an HTTP server with the API proxy for integrated workflows.
+Validation: 59 backend tests and 11 frontend tests passed; TypeScript and the production frontend build passed. The built frontend is in `frontend/dist` and needs an HTTP server with the API proxy for integrated workflows.
 
-Production deployment remains incomplete. Read `DEVELOPMENT_REPORT.md` for the exact integration/deployment limitations and `docs/REQUIREMENT_COVERAGE.md` for the complete requirements ledger. Selecting the final theme does not change those limits.
+For a free-tier trial deployment, follow `DEPLOYMENT.md`. Free Render services sleep, and its free PostgreSQL expires after 30 days; this setup is not production-durable. Read `DEVELOPMENT_REPORT.md` for the remaining integration limitations and `docs/REQUIREMENT_COVERAGE.md` for the requirements ledger.

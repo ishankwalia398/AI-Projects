@@ -17,7 +17,10 @@ def s3():
 
 def write_bytes(key, blob):
     if settings.s3_bucket:
-        s3().put_object(Bucket=settings.s3_bucket, Key=key, Body=blob, ServerSideEncryption='AES256')
+        options = {'Bucket':settings.s3_bucket,'Key':key,'Body':blob}
+        if not settings.s3_endpoint:
+            options['ServerSideEncryption']='AES256'
+        s3().put_object(**options)
     else:
         path = settings.storage_dir / key
         path.parent.mkdir(parents=True, exist_ok=True)

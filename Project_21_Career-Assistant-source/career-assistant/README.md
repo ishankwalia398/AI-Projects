@@ -36,21 +36,22 @@ Amber Desk is the only application theme. Login, navigation, cards, forms and in
 
 Copy `.env.example` to `.env` and configure it using your host's secret manager. Plain uvicorn does **not** load this file automatically. Export values in your shell, or install `python-dotenv` and launch `uvicorn ... --env-file ../.env`; export the same values for the worker. Docker Compose loads `.env` for both services.
 
-For production deployment, follow [DEPLOYMENT.md](DEPLOYMENT.md) to run the FastAPI backend and worker, connect persistent services, and configure the Vercel API proxy.
+For a free-tier trial deployment, follow [DEPLOYMENT.md](DEPLOYMENT.md). It runs the FastAPI API and background worker together on Render, uses the free Render PostgreSQL plan, and requires private S3-compatible storage. Free services sleep and the free database expires after 30 days; this is not a durable production setup.
 
 | Setting | Purpose |
 | --- | --- |
 | `DATABASE_URL` | `postgresql+psycopg://...` for authoritative records. Empty/default uses local SQLite. |
-| `APP_ENV=production` | Enforces PostgreSQL, HTTPS frontend URL and secure cookies. |
+| `APP_ENV=production` | Enforces PostgreSQL, HTTPS frontend URL, secure cookies, and private object storage. |
 | `FRONTEND_URL`, `COOKIE_SECURE` | Exact browser origin; use `true` with production HTTPS. |
+| `INLINE_WORKER` | Runs background job processing in the API process when enabled. For a single free web instance only; use a dedicated worker for production. |
 | `LLM_API_KEY`, `LLM_MODEL`, `LLM_BASE_URL` | Server-only OpenAI-compatible chat-completions provider. |
 | `FALLBACK_*` | Optional second model/provider, attempted once after primary failure. |
 | `EMBEDDING_MODEL` | Configurable embeddings; default `text-embedding-3-small`. |
 | `QDRANT_URL`, `QDRANT_API_KEY` | Private vector service. Missing config provides labelled lexical text retrieval, not fake embeddings. |
 | `GREENHOUSE_BOARDS`, `LEVER_SITES` | Comma-separated employer ATS board identifiers. No broad web search runs without a configured integration. |
 | `SMTP_*`, `MAIL_FROM` | STARTTLS email delivery for 30-minute one-time password reset links. |
-| `STORAGE_DIR` | Private persistent disk shared by API and worker. |
-| `S3_BUCKET`, `S3_ENDPOINT_URL`, `AWS_*` | Optional private S3-compatible object store instead of local files. |
+| `STORAGE_DIR` | Local development storage. Do not use ephemeral container storage for user uploads. |
+| `S3_BUCKET`, `S3_ENDPOINT_URL`, `AWS_*` | Private S3-compatible object store. Required in production; Cloudflare R2 has a free monthly allowance within provider quotas. |
 
 The current defaults are configurable example choices, not a claim of latest/best models or account eligibility. Primary `gpt-5.1` emphasizes structured generation; fallback `gpt-4.1` uses a different model family through the same API contract. You may configure a separate compatible provider. ChatGPT subscriptions must not be assumed to include API credits. Provider model availability, latency, cost and output quality need real benchmarking before launch.
 

@@ -1,6 +1,6 @@
-# Development report — 21 October 2026
+# Development report — 22 October 2026
 
-**Delivered:** a substantial, runnable local implementation and source package. **Not delivered:** a verified complete production application. The original production definition of done has not been met. The requested Vercel URL has not been deployed by this session.
+**Delivered:** a substantial, runnable local implementation and source package. **Not delivered:** a verified complete production application. The original production definition of done has not been met. The Vercel frontend and API proxy are deployed at the requested URL, but no backend service has been provisioned or connected yet.
 
 ## What is implemented
 
@@ -19,26 +19,34 @@
 
 | Check | Observed result |
 | --- | --- |
-| Backend pytest suite | 56 passed. Includes authentication, invalid inputs, password-reset single-use/revocation with mocked SMTP, sessions, CSRF, isolation, resume parsing/versioning, experience, matches, sponsorship, retention, attachments, partial bulk validation, content caching/review/rendering/expiry/cleanup, failover, discovery adapters, interview batching/cache and connector success/unknown-outcome duplicate protection. |
+| Backend pytest suite | 59 passed. Includes authentication, invalid inputs, password-reset single-use/revocation with mocked SMTP, sessions, CSRF, isolation, resume parsing/versioning, experience, matches, sponsorship, retention, attachments, partial bulk validation, content caching/review/rendering/expiry/cleanup, failover, discovery adapters, interview batching/cache, connector success/unknown-outcome duplicate protection, inline-worker lifecycle, production storage validation, and R2 upload compatibility. |
 | Qdrant integration in tests | Actual Qdrant in-memory client; synthetic vectors. Tenant/version filters and embedding reuse passed. Local mode warns that payload indexes have no effect; hosted index behavior remains untested. |
-| Frontend logic | 7 Node tests passed for page selection, deduplication, non-mutating state, page windows and timezone-aware date display. |
+| Frontend Node tests | 11 passed, including API proxy request, cookie, and error handling. |
 | TypeScript and Vite production build | Passed; final asset sizes are available in the build output. |
 | Local API | Started successfully; health endpoint returned HTTP 200. |
 | Browser | Real local QA-account login, authenticated empty workspace, interview navigation and 390px mobile rendering checked. Fixed a localhost/127.0.0.1 origin mismatch found during browser testing. Screenshots supplied. |
 | Parsing/rendering | PDF/DOCX text extraction, DOCX ZIP integrity, readable PDF parsing, LaTeX escaping, ZIP members and expiry/regeneration tested. No claim of TeX compilation or executing generated interview coding answers. |
 | Live integrations | No real PostgreSQL, hosted Qdrant, embedding/LLM, S3, SMTP or employer-submission acceptance established. AI/source/mail/submission tests use explicit synthetic fixtures. |
 
-The suite is a meaningful local regression suite, not complete coverage of every scenario in the master specification. Security/load/concurrency audits, model fact accuracy, real international job eligibility, generated guide quality and full production acceptance remain outstanding.
+The suite is a meaningful local regression suite, not complete coverage of every scenario in the master specification. A free-tier Render trial Blueprint now combines the FastAPI service and queue worker, uses free PostgreSQL, and requires private S3-compatible storage such as Cloudflare R2. The free database expires after 30 days and the web service may sleep; this is not production-durable. Security/load/concurrency audits, model fact accuracy, real international job eligibility, generated guide quality and full production acceptance remain outstanding.
 
-## Deployment and the supplied token
+## Deployment status
 
-The Vercel CLI exists, but read-only CLI identity checks failed inside the execution environment. A direct Vercel API helper was prepared to use a hidden token prompt and upload source without recording credentials. The token was **not** accepted into that process: automatic approval review rejected the input operation because this session's sandbox approval category is disabled, including after a supported network-permission grant. No upload/deployment success was returned. The token was not written to the project, environment files, archives or deployment logs.
+The Vercel frontend and same-origin API proxy are deployed at
+`https://jobsearchandtracker.vercel.app`. The proxy returns HTTP 503 with an
+explicit configuration message until `CAREER_API_URL` is set in Vercel.
 
-`scripts/deploy_vercel.py` is a user-runnable deployment helper. Its disconnected frontend mode returns explicit HTTP 503 for career APIs and displays a backend-pending notice. A successful deployment of that mode would be a frontend preview only. Full deployment still requires actual FastAPI/worker hosting, PostgreSQL, Qdrant, private storage, AI/email/source configuration, a real API rewrite and production verification. See README for exact setup and activation steps. The original Vercel hostname remains an unverified target.
+`render.yaml` defines a free-tier trial: one Render free web service runs both
+FastAPI and the inline queue worker, backed by free Render PostgreSQL. Private
+Cloudflare R2 storage is required for production-mode startup so user files are
+not written to Render's ephemeral filesystem. No Render services have been
+created yet; the user must create the Blueprint and supply R2 credentials. The
+free database expires after 30 days and has no backup, and the web service can
+sleep. This trial is not production-durable.
 
 ## Known limitations and next required work
 
-1. Provision backend infrastructure and provider configuration, run real integration acceptance, and deploy through an execution path permitted by the environment. Do not share further credentials in source or chat; use local prompts/secret stores.
+1. Create the Render Blueprint, configure R2, set `CAREER_API_URL` in Vercel, then run live registration and workflow acceptance. Do not share credentials in source or chat; use provider secret settings.
 2. Extend discovery beyond configured Greenhouse/Lever boards through permitted integrations. Current title/country suggestions are inferred, not verified worldwide market research. No live company interview-pattern research is supplied.
 3. Improve semantic JD/eligibility/seniority analysis, near-duplicate reconciliation, country coverage and sponsorship language validation. Current weighted fit is a heuristic, never a hiring probability.
 4. Benchmark chunking/retrieval, model factuality, latency/cost and real interview content. Plans/question counts are structurally validated; all requested mock-round depth and answer timing are not guaranteed by structural checks.
@@ -46,7 +54,7 @@ The Vercel CLI exists, but read-only CLI identity checks failed inside the execu
 6. Expand submission integrations only where authorized employer credentials/form support exist. Custom answers and legal consent remain external; no CAPTCHA bypass or speculative retries are implemented.
 7. Validate all document layouts/fonts with real resumes/guides, compile TeX if required, and add S3 orphan inventory cleanup. Rendering is tested locally; generated PDFs do not currently use LaTeX as an intermediate.
 
-The user selected Amber Desk. It is applied throughout the app. All other theme implementations, comparison options and the theme picker have been removed. Migration 002 updates existing preferences while preserving search settings. No existing repository was supplied, and no remote repository was created.
+The user selected Amber Desk. It is applied throughout the app. All other theme implementations, comparison options and the theme picker have been removed. Migration 002 updates existing preferences while preserving search settings. Source is maintained in the `ishankwalia398/AI-Projects` GitHub repository.
 
 
 Final appearance: **Amber Desk only**. All alternative theme assets and switching controls are removed. Preference data migration 002 preserves existing search settings.

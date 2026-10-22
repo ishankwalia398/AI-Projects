@@ -7,6 +7,7 @@ import ssl
 from contextlib import asynccontextmanager
 from datetime import timedelta
 from email.message import EmailMessage
+from threading import Event, Thread
 from typing import Literal
 from urllib.parse import urlparse
 
@@ -33,7 +34,18 @@ from .workflows import enqueue
 @asynccontextmanager
 async def lifespan(app):
     settings.validate(); migrate()
-    yield
+    worker_stop = Event()
+    worker_thread = None
+    if settings.inline_worker:
+        from .worker import run
+        worker_thread = Thread(target=run, args=(worker_stop,), name='career-worker', daemon=True)
+        worker_thread.start()
+    try:
+        yield
+    finally:
+        if worker_thread:
+            worker_stop.set()
+            worker_thread.join(timeout=5)
 
 
 app=FastAPI(title='Career Assistant',version='0.1.0',lifespan=lifespan)
