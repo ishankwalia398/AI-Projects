@@ -1,5 +1,32 @@
 ﻿# DeepEval Live Lab
 
+## Overview
+
+A hands-on lab for **evaluating LLM applications with DeepEval**. It contains a ShopEasy customer-support chatbot, a RAG explorer, and a framework of 25 DeepEval metrics, plus a live dashboard that runs those metrics against fresh model responses.
+
+## Features
+
+- Dashboard with a card per metric (starts as NOT RUN, with Run and Run all controls).
+- Try-it panels for the chatbot and the RAG assistant, including retrieved sources.
+- Hosted RAG using BM25 keyword retrieval over bundled policy documents; original local Ollama + Chroma version kept in `02_RAG_Explorer`.
+- Test dataset of 100 cases (`testcases_vwo_100.csv`) and a metric audit (`metric-audit.json`).
+- One-command build and Vercel deployment.
+
+## Tech stack
+
+- Python 3.12, FastAPI and Uvicorn
+- DeepEval (LLM-as-judge metrics)
+- Groq-hosted models for chatbot, RAG and judge
+- BM25 retrieval (hosted), Ollama and ChromaDB (local)
+- Node.js deploy script, Vercel
+
+## Project layout
+
+- `01_Chatbot_Shopeasy_chatbot` – ShopEasy chatbot
+- `02_RAG_Explorer` – local RAG explorer
+- `03_DeepFramework` – the DeepEval metric framework
+- `app.py`, `hosted.py`, `build.py`, `deploy.mjs` – live lab app and deployment
+
 Live adaptation of chapter_16_DeepEval_Framwork. The dashboard runs the original
 25 DeepEval metrics against fresh model responses. Cards start as NOT RUN, with
 Run and Run all visible controls. The snapshot notice has been removed.
