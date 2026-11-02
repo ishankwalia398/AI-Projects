@@ -1,3 +1,4 @@
+from conftest import SHORT_ANSWER, DETAILED_ANSWER
 import io
 import json
 import re
@@ -10,14 +11,14 @@ from docx import Document
 from fastapi.testclient import TestClient
 from pypdf import PdfReader
 
-from app import ai, rag, workflows
+from app import ai, jobs, rag, workflows
 from app.config import settings
 from app.db import File, Record, ResetToken, Session, Task, User, digest, get_record, now, put, records
 from app.interviews import COMMON_FIELDS, TECH_CATEGORIES, validate_questions
-from app.jobs import active_results, canonical, match, sponsorship, validate_public_url
+from app.jobs import active_results, canonical, fetch_jd, match, sponsorship, validate_public_url
 from app.main import app
 from app.rendering import render
-from app.resumes import chunk, experience_months, extract
+from app.resumes import bootstrap_profile, check_missing_mandatory_fields, chunk, experience_months, extract
 from app.security import hasher
 from app.storage import cleanup, read_bytes, store, validate_upload
 from conftest import login,register
@@ -134,7 +135,7 @@ def test_resume_ingestion_versions_knowledge(account):
     c,factory=account
     rid=ingest(c)
     p=c.get('/api/profile').json()
-    assert not p['approved'] and 'Python' in p['skills'] and p['name']==''
+    assert not p['approved'] and 'Python' in p['skills'] and p['name']=='Jane Example'
     p.update(name='Jane Example',approved=True,employments=[{'employer':'ExampleCo','title':'Engineer','start':'2020-01','end':'2024-01'}])
     assert c.put('/api/profile',json=p).status_code==200
     assert c.get('/api/profile').json()['experience']['months']==48
@@ -329,7 +330,7 @@ def test_unconfigured_ai_fails_truthfully(account):
 
 def test_interview_question_validator_requires_answers():
     q={k:'detail' for k in COMMON_FIELDS}
-    q.update(id='T1',category=TECH_CATEGORIES[0],source_classification='General Preparation',follow_ups=[{'question':'Why?','answer':'Because.'}])
+    q.update(short_answer=SHORT_ANSWER,detailed_answer=DETAILED_ANSWER,id='T1',category=TECH_CATEGORIES[0],source_classification='General Preparation',follow_ups=[{'question':'Why?','answer':'Because.'}])
     qs=[{**q,'id':str(i),'question':f'Question {i}?'} for i in range(3)]
     validate_questions({'questions':qs},TECH_CATEGORIES[0],'technical')
     qs[0]['detailed_answer']=''
@@ -344,6 +345,101 @@ def test_rag_filters_always_tenant_namespace_version():
 @pytest.mark.parametrize('url',['http://example.com','https://127.0.0.1','https://localhost','https://example.com:8000','https://user:secret@example.com'])
 def test_ssrf_urls_rejected(url):
     with pytest.raises(ValueError):validate_public_url(url)
+
+
+def test_resume_bootstrap_extracts_header_contact_fields():
+    profile=bootstrap_profile(
+        'Jane Example\nSenior Software Engineer\nBengaluru, Karnataka, India\n'
+        'jane@example.com\n\nPROFESSIONAL SUMMARY\nPython and SQL developer'
+    )
+    assert profile['name']=='Jane Example'
+    assert profile['designation']=='Senior Software Engineer'
+    assert profile['location']=='Bengaluru, Karnataka, India'
+    assert profile['email']=='jane@example.com'
+    assert check_missing_mandatory_fields(profile)==[]
+
+
+def test_resume_bootstrap_does_not_invent_missing_header_fields():
+    profile=bootstrap_profile('PROFESSIONAL EXPERIENCE\nBuilt services using Python.')
+    assert profile['name']==''
+    assert profile['designation']==''
+    assert profile['location']==''
+
+
+@pytest.mark.parametrize('location', ['Seattle, WA', 'Pune, Maharashtra'])
+def test_resume_bootstrap_parses_common_city_state_locations(location):
+    profile=bootstrap_profile(f'Alex Example\nCloud Platform Engineer\n{location}\nalex@example.com')
+    assert profile['location']==location
+
+
+def test_fetch_jd_accepts_general_public_https_page(monkeypatch):
+    monkeypatch.setattr('app.jobs.validate_public_url',lambda url:url)
+    monkeypatch.setattr(
+        'app.jobs._request_public_https',
+        lambda url:(200,{'Content-Type':'text/html; charset=utf-8'},b'<html><body><h1>Platform Engineer</h1><p>Build reliable systems and APIs.</p></body></html>'),
+    )
+    text=fetch_jd('https://careers.example.test/jobs/platform-engineer')
+    assert 'Platform Engineer' in text and 'Build reliable systems and APIs.' in text
+
+
+def test_fetch_jd_rejects_redirect_to_local_network(monkeypatch):
+    import socket
+
+    def resolve(host, *args, **kwargs):
+        ip = '127.0.0.1' if host == 'localhost' else '93.184.216.34'
+        return [(socket.AF_INET, socket.SOCK_STREAM, 6, '', (ip, 443))]
+    monkeypatch.setattr('app.jobs.socket.getaddrinfo', resolve)
+    def request(url):
+        parsed,_=jobs._public_url_details(url)
+        if parsed.hostname=='careers.example.test':
+            return 302,{'Location':'https://localhost/admin'},b''
+        raise AssertionError('Local address should be rejected before requesting it.')
+    monkeypatch.setattr('app.jobs._request_public_https',request)
+
+    with pytest.raises(ValueError, match='Private and local network addresses'):
+        fetch_jd('https://careers.example.test/job/123')
+
+
+def test_public_https_request_pins_validated_ip_and_keeps_tls_hostname(monkeypatch):
+    import socket
+
+    calls={}
+    monkeypatch.setattr(
+        'app.jobs.socket.getaddrinfo',
+        lambda host,*args,**kwargs:[(socket.AF_INET,socket.SOCK_STREAM,6,'',('93.184.216.34',443))],
+    )
+    monkeypatch.setattr(
+        'app.jobs.socket.create_connection',
+        lambda address,timeout:(calls.update(connect_address=address) or object()),
+    )
+    class TLSContext:
+        def wrap_socket(self,raw_socket,server_hostname):
+            calls['server_hostname']=server_hostname
+            return raw_socket
+    monkeypatch.setattr('app.jobs.ssl.create_default_context',lambda:TLSContext())
+    class Response:
+        status=200
+        def read(self,limit):return b'<html>fixture page</html>'
+        def getheaders(self):return [('Content-Type','text/html')]
+    class Connection:
+        def __init__(self,host,port,timeout):
+            calls['http_host']=host
+            self.sock=None
+        def request(self,method,target,headers):calls['target']=target
+        def getresponse(self):return Response()
+        def close(self):pass
+    monkeypatch.setattr('app.jobs.http.client.HTTPSConnection',Connection)
+
+    status,headers,body=jobs._request_public_https('https://careers.example.test/jobs?id=1')
+
+    assert status==200 and headers['Content-Type']=='text/html'
+    assert body==b'<html>fixture page</html>'
+    assert calls=={
+        'connect_address':('93.184.216.34',443),
+        'server_hostname':'careers.example.test',
+        'http_host':'careers.example.test',
+        'target':'/jobs?id=1',
+    }
 
 
 def test_account_delete_preserves_other_user(account):

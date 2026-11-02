@@ -94,8 +94,10 @@ export function EmploymentEditor({
               <label key={key}>
                 {text}
                 <input
-                  type={["start", "end"].includes(key) ? "month" : "text"}
-                  value={r[key] || ""}
+                  type="text"
+                  placeholder={["start", "end"].includes(key) ? "YYYY-MM or YYYY-MM-DD" : undefined}
+                  pattern={["start", "end"].includes(key) ? "[0-9]{4}-(0[1-9]|1[0-2])(-(0[1-9]|[12][0-9]|3[01]))?" : undefined}
+                  value={key === "end" && /^(present|current)$/i.test(r[key] || "") ? "" : r[key] || ""}
                   onChange={(e) => update(i, key, e.target.value)}
                 />
               </label>

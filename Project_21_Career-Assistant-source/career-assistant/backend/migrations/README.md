@@ -4,4 +4,4 @@
 
 The initial migration is additive and idempotent. It does not implement alterations of an existing deployed schema. Before a future schema change, add a numbered, reviewed migration with backup/rollback instructions; `create_all` cannot migrate existing columns. Run migrations once before launching multiple API/worker processes. SQLite is a local development option only.
 
-Migration 002 normalizes all existing appearance preferences to Amber Desk without changing search preferences. See `002_amber_desk.md`.
+Migration 002 normalizes appearance preferences to the legacy `amber` ID without changing search preferences. This ID now renders the selected Cream & Brown theme. See `002_amber_desk.md` and `../../docs/THEME_AND_AI_ROUTING.md`.

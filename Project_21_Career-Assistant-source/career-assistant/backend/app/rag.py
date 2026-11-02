@@ -12,6 +12,9 @@ from .resumes import chunk
 def embedding(texts):
     if not settings.llm_key:
         raise ValueError('Embedding API key is not configured.')
+    # If base url is Anthropic, Anthropic does not have a /embeddings endpoint; gracefully degrade
+    if 'anthropic.com' in settings.llm_url:
+        raise ValueError('Anthropic Claude does not provide an embedding endpoint; using lexical retrieval.')
     response = httpx.post(settings.llm_url.rstrip('/')+'/embeddings', headers={'Authorization':'Bearer '+settings.llm_key}, json={'model':settings.embedding_model,'input':texts}, timeout=60)
     response.raise_for_status()
     return [r['embedding'] for r in sorted(response.json()['data'], key=lambda x:x['index'])]

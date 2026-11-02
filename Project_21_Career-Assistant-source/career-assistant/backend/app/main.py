@@ -1,5 +1,6 @@
 import io
 import json
+import os
 import re
 import secrets
 import smtplib
@@ -20,15 +21,17 @@ from sqlalchemy.exc import IntegrityError
 
 from . import rag, ai
 from .applications import channel
-from .config import settings
+from .config import DEFAULT_GREENHOUSE_BOARDS, settings
 from .db import DB, File, Record, ResetToken, Session, Task, User, audit, digest, get_record, migrate, now, put, records, uid
-from .interviews import guide_sections
-from .jobs import STATUSES, active_results, fetch_jd, match, upsert_job
-from .rendering import render
-from .resumes import experience_summary
+from .interviews import INTERVIEW_EXPORT_VERSION, clear_interview_answers, guide_sections
+from .jobs import STATUSES, active_results, fetch_jd, match, required_documents, upsert_job
+from .latex_documents import document_latex
+from .prompt_library import section as prompt_section
+from .rendering import render, render_application_document
+from .resumes import check_missing_mandatory_fields, experience_summary
 from .security import DUMMY_HASH, current, database, hasher, invalidate, password_ok, rate_limit, verify
 from .storage import cleanup, read_bytes, remove_bytes, store, validate_upload
-from .workflows import enqueue
+from .workflows import enqueue, repair_saved_profile, task_views
 
 
 @asynccontextmanager
@@ -137,9 +140,36 @@ def me(request:Request,user=Depends(current)):
 
 @app.post('/api/auth/logout')
 def logout(request:Request,response:Response,user=Depends(current),db=Depends(database)):
-    db.execute(delete(Session).where(Session.id==request.state.session.id)); audit(db,user.id,'logout'); db.commit()
+    from .answer_lifecycle import lock_user
+    lock_user(db,user.id)
+    guides=records(db,user.id,'interview').populate_existing().all()
+    guide_ids=[]
+    for guide in guides:
+        guide.data=clear_interview_answers(guide.data)
+        guide_ids.append(guide.id)
+    for batch in records(db,user.id,'interview_batch').all():
+        batch.data=clear_interview_answers(batch.data)
+    if guide_ids:
+        for file in db.query(File).filter(
+            File.user_id==user.id,
+            File.record_id.in_(guide_ids),
+            File.category=='temporary',
+            File.deleted==False,
+        ).all():
+            file.expires_at=now()
+    db.query(Task).filter(
+        Task.user_id==user.id,
+        Task.kind=='interview_answer',
+        Task.status.in_(['queued','running']),
+    ).update(
+        {'status':'failed','error':'Answer generation was cancelled because you logged out.'},
+        synchronize_session=False,
+    )
+    db.execute(delete(Session).where(Session.id==request.state.session.id))
+    audit(db,user.id,'logout',{'interview_answers_cleared':True})
+    db.commit()
     response.delete_cookie('career_session',path='/')
-    return {'message':'Logged out. Your saved data is preserved.'}
+    return {'message':'Logged out. Saved questions remain; generated interview answers were cleared.'}
 
 
 @app.post('/api/auth/forgot-password')
@@ -184,7 +214,7 @@ def dashboard(user=Depends(current),db=Depends(database)):
 
 @app.get('/api/integrations')
 def integrations(user=Depends(current)):
-    return {'ai':bool(settings.llm_key),'fallback':bool(settings.fallback_key),'semantic_search':bool(settings.qdrant_url and settings.llm_key),'job_discovery':bool(settings.greenhouse_boards or settings.lever_sites),'password_email':bool(settings.smtp_host),'object_storage':bool(settings.s3_bucket),'database':'PostgreSQL' if settings.database_url.startswith('postgresql') else 'SQLite (local development)','submission':'Employer-authorized Greenhouse connector when configured; otherwise external application'}
+    return {'ai':bool(settings.llm_key or settings.fallback_key or settings.openrouter_key or settings.anthropic_key),'fallback':bool(settings.fallback_key or settings.llm_key or settings.openrouter_key or settings.anthropic_key),'semantic_search':bool(settings.qdrant_url and settings.llm_key),'job_discovery':bool(settings.greenhouse_boards or settings.lever_sites or DEFAULT_GREENHOUSE_BOARDS),'password_email':bool(settings.smtp_host),'object_storage':bool(settings.s3_bucket),'database':'PostgreSQL' if settings.database_url.startswith('postgresql') else 'SQLite (local development)','submission':'Employer-authorized Greenhouse connector when configured; otherwise external application'}
 
 
 @app.get('/api/preferences')
@@ -208,14 +238,39 @@ def save_preferences(body:Preferences,user=Depends(current),db=Depends(database)
 @app.post('/api/resumes')
 async def upload_resume(file:UploadFile=Upload(...),user=Depends(current),db=Depends(database)):
     blob=await file.read(settings.max_upload+1); validate_upload(file.filename,blob)
-    existing=db.query(File).filter_by(user_id=user.id,sha=digest(blob),category='original').first()
+    existing=db.query(File).filter_by(user_id=user.id,sha=digest(blob),category='original',deleted=False).first()
     stored=existing or store(db,user.id,file.filename,blob,'original')
     return enqueue(db,user.id,'ingest',{'file_id':stored.id})
 
 
 @app.get('/api/resumes')
 def resumes(user=Depends(current),db=Depends(database)):
-    return [public(r) for r in records(db,user.id,'resume').order_by(Record.created_at.desc()).all()]
+    rows = records(db,user.id,'resume').order_by(Record.created_at.desc()).all()
+    for row in rows:
+        repair_saved_profile(db, user.id, row)
+    return [public(r) for r in rows]
+
+
+@app.delete('/api/resumes/{id}')
+def delete_resume(id:str,user=Depends(current),db=Depends(database)):
+    resume=owned(db,user.id,'resume',id)
+    active=get_record(db,user.id,'profile','active')
+    if resume.data.get('active') or (active and active.data.get('resume_version_id') == id):
+        raise HTTPException(409,'Choose another active resume before deleting this one.')
+    for task in db.query(Task).filter(Task.user_id==user.id,Task.status.in_(['queued','running'])).all():
+        if task.payload.get('resume_id') == id or task.payload.get('file_id') == resume.data.get('file_id'):
+            raise HTTPException(409,'Wait for tasks using this resume to finish before deleting it.')
+    file=db.query(File).filter_by(id=resume.data.get('file_id'),user_id=user.id,deleted=False).first()
+    shared=any(row.id != id and row.data.get('file_id') == resume.data.get('file_id') for row in records(db,user.id,'resume').all())
+    if file and not shared:
+        remove_bytes(file.key)
+        file.deleted=True
+    # Archive the processed version so RAG references and existing guides remain valid.
+    resume.kind='resume_archive'
+    resume.data={**resume.data,'active':False,'deleted_at':now().isoformat()}
+    audit(db,user.id,'resume_deleted',{'resume_id':id,'knowledge_preserved':True})
+    db.commit()
+    return {'deleted':True,'knowledge_preserved':True}
 
 
 @app.post('/api/resumes/{id}/activate')
@@ -237,9 +292,19 @@ def reindex(id:str,user=Depends(current),db=Depends(database)):
     return enqueue(db,user.id,'rag_reindex',{'resume_id':id})
 
 
+@app.post('/api/resumes/{id}/reparse')
+def reparse_resume(id:str,user=Depends(current),db=Depends(database)):
+    owned(db,user.id,'resume',id)
+    return enqueue(db,user.id,'reparse',{'resume_id':id})
+
+
 @app.get('/api/profile')
 def profile(user=Depends(current),db=Depends(database)):
     row=get_record(db,user.id,'profile','active')
+    if row:
+        resume=records(db,user.id,'resume').filter_by(id=row.data.get('resume_version_id')).first()
+        if resume:
+            repair_saved_profile(db,user.id,resume)
     return row.data if row else None
 
 
@@ -270,7 +335,8 @@ def save_profile(body:Profile,user=Depends(current),db=Depends(database)):
         raise HTTPException(409,'Upload and activate a resume first.')
     if len(json.dumps(body.model_dump()))>100000:
         raise HTTPException(422,'Profile too large.')
-    row.data={**row.data,**body.model_dump(),'classification':'User-provided','experience':experience_summary(body.employments)}
+    missing = check_missing_mandatory_fields(body.model_dump())
+    row.data={**row.data,**body.model_dump(),'classification':'User-provided','experience':experience_summary(body.employments),'missing_mandatory_fields':missing}
     resume=owned(db,user.id,'resume',row.data['resume_version_id'])
     resume.data={**resume.data,'profile':row.data,'approved':body.approved}
     for job in records(db,user.id,'job').all():
@@ -301,10 +367,20 @@ def research(body:Search,user=Depends(current),db=Depends(database)):
     return enqueue(db,user.id,'research',body.model_dump())
 
 
+@app.post('/api/research/countries')
+def suggest_countries(user=Depends(current),db=Depends(database)):
+    return enqueue(db,user.id,'countries',{'module':'visa'})
+
+
 @app.get('/api/research/{module}')
 def saved_research(module:str,user=Depends(current),db=Depends(database)):
     row=get_record(db,user.id,'research',module)
-    return row.data if row else None
+    if not row:
+        return None
+    data=dict(row.data)
+    if not (data.get('live_evidence') or {}).get('available'):
+        data['live_evidence']={'available':False}
+    return data
 
 
 class JobInput(BaseModel):
@@ -326,20 +402,64 @@ def add_job(body:JobInput,user=Depends(current),db=Depends(database)):
     if p.scheme!='https' or not p.hostname or p.username or p.password:
         raise HTTPException(422,'Use an HTTPS application URL.')
     data=body.model_dump(); data.update({'source':'manual','verification':{'status':'Not found on company website / third-party listing only','classification':'User-provided','checked_at':None}})
-    row=upsert_job(db,user.id,data); audit(db,user.id,'job_saved',{'job_id':row.id}); db.commit()
+    row=upsert_job(db,user.id,data)
+    if row is None: raise HTTPException(409,'This job was deleted and is suppressed from rediscovery.')
+    audit(db,user.id,'job_saved',{'job_id':row.id}); db.commit()
     return public(row)
 
 
 @app.get('/api/jobs')
-def list_jobs(module:Literal['domestic','visa']='domestic',page:int=1,status:str='',q:str='',sort:str='default',history:bool=False,user=Depends(current),db=Depends(database)):
+def list_jobs(module:Literal['domestic','visa']='domestic',page:int=1,status:str='',q:str='',sort:str='default',history:bool=False,view:Literal['latest','previous']='latest',user=Depends(current),db=Depends(database)):
     page=max(1,page)
+    # Jobs saved before document detection existed get their required documents filled in once.
+    changed=False
+    for row in records(db,user.id,'job').all():
+        if row.data.get('module')==module and not row.data.get('mandatory_documents_known') and not row.data.get('documents_edited'):
+            row.data={**row.data,'mandatory_documents':required_documents(row.data,module),'mandatory_documents_known':True,'documents_source':'Job description'}
+            changed=True
+    if changed:
+        db.commit()
+    if view=='previous':
+        # Every job found to date, with its current status, including older ones.
+        rows=[r for r in records(db,user.id,'job').all() if r.data.get('module')==module]
+        data=active_results(rows,module,status,q,sort if sort!='default' else 'date',True)
+        return {'items':data[(page-1)*30:page*30],'total':len(data),'page':page,'page_size':30}
+    run=get_record(db,user.id,'discovery_run',module)
+    if run and not history and not q and not status:
+        ids=run.data.get('job_ids',[])
+        latest=[d for d in active_results(records(db,user.id,'job').all(),module,'','',sort,True) if d['id'] in ids or d.get('source')=='manual']
+        if sort=='default':
+            latest.sort(key=lambda d:ids.index(d['id']) if d['id'] in ids else len(ids))
+        return {'items':latest[(page-1)*30:page*30],'total':len(latest),'page':page,'page_size':30,'found_at':run.data.get('at')}
     data=active_results(records(db,user.id,'job').all(),module,status,q,sort,history)
+    if not history and get_record(db,user.id,'research',module):
+        from .search_scope import resolve_scope, matches_scope
+        profile=get_record(db,user.id,'profile','active')
+        try:
+            scope=resolve_scope(db,user.id,module,profile.data if profile else {})
+            data=[job for job in data if job.get('source')=='manual' or matches_scope(job,scope)]
+        except ValueError:
+            data=[job for job in data if job.get('source')=='manual']
     return {'items':data[(page-1)*30:page*30],'total':len(data),'page':page,'page_size':30}
 
 
 @app.get('/api/jobs/{id}')
 def job_detail(id:str,user=Depends(current),db=Depends(database)):
     return public(owned(db,user.id,'job',id))
+
+
+@app.delete('/api/jobs/{id}')
+def delete_job(id:str,user=Depends(current),db=Depends(database)):
+    row=owned(db,user.id,'job',id)
+    if any(t.payload.get('job_id')==id or id in t.payload.get('job_ids',[]) for t in db.query(Task).filter(Task.user_id==user.id,Task.status.in_(['queued','running'])).all()):
+        raise HTTPException(409,'Wait for the active job task to finish before deleting this job.')
+    for attachment in db.query(File).filter_by(user_id=user.id,record_id=id,category='attachment',deleted=False).all():
+        remove_bytes(attachment.key)
+        attachment.deleted=True
+    row.kind='deleted_job'
+    row.data={'url':row.data.get('url',''),'deleted_at':now().isoformat()}
+    db.commit()
+    return {'deleted':True,'generated_documents_preserved':True}
 
 
 class JobPatch(BaseModel):
@@ -359,6 +479,7 @@ def patch_job(id:str,body:JobPatch,user=Depends(current),db=Depends(database)):
         data['comment']=body.comment
     if body.mandatory_documents is not None:
         data['mandatory_documents']=body.mandatory_documents
+        data['documents_edited']=True
     if body.mandatory_documents_known is not None:
         data['mandatory_documents_known']=body.mandatory_documents_known
     row.data=data; db.commit()
@@ -387,11 +508,12 @@ def prepare(body:Bulk,user=Depends(current),db=Depends(database)):
         available={x['document_type'].lower() for x in d.get('attachment_ids',[])}
         generated=[r for r in records(db,user.id,'content').all() if r.data.get('job_id')==id and r.data.get('validation_status')=='approved' and profile and r.data.get('resume_version_id')==profile.data.get('resume_version_id') and r.data.get('jd_hash')==digest(d.get('description',''))]
         available.update(r.data['content_type'].replace('_',' ') for r in generated)
-        missing=[x for x in d.get('mandatory_documents',[]) if x.lower() not in available]
+        documents=d.get('mandatory_documents') if d.get('mandatory_documents_known') else required_documents(d,d.get('module'))
+        aliases={'resume/cv':{'resume','resume/cv','cv'}}
+        missing=[x for x in documents if not (aliases.get(x.lower(),{x.lower()}) & available)]
         errors=[]
         if missing: errors.append('Missing documents: '+', '.join(missing))
         if d['status']!='NOT APPLIED': errors.append('Already in application tracking; review before applying again.')
-        if not d.get('mandatory_documents_known'): errors.append('Mandatory document requirements have not been confirmed. Review the employer application form.')
         outcomes.append({'job_id':id,'valid':not errors,'errors':errors,'url':d['url'],'channel':channel(d),'message':'Review the submission channel. No submission has been made.'})
     audit(db,user.id,'application_prepared',{'job_ids':body.job_ids}); db.commit()
     return {'outcomes':outcomes,'requires_confirmation':True}
@@ -435,8 +557,27 @@ def generate_documents(id:str,user=Depends(current),db=Depends(database)):
 
 
 @app.get('/api/content')
-def contents(job_id:str='',user=Depends(current),db=Depends(database)):
-    return [public(r) for r in records(db,user.id,'content').all() if not job_id or r.data.get('job_id')==job_id]
+def contents(job_id:str='',source:str='',user=Depends(current),db=Depends(database)):
+    rows=[r for r in records(db,user.id,'content').all() if (not job_id or r.data.get('job_id')==job_id) and (not source or r.data.get('source')==source)]
+    rows.sort(key=lambda r:r.created_at,reverse=True)
+    return [public(r) for r in rows]
+
+
+class DocumentRequest(BaseModel):
+    kind:Literal['resume','cover_letter','motivational_letter']
+    country:str=Field(min_length=2,max_length=100)
+    jd:str=Field(min_length=30,max_length=60000)
+    company:str=Field(default='',max_length=200)
+    url:str=Field(default='',max_length=2000)
+    resume_id:str|None=None
+
+
+@app.post('/api/documents')
+def create_document(body:DocumentRequest,user=Depends(current),db=Depends(database)):
+    if len(body.country.strip())<2:
+        raise HTTPException(422,'Country is required.')
+    if body.resume_id: owned(db,user.id,'resume',body.resume_id)
+    return enqueue(db,user.id,'document',{**body.model_dump(),'country':body.country.strip()})
 
 
 @app.post('/api/content/{id}/approve')
@@ -453,12 +594,27 @@ class ContentEdit(BaseModel):
 @app.put('/api/content/{id}')
 def edit_content(id:str,body:ContentEdit,user=Depends(current),db=Depends(database)):
     row=owned(db,user.id,'content',id)
+    kind=row.data.get('content_type')
+    final=row.data.get('document_format')==ai.DOCUMENT_FORMAT_VERSION
+    content={**{k:row.data['structured_content'].get(k) for k in ('name','contact','title') if k in row.data.get('structured_content',{})},**body.structured_content} if final else body.structured_content
     try:
-        ai.validate_document(body.structured_content)
+        module=row.data.get('prompt_module') or ('visa' if (records(db,user.id,'job').filter_by(id=row.data.get('job_id')).first() or Record(data={})).data.get('module')=='visa' else 'domestic')
+        if final:
+            ai.document_validator(kind,module)(content)
+        elif kind=='motivational_letter':
+            ai.validate_document(content)
+            low,high=ai.motivational_word_limits(prompt_section(module,kind))
+            words=ai.word_count(ai.letter_text(content))
+            if not low<=words<=high:
+                raise ValueError(f'Motivational letter has {words} words; the prompt allows {low}–{high} (at most {high}).')
+        else:
+            ai.validate_document(content)
     except ValueError as exc:
         raise HTTPException(422,str(exc))
+    body.structured_content=content
+    latex={'latex':document_latex(content,kind)} if final else {}
     put(db,user.id,'content_version',uid(),{'content_id':id,**row.data})
-    row.data={**row.data,'structured_content':body.structured_content,'markdown_content':ai.markdown(body.structured_content),'content_hash':digest(json.dumps(body.structured_content,sort_keys=True)),'validation_status':'needs_review','last_edit_classification':'User-provided'}
+    row.data={**row.data,**latex,'structured_content':body.structured_content,'markdown_content':ai.markdown(body.structured_content,row.data.get('content_type')),'content_hash':digest(json.dumps(body.structured_content,sort_keys=True)),'validation_status':'needs_review','last_edit_classification':'User-provided'}
     for file in db.query(File).filter_by(user_id=user.id,record_id=id,category='temporary',deleted=False).all():
         file.expires_at=now()
     audit(db,user.id,'content_edited',{'content_id':id}); db.commit()
@@ -471,13 +627,37 @@ def render_content(id:str,format:Literal['docx','pdf','tex','zip']='pdf',user=De
     if not row:
         raise HTTPException(404,'Content not found.')
     content=row.data['structured_content'] if row.kind=='content' else guide_sections(row.data)
-    if row.kind=='content' and row.data.get('validation_status')!='approved':
+    if row.kind=='content' and row.data.get('content_type')=='motivational_letter':
+        content={**content,'letter':True}
+    if row.kind=='content' and row.data.get('validation_status')!='approved' and row.data.get('source')!='documents_tab':
         raise HTTPException(409,'Review and approve generated text before rendering application documents.')
+    final=row.kind=='content' and row.data.get('document_format')==ai.DOCUMENT_FORMAT_VERSION
     prefix=row.data.get('content_type','interview-guide')
+    prefix+='-'+os.getenv('DOCUMENT_RENDERER','native')+('-v3' if final else '-v2')
+    if row.kind=='content':
+        # Edits change the hash, so a stale cached file is never served.
+        prefix+='-'+row.data.get('content_hash',digest(json.dumps(content,sort_keys=True)))[:12]
+    if final and format=='zip':
+        raise HTTPException(422,'Download the Word, PDF or LaTeX file individually.')
+    if row.kind=='interview':
+        # A record ID alone cannot identify an export: questions and templates
+        # change while the same guide remains in the library.
+        fingerprint=digest(json.dumps([INTERVIEW_EXPORT_VERSION,content],sort_keys=True))[:20]
+        prefix=f'{prefix}-{fingerprint}'
+        invalidated=False
+        for file in db.query(File).filter(File.user_id==user.id,File.record_id==id,File.category=='temporary',File.deleted==False,File.expires_at>now()).all():
+            if not file.name.startswith(prefix+'.'):
+                file.expires_at=now()
+                invalidated=True
+        if invalidated:
+            db.commit()
     cached=db.query(File).filter(File.user_id==user.id,File.record_id==id,File.category=='temporary',File.deleted==False,File.name==f'{prefix}.{format}',File.expires_at>now()).first()
     if cached:
         return {'file_id':cached.id,'url':'/api/files/'+cached.id,'expires_at':cached.expires_at.isoformat(),'cached':True}
-    blob=render(content,format)
+    try:
+        blob=render_application_document(content,row.data['content_type'],format) if final else render(content,format)
+    except ValueError as exc:
+        raise HTTPException(422,str(exc)) from exc
     f=store(db,user.id,f'{prefix}.{format}',blob,'temporary',id,now()+timedelta(hours=24)); db.commit()
     return {'file_id':f.id,'url':'/api/files/'+f.id,'expires_at':f.expires_at.isoformat(),'cached':False}
 
@@ -519,7 +699,33 @@ def create_interview(body:Interview,user=Depends(current),db=Depends(database)):
 
 @app.get('/api/interviews')
 def interviews(user=Depends(current),db=Depends(database)):
-    return [public(r) for r in records(db,user.id,'interview').order_by(Record.created_at.desc()).all()]
+    return [{k:v for k,v in public(r).items() if k not in {'plans','category_plans'}} for r in records(db,user.id,'interview').order_by(Record.created_at.desc()).all() if r.data.get('generation_mode')!='built_in']
+
+
+@app.post('/api/interviews/{id}/questions/{question_id}/answer',status_code=202)
+def answer_interview_question(id:str,question_id:str,request:Request,user=Depends(current),db=Depends(database)):
+    from .answer_lifecycle import lock_user
+    lock_user(db,user.id)
+    guide=owned(db,user.id,'interview',id)
+    if guide.data.get('generation_status') not in (None, 'completed'):
+        raise HTTPException(409,'Wait for question generation to finish before requesting answers.')
+    question=next((item for item in guide.data.get('questions',[]) if item.get('id')==question_id),None)
+    if not question:
+        raise HTTPException(404,'Interview question not found.')
+    if question.get('answer'):
+        raise HTTPException(409,'This question already has a saved answer.')
+    active=db.query(Task).filter(
+        Task.user_id==user.id,
+        Task.kind=='interview_answer',
+        Task.status.in_(['queued','running']),
+    ).first()
+    if active:
+        raise HTTPException(409,'An interview answer is already being generated. Wait for it to finish first.')
+    return enqueue(db,user.id,'interview_answer',{
+        'guide_id':id,
+        'question_id':question_id,
+        'session_id':request.state.session.id,
+    })
 
 
 @app.post('/api/interviews/{id}/sessions')
@@ -532,14 +738,14 @@ def save_mock(id:str,body:dict,user=Depends(current),db=Depends(database)):
 
 @app.get('/api/tasks')
 def tasks(user=Depends(current),db=Depends(database)):
-    return [{'id':t.id,'kind':t.kind,'status':t.status,'result':t.result,'error':t.error,'created_at':t.created_at.isoformat()} for t in db.query(Task).filter_by(user_id=user.id).order_by(Task.created_at.desc()).limit(30)]
+    return task_views(db,user.id)
 
 
 @app.get('/api/tasks/{id}')
 def task(id:str,user=Depends(current),db=Depends(database)):
     t=db.query(Task).filter_by(id=id,user_id=user.id).first()
     if not t: raise HTTPException(404,'Task not found.')
-    return {'id':t.id,'kind':t.kind,'status':t.status,'result':t.result,'error':t.error}
+    return next((item for item in task_views(db,user.id) if item['id']==id), {'id':t.id,'kind':t.kind,'status':t.status,'result':t.result,'error':t.error,'eta_seconds':0})
 
 
 @app.get('/api/storage')

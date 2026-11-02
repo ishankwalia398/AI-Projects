@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, ReactNode, FormEvent } from "react";
+import { Fragment, useState, useEffect, useCallback, useRef, ReactNode, FormEvent } from "react";
 import {
   ArrowDownToLine,
   ArrowRight,
@@ -20,7 +20,6 @@ import {
   Info,
   LayoutGrid,
   LogOut,
-  Menu,
   MessageSquareText,
   Paperclip,
   Plus,
@@ -30,6 +29,7 @@ import {
   ShieldCheck,
   Sparkles,
   Target,
+  Trash2,
   Upload,
   UserRound,
   X,
@@ -41,7 +41,7 @@ import {
   SubmissionReview,
 } from "./DocumentEditors";
 import { api, downloadContent, setCsrf, statuses } from "./api";
-import { date, pageNumbers, togglePageSelection } from "./viewLogic";
+import { date, discoveryTask, pageNumbers, profileSnapshot, taskCompletion, tasksChanged, titleRegions, togglePageSelection } from "./viewLogic";
 
 type Data = Record<string, any>;
 type Runner = (operation: () => Promise<any>, message?: string) => Promise<any>;
@@ -49,7 +49,67 @@ const nav = [
   { id: "domestic", title: "Domestic Jobs", icon: BriefcaseBusiness },
   { id: "visa", title: "Visa Sponsored Jobs", icon: Globe2 },
   { id: "interview", title: "Interview Questions", icon: MessageSquareText },
+  { id: "documents", title: "Generate Documents", icon: FileText },
 ];
+const tabs = [
+  ...nav,
+  { id: "resume", title: "Resume Library", icon: Upload },
+  { id: "profile", title: "Candidate Profile", icon: UserRound },
+];
+
+function UserMenu({
+  username,
+  open,
+  setOpen,
+  onSettings,
+  onLogout,
+}: {
+  username: string;
+  open: boolean;
+  setOpen: (value: boolean) => void;
+  onSettings: () => void;
+  onLogout: () => void;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const close = (e: MouseEvent | KeyboardEvent) => {
+      if (e instanceof KeyboardEvent ? e.key === "Escape" : !ref.current?.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", close);
+    document.addEventListener("keydown", close);
+    return () => {
+      document.removeEventListener("mousedown", close);
+      document.removeEventListener("keydown", close);
+    };
+  }, [open, setOpen]);
+  return (
+    <div className="account" ref={ref}>
+      <button
+        className="account-trigger"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => setOpen(!open)}
+      >
+        <span className="avatar">{username.slice(0, 2).toUpperCase()}</span>
+        <span>{username}</span>
+        <ChevronDown size={13} className={open ? "chevron open" : "chevron"} />
+      </button>
+      {open && (
+        <div className="account-menu" role="menu">
+          <button role="menuitem" onClick={() => { setOpen(false); onSettings(); }}>
+            <Settings2 size={15} />
+            Settings
+          </button>
+          <button role="menuitem" onClick={() => { setOpen(false); onLogout(); }}>
+            <LogOut size={15} />
+            Logout
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
 function Brand() {
   return (
     <div className="brand">
@@ -236,12 +296,6 @@ function Auth({ onLogin }: { onLogin: (u: Data) => void }) {
         <footer>Your experience. Your ambition. Your next chapter.</footer>
       </section>
       <section className="auth-form">
-        {import.meta.env.VITE_BACKEND_CONFIGURED === "false" && (
-          <Notice>
-            Account services are unavailable because the backend is not
-            connected yet.
-          </Notice>
-        )}
         <span className="eyebrow">LET’S BUILD WHAT’S NEXT</span>
         <h2>
           {mode === "register"
@@ -404,14 +458,15 @@ export default function App() {
     [integrations, setIntegrations] = useState<Data>({}),
     [busy, setBusy] = useState(false);
   const reload = () => setVersion((v) => v + 1);
+  const [trackedTaskId, setTrackedTaskId] = useState("");
+  const taskSnapshot = useRef<Data[]>([]);
   const run: Runner = async (fn, msg) => {
     setBusy(true);
     try {
       const r = await fn();
-      if (msg) {
-        setMessage(msg);
-        setError(false);
-      }
+      setTrackedTaskId(r?.task_id || "");
+      setMessage(msg || "");
+      setError(false);
       reload();
       return r;
     } catch (e) {
@@ -443,6 +498,7 @@ export default function App() {
         setStats(s);
         setIntegrations(i);
         setTasks(t);
+        taskSnapshot.current = t;
       })
       .catch((e) => {
         setMessage(e.message);
@@ -454,18 +510,28 @@ export default function App() {
     const timer = setInterval(() => {
       api("/tasks")
         .then((t) => {
-          setTasks((previous) => {
-            const changed = previous.some((p) =>
-              t.some((n: Data) => n.id === p.id && n.status !== p.status),
-            );
-            if (changed) reload();
-            return t;
-          });
+          const changed = tasksChanged(taskSnapshot.current, t);
+          taskSnapshot.current = t;
+          setTasks(t);
+          if (changed) reload();
         })
         .catch(() => {});
     }, 4000);
     return () => clearInterval(timer);
   }, [user]);
+  useEffect(() => {
+    const task = tasks.find((item) => item.id === trackedTaskId);
+    if (task && ["completed", "failed"].includes(task.status)) {
+      setMessage(taskCompletion(task));
+      setError(task.status === "failed");
+      setTrackedTaskId("");
+    }
+  }, [tasks, trackedTaskId]);
+  useEffect(() => {
+    if (!["Title suggestions are ready.", "Country suggestions are ready.", "Generating country suggestions...", "Generating title suggestions..."].includes(message)) return;
+    const timer = setTimeout(() => setMessage(""), 10_000);
+    return () => clearTimeout(timer);
+  }, [message]);
   if (loading)
     return (
       <div className="empty loading">
@@ -480,103 +546,39 @@ export default function App() {
     setMenu(false);
     setMessage("");
   };
+  const logout = () =>
+    run(async () => {
+      await api("/auth/logout", "POST");
+      setUser(null);
+      setCsrf("");
+    });
   return (
-    <div className={"shell " + (menu ? "menu-open" : "")}>
-      <aside className="sidebar">
-        <Brand />
-        <span className="nav-caption">YOUR WORKSPACE</span>
-        <nav>
-          {nav.map((n) => (
+    <div className="shell">
+      <div className="workspace">
+        <header className="topbar">
+          <Brand />
+          <UserMenu
+            username={user.username}
+            open={menu}
+            setOpen={setMenu}
+            onSettings={() => go("settings")}
+            onLogout={logout}
+          />
+        </header>
+        <nav className="page-tabs" role="tablist" aria-label="Workspace sections">
+          {tabs.map((n) => (
             <button
               key={n.id}
-              className={"nav-button " + (page === n.id ? "active" : "")}
+              role="tab"
+              aria-selected={page === n.id}
+              className={"page-tab " + (page === n.id ? "active" : "")}
               onClick={() => go(n.id)}
             >
-              <n.icon />
-              {n.title}
+              <n.icon size={16} />
+              <span>{n.title}</span>
             </button>
           ))}
         </nav>
-        <span className="nav-caption">PERSONAL</span>
-        <nav>
-          <button
-            className={"nav-button " + (page === "resume" ? "active" : "")}
-            onClick={() => go("resume")}
-          >
-            <FileText />
-            Resume library
-          </button>
-          <button
-            className={"nav-button " + (page === "profile" ? "active" : "")}
-            onClick={() => go("profile")}
-          >
-            <UserRound />
-            Candidate profile
-          </button>
-        </nav>
-        <div className="nav-end">
-          <div className="side-note">
-            <Sparkles size={17} color="var(--accent)" />
-            <p>
-              <strong>A little progress, every day.</strong>
-            </p>
-            <p>Your next chapter starts with the step you take today.</p>
-          </div>
-          <button
-            className={"nav-button " + (page === "settings" ? "active" : "")}
-            onClick={() => go("settings")}
-          >
-            <Settings2 />
-            Settings
-          </button>
-          <button
-            className="nav-button"
-            onClick={() =>
-              run(async () => {
-                await api("/auth/logout", "POST");
-                setUser(null);
-                setCsrf("");
-              })
-            }
-          >
-            <LogOut />
-            Logout
-          </button>
-        </div>
-      </aside>
-      <div className="workspace">
-        <header className="topbar">
-          <button
-            className="ghost mobile-menu"
-            aria-label="Toggle navigation"
-            onClick={() => setMenu(!menu)}
-          >
-            <Menu size={21} />
-          </button>
-          <div className="breadcrumb">
-            My workspace <ChevronRight size={12} />
-            <strong>
-              {nav.find((n) => n.id === page)?.title ||
-                (
-                  {
-                    resume: "Resume library",
-                    profile: "Candidate profile",
-                    settings: "Settings",
-                  } as Data
-                )[page]}
-            </strong>
-          </div>
-          <div className="account">
-            <span className="tag green">
-              <span style={{ fontSize: 8 }}>●</span> Private workspace
-            </span>
-            <span className="avatar">
-              {user.username.slice(0, 2).toUpperCase()}
-            </span>
-            <span>{user.username}</span>
-            <ChevronDown size={12} />
-          </div>
-        </header>
         <main className="content">
           {message && (
             <div
@@ -602,9 +604,17 @@ export default function App() {
               {pending.some((t) => t.status === "running")
                 ? "processing"
                 : "queued"}
-              . You can keep working; progress is saved.
+              . Approximate total time remaining: {pending.some((t) => t.total_eta_seconds != null) ? `${Math.max(1, Math.ceil(Math.max(...pending.map((t) => t.total_eta_seconds || 0)) / 60))} min` : "estimating..."}. You can keep working; progress is saved.
             </Notice>
           )}
+          {pending.filter((t) => page === "resume" ? t.kind === "ingest" : page === "profile" ? ["ingest", "reparse"].includes(t.kind) : page === "interview" ? t.kind === "interview" : page === "documents" ? t.kind === "document" : t.module === page && t.kind !== "interview").map((t) => (
+            <div className="notice" role="status" key={t.id}>
+              <Clock3 size={14} />
+              {{ingest: "Resume upload", reparse: "Profile extraction", research: "Title suggestions", countries: "Country suggestions", discover: "Finding jobs", interview: t.interview_kind === "hr" ? "Non-technical interview" : "Technical interview", generate: "Document generation", document: "Document generation"}[t.kind as string] || t.kind}
+              {" — "}{t.status}. Approximate time remaining: {t.eta_seconds != null ? `${Math.max(1, Math.ceil(t.eta_seconds / 60))} min` : "estimating..."}
+            </div>
+          ))}
+          <div className="tab-panel" key={page}>
           {page === "domestic" || page === "visa" ? (
             <Jobs
               module={page}
@@ -613,13 +623,16 @@ export default function App() {
               version={version}
               busy={busy}
               go={go}
+              tasks={tasks}
             />
           ) : page === "resume" ? (
             <Resumes run={run} version={version} go={go} />
           ) : page === "profile" ? (
             <ProfileEditor run={run} version={version} />
           ) : page === "interview" ? (
-            <InterviewPage run={run} version={version} />
+            <InterviewPage run={run} version={version} tasks={tasks} />
+          ) : page === "documents" ? (
+            <DocumentsPage run={run} version={version} tasks={tasks} />
           ) : (
             <SettingsPage
               integrations={integrations}
@@ -631,6 +644,7 @@ export default function App() {
               }}
             />
           )}
+          </div>
           <footer className="footer-note">
             Career Assistant · A thoughtful step toward what’s next.
           </footer>
@@ -647,6 +661,7 @@ function Jobs({
   version,
   busy,
   go,
+  tasks = [],
 }: {
   module: string;
   stats: Data;
@@ -654,6 +669,7 @@ function Jobs({
   version: number;
   busy: boolean;
   go: (s: string) => void;
+  tasks?: Data[];
 }) {
   const [jobs, setJobs] = useState<Data[]>([]),
     [total, setTotal] = useState(0),
@@ -661,20 +677,49 @@ function Jobs({
     [query, setQuery] = useState(""),
     [status, setStatus] = useState(""),
     [sort, setSort] = useState("default"),
-    [history, setHistory] = useState(false),
+    [view, setView] = useState<"latest" | "previous">("latest"),
     [selected, setSelected] = useState<string[]>([]),
     [add, setAdd] = useState(false),
     [detail, setDetail] = useState<Data | null>(null),
-    [contentJob, setContentJob] = useState<string | null>(null),
     [outcomes, setOutcomes] = useState<Data[] | null>(null),
     [research, setResearch] = useState<Data | null>(null),
     [errors, setErrors] = useState<Record<string, string>>({}),
-    [loading, setLoading] = useState(false);
+    [loading, setLoading] = useState(false),
+    [dismissDiscoveryNotice, setDismissDiscoveryNotice] = useState(false);
+
+  const [openedAt] = useState(() => Date.now());
+  const latestDiscoverTask = discoveryTask(tasks, module, openedAt);
+  const [researchTaskId, setResearchTaskId] = useState("");
+  const [researchKind, setResearchKind] = useState("research");
+  const [researchNoticeVisible, setResearchNoticeVisible] = useState(false);
+  useEffect(() => {
+    if (!researchTaskId) return;
+    setResearchNoticeVisible(true);
+    const timer = setTimeout(() => setResearchNoticeVisible(false), 10_000);
+    return () => clearTimeout(timer);
+  }, [researchTaskId]);
+  const researchTask = tasks.find((task) => task.id === researchTaskId && task.module === module);
+  const researching = !!researchTaskId && (!researchTask || ["queued","running"].includes(researchTask.status));
+  useEffect(() => { setResearchTaskId(""); setResearch(null); }, [module]);
+  useEffect(() => {
+    if (researchTask?.status !== "completed") return;
+    let alive = true;
+    api("/research/" + (researchTask?.kind === "countries" ? "visa-countries" : module)).then((value) => { if (alive) setResearch(value); }).catch(() => {});
+    const timer = setTimeout(() => setResearchTaskId(""), 10_000);
+    return () => { alive = false; clearTimeout(timer); };
+  }, [researchTask?.status, researchTask?.id, module]);
+
+  const isDiscovering =
+    latestDiscoverTask && ["queued", "running"].includes(latestDiscoverTask.status);
   useEffect(() => {
     setPage(1);
     setSelected([]);
     setErrors({});
-  }, [module, query, status, sort, history]);
+  }, [module, query, status, sort, view]);
+  useEffect(() => { setView("latest"); }, [module]);
+  useEffect(() => {
+    setDismissDiscoveryNotice(false);
+  }, [module]);
   useEffect(() => {
     let alive = true;
     setLoading(true);
@@ -684,7 +729,7 @@ function Jobs({
       q: query,
       status,
       sort,
-      history: String(history),
+      view,
     });
     api("/jobs?" + params)
       .then((r) => {
@@ -702,7 +747,7 @@ function Jobs({
     return () => {
       alive = false;
     };
-  }, [module, page, query, status, sort, history, version]);
+  }, [module, page, query, status, sort, view, version]);
   const pages = Math.max(1, Math.ceil(total / 30));
   const prepare = async () => {
     const r = await run(() =>
@@ -741,57 +786,73 @@ function Jobs({
         </div>
         <button
           className="primary"
-          disabled={busy}
-          onClick={() =>
+          disabled={busy || isDiscovering}
+          onClick={() => {
+            setDismissDiscoveryNotice(false);
             run(
               () => api("/jobs/discover", "POST", { module }),
-              "Job discovery queued. Results will appear when processing completes.",
-            )
-          }
+              "Job discovery started. Preparing titles" + (module === "visa" ? " and countries" : "") + " if needed, then finding your top 10 jobs...",
+            );
+          }}
         >
-          <Search size={16} />
-          Find Jobs
+          {isDiscovering ? (
+            <>
+              <RefreshCw size={16} className="loading" />
+              Finding Jobs…
+            </>
+          ) : (
+            <>
+              <Search size={16} />
+              Find Jobs
+            </>
+          )}
         </button>
       </div>
-      <div className="stats">
-        {[
-          {
-            label: "Saved opportunities",
-            value: stats.saved || 0,
-            icon: BriefcaseBusiness,
-            note: "Across your workspace",
-          },
-          {
-            label: "Applications tracked",
-            value: stats.applied || 0,
-            icon: ArrowUpRight,
-            note: "Every step, in one place",
-          },
-          {
-            label: "At interview stage",
-            value: stats.interviews || 0,
-            icon: MessageSquareText,
-            note: "Make a great impression",
-          },
-          {
-            label: "Preparation guides",
-            value: stats.guides || 0,
-            icon: FileText,
-            note: "Ready when you are",
-          },
-        ].map((s) => (
-          <div className="stat" key={s.label}>
-            <div className="stat-top">
-              {s.label}
-              <span className="stat-icon">
-                <s.icon />
-              </span>
+      {isDiscovering && (
+        <Notice>
+          <span className="loading">
+            <RefreshCw size={14} />
+          </span>
+          <strong>Searching job opportunities…</strong> Scanning job boards and matching listings against your candidate skills and preferences. Results will appear automatically below. {latestDiscoverTask?.result?.stage} {latestDiscoverTask?.result?.sources_complete ?? 0}/{latestDiscoverTask?.result?.source_count || ""} sources; {latestDiscoverTask?.result?.scanned || 0} listings read.
+        </Notice>
+      )}
+      {!isDiscovering && !dismissDiscoveryNotice && latestDiscoverTask && (
+        latestDiscoverTask.status === "failed" ? (
+          <div className="notice error" role="alert">
+            <Info />
+            <div style={{ flex: 1 }}>
+              <strong>Job discovery failed:</strong> {latestDiscoverTask.error || "Unable to fetch job listings."}
             </div>
-            <strong>{s.value}</strong>
-            <small>{s.note}</small>
+            <button aria-label="Dismiss notice" onClick={() => setDismissDiscoveryNotice(true)}>
+              <X size={15} />
+            </button>
           </div>
-        ))}
-      </div>
+        ) : latestDiscoverTask.status === "completed" && latestDiscoverTask.result ? (
+          <div className="notice success" role="status">
+            <CheckCircle2 size={16} color="var(--primary, #047857)" />
+            <div style={{ flex: 1 }}>
+              {latestDiscoverTask.result.fallback_used ? (
+                <>
+                  <strong>No live matches found:</strong> Saved {latestDiscoverTask.result.saved || 0} sample role example{latestDiscoverTask.result.saved === 1 ? "" : "s"}.
+                </>
+              ) : (
+                <>
+                  <strong>Discovery complete:</strong> Found {latestDiscoverTask.result.saved || 0} matching job{latestDiscoverTask.result.saved === 1 ? "" : "s"} for your profile from {latestDiscoverTask.result.scanned || 0} live listings. Use Previous Jobs to see every job found so far.
+                </>
+              )}
+              {latestDiscoverTask.result.note && (
+                <div>{latestDiscoverTask.result.note}</div>
+              )}
+            </div>
+            <button aria-label="Dismiss notice" onClick={() => setDismissDiscoveryNotice(true)}>
+              <X size={15} />
+            </button>
+          </div>
+        ) : null
+      )}
+      {researchTaskId && researchNoticeVisible && <div className={"notice " + (researchTask?.status === "failed" ? "error" : "")} role="status">
+        {researchTask?.status === "failed" ? researchTask.error : researching ? researchTask?.result?.stage || (researchKind === "countries" ? "Generating country suggestions..." : "Generating title suggestions...") : researchTask?.kind === "countries" ? "Country suggestions are ready." : "Title suggestions are ready."}
+      </div>}
       {!stats.profile?.approved ? (
         <div className="welcome">
           <div>
@@ -846,36 +907,35 @@ function Jobs({
         >
           <div>
             <h2>
-              {module === "visa"
-                ? "International opportunities"
-                : "Your opportunities"}{" "}
-              <span className="tag">{total} saved</span>
+              {view === "previous"
+                ? "Previous jobs"
+                : module === "visa"
+                  ? "International opportunities"
+                  : "Your opportunities"}{" "}
+              <span className="tag">{total} {view === "previous" ? "found to date" : "jobs"}</span>
             </h2>
             <p style={{ margin: 0 }}>
-              Matching Probability is an estimated fit score, not a hiring
-              probability.
+              {view === "previous"
+                ? "Every job found for you so far, with its current status."
+                : "Your latest Find Jobs results. Matching Probability is an estimated fit score, not a hiring probability."}
             </p>
           </div>
           <div className="toolbar-group">
             <button
-              onClick={() =>
-                run(async () => {
-                  await api("/research", "POST", { module });
-                }, "Title research queued.")
-              }
-            >
-              <Sparkles size={14} />
-              Suggest titles
-            </button>
-            <button
+              disabled={researching || busy}
               onClick={async () => {
-                const r = await run(() => api("/research/" + module));
-                if (r) setResearch(r);
+                const queued = await run(() => api("/research", "POST", { module }), "Generating title suggestions...");
+                if (queued) { setResearchKind("research"); setResearchTaskId(queued.task_id); }
               }}
             >
-              <FileText size={14} />
-              Saved research
+              <Sparkles size={14} />
+              {researching && researchKind === "research" ? "Suggesting titles…" : "Suggest Titles"}
             </button>
+            {module === "visa" && <button disabled={researching || busy} onClick={async () => {
+              const queued = await run(() => api("/research/countries", "POST", {}), "Generating country suggestions...");
+              if (queued) { setResearchKind("countries"); setResearchTaskId(queued.task_id); }
+            }}><Globe2 size={14} />Suggest Countries</button>}
+
             <button onClick={() => setAdd(true)}>
               <Plus size={15} />
               Save a job
@@ -919,7 +979,6 @@ function Jobs({
                 setQuery("");
                 setStatus("");
                 setSort("default");
-                setHistory(false);
               }}
               aria-label="Reset to default"
             >
@@ -927,16 +986,14 @@ function Jobs({
             </button>
           </div>
           <div className="toolbar-group">
-            <label
-              style={{ display: "flex", alignItems: "center", fontSize: 11 }}
+            <button
+              className={view === "previous" ? "primary" : ""}
+              aria-pressed={view === "previous"}
+              onClick={() => setView(view === "previous" ? "latest" : "previous")}
             >
-              <input
-                type="checkbox"
-                checked={history}
-                onChange={(e) => setHistory(e.target.checked)}
-              />
-              Include history
-            </label>
+              <Clock3 size={13} />
+              {view === "previous" ? "Show latest jobs" : "Previous Jobs"}
+            </button>
             <button
               disabled={!selected.length}
               className="primary"
@@ -982,12 +1039,11 @@ function Jobs({
                     "Link or URL to Apply",
                     "Matching Probability",
                     "Mandatory Documents",
-                    "Generate Documents",
-                    "Download Documents",
                     "Status",
                     "Date",
                     "Attachments",
                     "Comment",
+                    "Delete",
                   ].map((h) => (
                     <th key={h}>
                       {h === "Checkbox" ? (
@@ -1062,30 +1118,11 @@ function Jobs({
                       </button>
                     </td>
                     <td>
-                      {j.mandatory_documents.length
-                        ? j.mandatory_documents.join(", ")
-                        : j.mandatory_documents_known
-                          ? "None listed"
-                          : "Unknown · review form"}
-                    </td>
-                    <td>
-                      <button
-                        onClick={() =>
-                          run(
-                            () => api("/jobs/" + j.id + "/generate", "POST"),
-                            "Document generation queued. Review generated text before downloading.",
-                          )
-                        }
-                      >
-                        <Sparkles size={12} />
-                        Generate
-                      </button>
-                    </td>
-                    <td>
-                      <button onClick={() => setContentJob(j.id)}>
-                        <ArrowDownToLine size={12} />
-                        Documents
-                      </button>
+                      <div className="doc-chips">
+                        {(j.mandatory_documents?.length ? j.mandatory_documents : ["Resume/CV", "Cover Letter", ...(module === "visa" ? ["Motivational Letter"] : [])]).map((d: string) => (
+                          <span className="tag" key={d}>{d}</span>
+                        ))}
+                      </div>
                     </td>
                     <td>
                       <select
@@ -1141,6 +1178,11 @@ function Jobs({
                         <p className="row-error">{errors[j.id]}</p>
                       )}
                     </td>
+                    <td><button className="ghost" aria-label={"Delete " + j.title} onClick={async () => {
+                      if (!window.confirm("Delete this job and its attachments? It will not reappear in discovery.")) return;
+                      const result = await run(() => api("/jobs/" + j.id, "DELETE"), "Job deleted.");
+                      if (result) setSelected((ids) => ids.filter((id) => id !== j.id));
+                    }}>Delete</button></td>
                   </tr>
                 ))}
               </tbody>
@@ -1250,14 +1292,6 @@ function Jobs({
           )}
         </Modal>
       )}
-      {contentJob && (
-        <Modal
-          title="Your tailored documents"
-          close={() => setContentJob(null)}
-        >
-          <ContentDocuments jobId={contentJob} run={run} version={version} />
-        </Modal>
-      )}
       {outcomes && (
         <Modal
           title="Review your selected applications"
@@ -1297,8 +1331,16 @@ function Jobs({
           title="Saved title & country suggestions"
           close={() => setResearch(null)}
         >
-          <Notice>{research.disclaimer}</Notice>
-          <StructuredData value={research} />
+          {titleRegions(research, module).map((group) => (
+            <section key={group.region}><h3>{group.region}</h3>
+              <ul>{group.titles.map((title) => <li key={title}>{title}</li>)}</ul>
+            </section>
+          ))}
+          {research.live_evidence?.available && <section className="research-sources">
+            <h3>Research sources</h3>
+            <ul>{(research.live_evidence.sources || []).filter((source: Data) => /^https:\/\//.test(source.uri)).map((source: Data, index: number) => <li key={index}><a href={source.uri} target="_blank" rel="noopener noreferrer">{source.title || "Source"}</a></li>)}</ul>
+            {research.live_evidence.search_suggestions && <iframe title="Google Search suggestions" sandbox="allow-popups allow-popups-to-escape-sandbox" srcDoc={research.live_evidence.search_suggestions} style={{width:"100%",height:150,border:0}} />}
+          </section>}
         </Modal>
       )}
     </>
@@ -1523,74 +1565,242 @@ function ConfirmReceipt({
   );
 }
 
-function ContentDocuments({
-  jobId,
-  run,
-  version,
-}: {
-  jobId: string;
-  run: Runner;
-  version: number;
-}) {
-  const [items, setItems] = useState<Data[]>([]);
+const documentKinds = [
+  { kind: "resume", label: "Resume", button: "Generate Resume", icon: FileText },
+  { kind: "cover_letter", label: "Cover Letter", button: "Generate Cover Letter", icon: MessageSquareText },
+  { kind: "motivational_letter", label: "Motivational Letter", button: "Generate Motivational Letter", icon: Sparkles },
+];
+
+function DocumentPreview({ doc }: { doc: Data }) {
+  const content = doc.structured_content || {};
+  const letter = doc.content_type !== "resume";
+  const lines = (text: string) => text.split("\n").filter((line) => line.trim());
+  const bullet = /^\s*(?:[-*•–]\s+|\d+[.)]\s+)/;
+  return (
+    <article className={"doc-preview " + (letter ? "letter" : "resume")} aria-label={"Preview of the " + doc.content_type.replace("_", " ")}>
+      <header>
+        <h3>{content.name}</h3>
+        {content.contact?.length > 0 && <p>{content.contact.join("  |  ")}</p>}
+      </header>
+      {(content.sections || []).map((section: Data, index: number) => {
+        // Keep reading order: each run of bullets stays under the line that precedes it.
+        const blocks: { kind: "p" | "ul"; rows: string[] }[] = [];
+        for (const row of lines(section.text)) {
+          const kind = bullet.test(row) ? "ul" : "p";
+          const last = blocks[blocks.length - 1];
+          if (kind === "ul" && last?.kind === "ul") last.rows.push(row.replace(bullet, ""));
+          else blocks.push({ kind, rows: [kind === "ul" ? row.replace(bullet, "") : row] });
+        }
+        return (
+          <section key={index}>
+            {!letter && <h4>{section.heading}</h4>}
+            {blocks.map((block, i) =>
+              block.kind === "ul" ? (
+                <ul key={i}>{block.rows.map((row, j) => <li key={j}>{row}</li>)}</ul>
+              ) : (
+                <p key={i} className={!letter && block.rows[0].includes(" | ") ? "role" : ""}>{block.rows[0]}</p>
+              ),
+            )}
+          </section>
+        );
+      })}
+    </article>
+  );
+}
+
+function LatexSource({ label, latex, run }: { label: string; latex: string; run: Runner }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="latex-source">
+      <div className="latex-head">
+        <button className="ghost" aria-expanded={open} onClick={() => setOpen(!open)}>
+          <ChevronDown size={14} className={open ? "chevron open" : "chevron"} />
+          LaTeX code
+        </button>
+        <button onClick={() => run(async () => { await navigator.clipboard.writeText(latex); }, label + " LaTeX copied. Paste it into any LaTeX editor, such as Overleaf.")}>
+          <FileText size={13} />
+          Copy LaTeX
+        </button>
+      </div>
+      {open && <pre className="latex-code">{latex}</pre>}
+    </div>
+  );
+}
+
+function DocumentsPage({ run, version, tasks }: { run: Runner; version: number; tasks: Data[] }) {
+  const [resumes, setResumes] = useState<Data[]>([]),
+    [resume, setResume] = useState(""),
+    [company, setCompany] = useState(""),
+    [url, setUrl] = useState(""),
+    [jd, setJD] = useState(""),
+    [country, setCountry] = useState(""),
+    [items, setItems] = useState<Data[]>([]),
+    [taskIds, setTaskIds] = useState<Record<string, string>>({}),
+    [uploadTaskId, setUploadTaskId] = useState(""),
+    [touched, setTouched] = useState(false);
+  const uploadTask = tasks.find((task) => task.id === uploadTaskId);
+  const uploading = !!uploadTaskId && (!uploadTask || ["queued", "running"].includes(uploadTask.status));
+  const taskFor = (kind: string) => tasks.find((task) => task.id === taskIds[kind]);
+  const busyKind = (kind: string) => !!taskIds[kind] && (!taskFor(kind) || ["queued", "running"].includes(taskFor(kind)!.status));
+  const finished = documentKinds.map(({ kind }) => taskFor(kind)?.status || "").join(",");
   useEffect(() => {
-    api("/content?job_id=" + jobId)
-      .then(setItems)
-      .catch(() => {});
-  }, [jobId, version]);
+    if (uploadTask?.status === "completed" && uploadTask.result?.resume_id) setResume(uploadTask.result.resume_id);
+  }, [uploadTask?.status, uploadTask?.result?.resume_id]);
+  useEffect(() => {
+    api("/resumes").then((r) => {
+      setResumes(r);
+      setResume((selected) => r.some((item: Data) => item.id === selected) ? selected : r.find((x: Data) => x.active)?.id || r[0]?.id || "");
+    }).catch(() => {});
+    api("/content?source=documents_tab").then(setItems).catch(() => {});
+  }, [version, finished]);
+  const countryMissing = !country.trim();
+  const ready = !!resume && jd.trim().length >= 30 && !countryMissing && !uploading;
+  const latest = (kind: string) => {
+    const done = taskFor(kind)?.result?.content_id;
+    // Older saves contained the prompt's analysis reports; only finished documents are shown.
+    const finished = items.filter((item) => item.content_type === kind && item.latex);
+    return finished.find((item) => item.id === done) || finished[0];
+  };
+  const generate = async (kind: string) => {
+    setTouched(true);
+    if (!ready) return;
+    const queued = await run(
+      () => api("/documents", "POST", { kind, country: country.trim(), jd, company, url, resume_id: resume }),
+      "Generating your " + documentKinds.find((d) => d.kind === kind)!.label.toLowerCase() + "…",
+    );
+    if (queued) setTaskIds((ids) => ({ ...ids, [kind]: queued.task_id }));
+  };
   return (
     <>
-      {!items.length ? (
-        <Empty title="No generated content yet." icon="resume">
-          <p>
-            Use Generate in the job row to create saved resume and cover letter
-            text. An AI provider must be configured.
-          </p>
-        </Empty>
-      ) : (
-        items.map((c) => (
-          <div key={c.id} className="panel">
-            <h2>
-              {c.content_type === "resume" ? "Tailored resume" : "Cover letter"}
-            </h2>
-            <span className="tag">{c.validation_status.replace("_", " ")}</span>
-            <pre>{c.markdown_content}</pre>
-            <ContentEditor content={c} run={run} />
-            {c.validation_status !== "approved" ? (
-              <>
-                <Notice>
-                  Check every name, employer, date, metric and achievement
-                  against your real experience before approval.
-                </Notice>
-                <button
-                  className="primary"
-                  onClick={() =>
-                    run(
-                      () => api("/content/" + c.id + "/approve", "POST"),
-                      "Content approved. Formats are now available.",
-                    )
-                  }
-                >
-                  <Check size={14} />
-                  Approve reviewed content
-                </button>
-              </>
-            ) : (
-              <div className="toolbar-group">
-                {["docx", "pdf", "tex", "zip"].map((f) => (
-                  <button
-                    key={f}
-                    onClick={() => run(() => downloadContent(c.id, f))}
-                  >
-                    <ArrowDownToLine size={13} />
-                    {f.toUpperCase()}
-                  </button>
-                ))}
-              </div>
-            )}
+      <div className="page-title">
+        <div>
+          <span className="eyebrow">TAILORED FOR EVERY APPLICATION</span>
+          <h1>Documents that speak for you.</h1>
+          <p>Create a resume, cover letter and motivational letter for a specific job description.</p>
+        </div>
+        <span className="tag"><FileText size={12} />Document studio</span>
+      </div>
+      <div className="panel">
+        <h2>Which job are you applying for?</h2>
+        <div className="form-grid">
+          <label>
+            Company (optional)
+            <input value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Company name" />
+          </label>
+          <label>
+            Country *
+            <input
+              required
+              aria-invalid={touched && countryMissing}
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+              placeholder="e.g. India, Germany, Canada"
+            />
+            {touched && countryMissing && <small className="row-error">Country is required.</small>}
+          </label>
+          <label>
+            Resume version
+            <select value={resume} onChange={(e) => setResume(e.target.value)}>
+              <option value="">Select a processed resume</option>
+              {resumes.map((r) => (
+                <option key={r.id} value={r.id}>{r.name}{r.active ? " · active" : ""}</option>
+              ))}
+            </select>
+          </label>
+          <label className="full">
+            Job description URL
+            <div className="toolbar-group">
+              <input style={{ flex: 1 }} type="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://example.com/careers/job-listing" />
+              <button
+                type="button"
+                disabled={!url.trim()}
+                onClick={async () => {
+                  const r = await run(() => api("/jd/extract", "POST", { url }), "Job description extracted successfully.");
+                  if (r) setJD(r.text);
+                }}
+              >
+                Extract JD
+                <ArrowUpRight size={13} />
+              </button>
+            </div>
+          </label>
+          <label className="full">
+            Job description
+            <textarea
+              value={jd}
+              rows={8}
+              maxLength={60000}
+              onChange={(e) => setJD(e.target.value)}
+              placeholder="Paste the full job description here. Review extracted text before generating documents."
+            />
+          </label>
+          <label className="full">
+            Or add an alternate resume
+            <input
+              type="file"
+              accept=".pdf,.docx"
+              disabled={uploading}
+              onChange={async (e) => {
+                const f = e.target.files?.[0];
+                if (!f) return;
+                const b = new FormData();
+                b.append("file", f);
+                const queued = await run(() => api("/resumes", "POST", b), "Processing alternate resume. It will be selected automatically when ready.");
+                if (queued) setUploadTaskId(queued.task_id);
+                e.target.value = "";
+              }}
+            />
+          </label>
+        </div>
+        {uploadTaskId && (
+          <div className={"notice " + (uploadTask?.status === "failed" ? "error" : "")} role="status">
+            {uploadTask?.status === "failed" ? uploadTask.error : uploadTask?.status === "completed" ? "Resume ready and selected for these documents." : "Processing your resume…"}
           </div>
-        ))
-      )}
+        )}
+        <div className="form-actions">
+          {documentKinds.map(({ kind, button, icon: Icon }, index) => (
+            <button key={kind} className={index === 0 ? "primary" : ""} disabled={busyKind(kind) || uploading} onClick={() => generate(kind)}>
+              {busyKind(kind) ? <RefreshCw size={15} className="loading" /> : <Icon size={15} />}
+              {busyKind(kind) ? "Generating…" : button}
+            </button>
+          ))}
+        </div>
+        {touched && !ready && !countryMissing && (
+          <Notice error>Select a resume and add a job description of at least 30 characters.</Notice>
+        )}
+      </div>
+      {documentKinds.map(({ kind, label }) => {
+        const task = taskFor(kind);
+        const doc = latest(kind);
+        if (task?.status === "failed")
+          return <Notice key={kind} error>{label}: {task.error}</Notice>;
+        if (!doc) return null;
+        return (
+          <div className="panel" key={kind}>
+            <div className="page-title">
+              <div>
+                <span className="eyebrow">{doc.company ? doc.company.toUpperCase() + " · " : ""}{(doc.country || "").toUpperCase()}</span>
+                <h2>{label}</h2>
+                <p style={{ margin: 0 }}>{date(doc.created_at)}</p>
+              </div>
+              <div className="toolbar-group">
+                <button onClick={() => run(() => downloadContent(doc.id, "docx", label))}>
+                  <ArrowDownToLine size={13} />
+                  Word
+                </button>
+                <button onClick={() => run(() => downloadContent(doc.id, "pdf", label))}>
+                  <ArrowDownToLine size={13} />
+                  PDF
+                </button>
+              </div>
+            </div>
+            <Notice>Check every name, employer, date and achievement against your real experience before sending.</Notice>
+            <DocumentPreview doc={doc} />
+            <LatexSource label={label} latex={doc.latex} run={run} />
+            <ContentEditor content={doc} run={run} />
+          </div>
+        );
+      })}
     </>
   );
 }
@@ -1700,6 +1910,17 @@ function Resumes({
                 <Eye size={13} />
                 Preview
               </button>
+                <button
+                  aria-label={"Delete resume " + r.name}
+                  disabled={r.active}
+                  title={r.active ? "Choose another active resume before deleting this one." : "Delete the original resume; keep indexed knowledge and saved guides."}
+                  onClick={() => run(
+                    () => api("/resumes/" + r.id, "DELETE"),
+                    "Resume deleted from the library. RAG knowledge and saved guides are preserved.",
+                  )}
+                >
+                  <Trash2 size={14} /> Delete
+                </button>
               <a
                 href={"/api/files/" + r.file_id}
                 aria-label={"Download original " + r.name}
@@ -1752,15 +1973,48 @@ function ProfileEditor({ run, version }: { run: Runner; version: number }) {
     [employmentText, setEmploymentText] = useState("[]"),
     [sources, setSources] = useState<Data | null>(null),
     [query, setQuery] = useState("");
+  const [savedSnapshot, setSavedSnapshot] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [showExtracted, setShowExtracted] = useState(true);
+  const dirty = !!profile && profileSnapshot(profile, employmentText) !== savedSnapshot;
+  const dirtyRef = useRef(false);
+  dirtyRef.current = dirty;
   useEffect(() => {
     api("/profile")
       .then((p) => {
+        if (dirtyRef.current) return;
+        const text = JSON.stringify(p?.employments || [], null, 2);
         setProfile(p);
-        setEmploymentText(JSON.stringify(p?.employments || [], null, 2));
+        setEmploymentText(text);
+        setSavedSnapshot(profileSnapshot(p, text));
       })
       .catch(() => {});
   }, [version]);
   const update = (k: string, v: any) => setProfile((p) => ({ ...p, [k]: v }));
+
+  // Mandatory fields check
+  const mandatoryFields = [
+    { key: "name", label: "Name" },
+    { key: "email", label: "Contact email" },
+    { key: "location", label: "Location" },
+    { key: "designation", label: "Current designation" },
+  ];
+  const missingMandatoryKeys = profile
+    ? [
+        ...mandatoryFields
+          .filter((f) => !profile[f.key] || !String(profile[f.key]).trim())
+          .map((f) => f.label),
+        ...(!profile.skills || profile.skills.length === 0 ? ["Skills"] : []),
+      ]
+    : [];
+
+  useEffect(() => {
+    if (!profile || missingMandatoryKeys.length) return;
+    setShowExtracted(true);
+    const timer = setTimeout(() => setShowExtracted(false), 20_000);
+    return () => clearTimeout(timer);
+  }, [!!profile, missingMandatoryKeys.length === 0]);
+
   return (
     <>
       <div className="page-title">
@@ -1790,55 +2044,100 @@ function ProfileEditor({ run, version }: { run: Runner; version: number }) {
         </div>
       ) : (
         <>
-          <Notice>
-            Extracted skills are suggestions from your resume text. Confirm them
-            and complete missing fields. Employment dates use YYYY-MM or
-            YYYY-MM-DD. Use an empty end date for a current role.
-          </Notice>
+          {missingMandatoryKeys.length > 0 ? (
+            <div className="notice error" role="alert">
+              <Info />
+              <div>
+                <strong>Missing mandatory fields from resume extraction:</strong>{" "}
+                Please fill in {missingMandatoryKeys.join(", ")} below before approving your profile. You can also manually adjust any other details as needed.
+              </div>
+            </div>
+          ) : showExtracted ? (
+            <div className="notice success" role="status">
+              <CheckCircle2 size={16} color="var(--primary, #047857)" />
+              <div>
+                <strong>All mandatory fields extracted.</strong> Review your details below, make any manual updates, and confirm your approval when ready.
+              </div>
+            </div>
+          ) : null}
+          <button
+            onClick={() => run(
+              () => api(`/resumes/${profile.resume_version_id}/reparse`, "POST"),
+              "Re-extraction started. Missing fields will be filled from the resume; saved edits will be preserved.",
+            )}
+          >
+            <RefreshCw size={15} /> Re-extract missing profile fields
+          </button>
           <form
             className="panel"
             onSubmit={async (e) => {
               e.preventDefault();
-              await run(
+              if (!dirty || saving) return;
+              setSaving(true);
+              const saved = await run(
                 async () =>
                   api("/profile", "PUT", {
                     ...profile,
                     employments: JSON.parse(employmentText),
                   }),
-                "Candidate profile saved.",
               );
+              if (saved) {
+                const text = JSON.stringify(saved.employments || [], null, 2);
+                setProfile(saved);
+                setEmploymentText(text);
+                setSavedSnapshot(profileSnapshot(saved, text));
+              }
+              setSaving(false);
             }}
           >
             <div className="form-grid">
               {[
-                ["name", "Name"],
-                ["email", "Contact email"],
-                ["phone", "Phone (optional)"],
-                ["linkedin", "LinkedIn (optional)"],
-                ["portfolio", "Portfolio (optional)"],
-                ["location", "Location"],
-                ["designation", "Current designation"],
-                ["notice_period", "Notice period (optional)"],
-                ["salary_expectations", "Salary expectations (optional)"],
-              ].map(([key, label]) => (
-                <label key={key}>
-                  {label}
-                  <input
-                    value={profile[key] || ""}
-                    onChange={(e) => update(key, e.target.value)}
-                    maxLength={key === "email" ? 254 : 200}
-                  />
-                </label>
-              ))}
+                ["name", "Name *", true],
+                ["email", "Contact email *", true],
+                ["phone", "Phone (optional)", false],
+                ["linkedin", "LinkedIn (optional)", false],
+                ["portfolio", "Portfolio (optional)", false],
+                ["location", "Location *", true],
+                ["designation", "Current designation *", true],
+                ["notice_period", "Notice period (days, optional)", false],
+                ["salary_expectations", "Salary expectations (optional)", false],
+              ].map(([key, label, isMandatory]) => {
+                const isMissing = isMandatory && (!profile[key as string] || !String(profile[key as string]).trim());
+                return (
+                  <label key={key as string}>
+                    <span style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      {label as string}
+                      {isMissing && <span style={{ color: "var(--danger, #b91c1c)", fontSize: 11 }}>Required</span>}
+                    </span>
+                    <input
+                      value={profile[key as string] || ""}
+                      onChange={(e) => update(key as string, e.target.value)}
+                      placeholder={key === "notice_period" ? "e.g. 30 days" : undefined}
+                      maxLength={key === "email" ? 254 : 200}
+                      style={isMissing ? { borderColor: "var(--danger, #b91c1c)" } : {}}
+                    />
+                  </label>
+                );
+              })}
               <label className="full">
-                Skills (comma separated)
+                <span style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  Skills (comma separated) *
+                  {(!profile.skills || profile.skills.length === 0) && (
+                    <span style={{ color: "var(--danger, #b91c1c)", fontSize: 11 }}>Required</span>
+                  )}
+                </span>
                 <input
                   value={(profile.skills || []).join(", ")}
                   onChange={(e) =>
                     update(
                       "skills",
-                      e.target.value.split(",").map((s) => s.trim()),
+                      e.target.value.split(",").map((s) => s.trim()).filter(Boolean),
                     )
+                  }
+                  style={
+                    !profile.skills || profile.skills.length === 0
+                      ? { borderColor: "var(--danger, #b91c1c)" }
+                      : {}
                   }
                 />
               </label>
@@ -1890,7 +2189,7 @@ function ProfileEditor({ run, version }: { run: Runner; version: number }) {
               </label>
             </div>
             <div className="form-actions">
-              <button className="primary">
+              <button className="primary" disabled={!dirty || saving}>
                 <Check size={15} />
                 Save profile
               </button>
@@ -1945,7 +2244,7 @@ function ProfileEditor({ run, version }: { run: Runner; version: number }) {
   );
 }
 
-function InterviewPage({ run, version }: { run: Runner; version: number }) {
+function InterviewPage({ run, version, tasks }: { run: Runner; version: number; tasks: Data[] }) {
   const [resumes, setResumes] = useState<Data[]>([]),
     [guides, setGuides] = useState<Data[]>([]),
     [resume, setResume] = useState(""),
@@ -1955,17 +2254,55 @@ function InterviewPage({ run, version }: { run: Runner; version: number }) {
     [guide, setGuide] = useState<Data | null>(null),
     [tab, setTab] = useState("questions"),
     [search, setSearch] = useState(""),
-    [category, setCategory] = useState(""),
-    [mock, setMock] = useState<Data>({}),
-    [mockIndex, setMockIndex] = useState(0);
+    [category, setCategory] = useState("");
+  const [uploadTaskId, setUploadTaskId] = useState("");
+  const [generationTaskId, setGenerationTaskId] = useState("");
+  const [answerTaskId, setAnswerTaskId] = useState("");
+  const uploadTask = tasks.find((task) => task.id === uploadTaskId);
+  const generationTask = tasks.find((task) => task.id === generationTaskId);
+  const [answerSubmitting, setAnswerSubmitting] = useState(false);
+  const activeAnswerTask = tasks.find((task) => task.kind === "interview_answer" && ["queued", "running"].includes(task.status));
+  const answerTask = activeAnswerTask || tasks.find((task) => task.id === answerTaskId);
+  const uploading = !!uploadTaskId && (!uploadTask || ["queued", "running"].includes(uploadTask.status));
+  const generating = !!generationTaskId && (!generationTask || ["queued", "running"].includes(generationTask.status));
+  const answering = answerSubmitting || !!activeAnswerTask || (!!answerTaskId && (!answerTask || ["queued", "running"].includes(answerTask.status)));
+  useEffect(() => {
+    if (uploadTask?.status === "completed" && uploadTask.result?.resume_id) {
+      setResume(uploadTask.result.resume_id);
+    }
+  }, [uploadTask?.status, uploadTask?.result?.resume_id]);
+  useEffect(() => {
+    if (!answerTask || !["completed", "failed"].includes(answerTask.status)) return;
+    api("/interviews").then((items) => {
+      setGuides(items);
+      setGuide((previous) => items.find((item: Data) => item.id === previous?.id) || previous);
+    }).catch(() => {});
+  }, [answerTask?.status]);
   useEffect(() => {
     api("/resumes").then((r) => {
       setResumes(r);
-      if (!resume)
-        setResume(r.find((x: Data) => x.active)?.id || r[0]?.id || "");
-    });
-    api("/interviews").then(setGuides);
-  }, [version]);
+      setResume((selected) => r.some((item: Data) => item.id === selected) ? selected : r.find((x: Data) => x.active)?.id || r[0]?.id || "");
+    }).catch(() => {});
+    api("/interviews").then((items) => {
+      setGuides(items);
+      setGuide((previous) => items.find((item: Data) => item.id === generationTask?.result?.content_id) || items.find((item: Data) => item.id === previous?.id) || (previous?.generation_mode === "built_in" ? null : previous));
+    }).catch(() => {});
+  }, [version, generationTask?.result?.content_id]);
+  const generateGuide = async (kind: string) => {
+    const queued = await run(() => api("/interviews", "POST", { kind, jd, resume_id: resume, company }), "Preparing interview questions only.");
+    if (queued) setGenerationTaskId(queued.task_id);
+  };
+  const answerQuestion = async (guideId: string, questionId: string) => {
+    if (answering) return;
+    setAnswerSubmitting(true);
+    try {
+    const queued = await run(
+      () => api(`/interviews/${guideId}/questions/${questionId}/answer`, "POST"),
+      "Generating the answer for this question.",
+    );
+    if (queued) setAnswerTaskId(queued.task_id);
+    } finally { setAnswerSubmitting(false); }
+  };
   return (
     <>
       <div className="page-title">
@@ -1973,8 +2310,8 @@ function InterviewPage({ run, version }: { run: Runner; version: number }) {
           <span className="eyebrow">SHOW UP WITH CONFIDENCE</span>
           <h1>A little preparation. A big difference.</h1>
           <p>
-            Role-specific questions, thoughtful answers, and a plan to make
-            progress.
+            Generate interview questions first, then request answers only for
+            the questions you want to practice.
           </p>
         </div>
         <span className="tag">
@@ -2017,12 +2354,15 @@ function InterviewPage({ run, version }: { run: Runner; version: number }) {
                 type="url"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
-                placeholder="https://jobs.lever.co/…"
+                placeholder="https://example.com/careers/job-listing"
               />
               <button
+                type="button"
+                disabled={!url.trim()}
                 onClick={async () => {
                   const r = await run(() =>
                     api("/jd/extract", "POST", { url }),
+                    "Job description extracted successfully.",
                   );
                   if (r) setJD(r.text);
                 }}
@@ -2047,53 +2387,55 @@ function InterviewPage({ run, version }: { run: Runner; version: number }) {
             <input
               type="file"
               accept=".pdf,.docx"
+              disabled={uploading}
               onChange={async (e) => {
                 const f = e.target.files?.[0];
                 if (!f) return;
                 const b = new FormData();
                 b.append("file", f);
-                await run(
+                const queued = await run(
                   () => api("/resumes", "POST", b),
-                  "Alternate resume queued. Select it after processing; your active resume is unchanged.",
+                  "Processing alternate resume. It will be selected automatically when ready.",
                 );
+                if (queued) setUploadTaskId(queued.task_id);
+                e.target.value = "";
               }}
             />
           </label>
         </div>
+        {uploadTaskId && (
+          <div className={"notice " + (uploadTask?.status === "failed" ? "error" : "")} role="status">
+            {uploadTask?.status === "failed" ? uploadTask.error : uploadTask?.status === "completed" ? "Resume ready and selected for this interview." : "Processing your resume…"}
+          </div>
+        )}
+        {generationTaskId && (
+          <div className={"notice " + (generationTask?.status === "failed" ? "error" : "")} role="status">
+            {generationTask?.status === "failed" ? `${generationTask.error} Any completed questions are saved below.` : generating ? `Preparing questions: ${generationTask?.result?.questions || 0} of ${generationTask?.result?.total_questions || "the requested"} ready. ${generationTask?.result?.stage || "Contacting AI provider…"}` : "Your questions are ready below."}
+          </div>
+        )}
+        {(answerTaskId || activeAnswerTask || answerSubmitting) && (
+          <div className={"notice " + (answerTask?.status === "failed" ? "error" : "")} role="status">
+            {answerTask?.status === "failed"
+              ? answerTask.error
+              : answering
+                ? "Generating one answer. Other answer buttons are disabled until it finishes."
+                : answerTask?.status === "completed"
+                  ? "Answer generated and saved to this guide."
+                  : ""}
+          </div>
+        )}
         <div className="form-actions">
           <button
             className="primary"
-            disabled={!resume || jd.length < 30}
-            onClick={() =>
-              run(
-                () =>
-                  api("/interviews", "POST", {
-                    kind: "technical",
-                    jd,
-                    resume_id: resume,
-                    company,
-                  }),
-                "Technical guide queued. Category batches are saved as they complete.",
-              )
-            }
+            disabled={!resume || jd.trim().length < 30 || uploading || generating}
+            onClick={() => generateGuide("technical")}
           >
             <Sparkles size={15} />
             Technical Interview
           </button>
           <button
-            disabled={!resume || jd.length < 30}
-            onClick={() =>
-              run(
-                () =>
-                  api("/interviews", "POST", {
-                    kind: "hr",
-                    jd,
-                    resume_id: resume,
-                    company,
-                  }),
-                "Non-technical guide queued. Each question includes answers and personalization notes.",
-              )
-            }
+            disabled={!resume || jd.trim().length < 30 || uploading || generating}
+            onClick={() => generateGuide("hr")}
           >
             <MessageSquareText size={15} />
             Non-Technical Interview
@@ -2119,12 +2461,16 @@ function InterviewPage({ run, version }: { run: Runner; version: number }) {
                   {g.kind === "hr" ? "Non-technical" : "Technical"}
                 </strong>
                 <p>
-                  {g.questions.length} answered questions · {date(g.created_at)}
+                  {g.questions.length} questions · {date(g.created_at)}
+                  {g.generation_mode === "built_in" ? " · Built-in practice guide" : g.generation_status === "generating" ? " · More questions are being prepared" : g.generation_status === "failed" ? " · Partial guide saved" : ""}
                 </p>
               </div>
               <button
                 onClick={() => {
                   setGuide(g);
+                  setJD(g.jd || "");
+                  setResume(g.resume_version_id || "");
+                  setCompany(g.company || "");
                   setTab("questions");
                 }}
               >
@@ -2154,25 +2500,18 @@ function InterviewPage({ run, version }: { run: Runner; version: number }) {
               ))}
               <button
                 className="ghost"
-                onClick={() => setGuide(null)}
+                onClick={() => { setGuide(null); setGenerationTaskId(""); }}
                 aria-label="Close guide"
               >
                 <X size={16} />
               </button>
             </div>
           </div>
-          <Notice>
-            AI-generated preparation requires review. Predicted questions are
-            not evidence of actual company interview questions. Code solutions
-            have not been executed by this application.
-          </Notice>
+          {guide.generation_status === "failed" && <div className="notice error" role="alert">{guide.generation_error} Completed questions are preserved below.</div>}
           <div className="tabs">
             {[
-              ["questions", "Questions & answers"],
+              ["questions", "Questions"],
               ["priorities", "Must-prepare"],
-              ["plans", "Preparation plans"],
-              ["mocks", "Mock interview"],
-              ["context", "Skills & research"],
             ].map(([id, label]) => (
               <button
                 className={tab === id ? "active" : ""}
@@ -2183,7 +2522,7 @@ function InterviewPage({ run, version }: { run: Runner; version: number }) {
               </button>
             ))}
           </div>
-          {["questions", "priorities"].includes(tab) ? (
+          {(
             <>
               <div className="toolbar-group" style={{ marginBottom: 16 }}>
                 <input
@@ -2209,10 +2548,14 @@ function InterviewPage({ run, version }: { run: Runner; version: number }) {
               </div>
               <div className="table-wrap">
                 <table className="guide-table">
+                  <colgroup>
+                    <col className="guide-question-col" />
+                    <col className="guide-action-col" />
+                  </colgroup>
                   <thead>
                     <tr>
                       <th>Question</th>
-                      <th>Answer & preparation notes</th>
+                      <th>Answer</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -2227,112 +2570,40 @@ function InterviewPage({ run, version }: { run: Runner; version: number }) {
                             guide.top_question_ids.includes(q.id)),
                       )
                       .map((q: Data) => (
-                        <tr key={q.id}>
-                          <td>
-                            <span className="tag">
-                              {q.id} · {q.difficulty}
-                            </span>
-                            <h3>{q.question}</h3>
-                            <p>{q.category}</p>
-                            <small>
-                              {q.source_classification} · {q.interview_round}
-                            </small>
-                          </td>
-                          <td>
-                            <strong>{q.short_answer}</strong>
-                            <p className="answer">
-                              {q.personalized_answer || q.detailed_answer}
-                            </p>
-                            <details>
-                              <summary>
-                                Full answer, examples & follow-ups
-                              </summary>
-                              <StructuredData value={q} />
-                            </details>
-                          </td>
-                        </tr>
+                        <Fragment key={q.id}>
+                          <tr className={q.answer ? "has-answer" : ""}>
+                            <td>
+                              <h3>Q{guide.questions.indexOf(q) + 1}. {q.question}</h3>
+                              <p className="guide-category">{q.category}</p>
+                            </td>
+                            <td className="guide-action">
+                              {q.answer ? (
+                                <span className="tag green"><Check size={12} />Answered</span>
+                              ) : (
+                                <button
+                                  type="button"
+                                  disabled={answering || generating || guide.generation_status === "generating"}
+                                  onClick={() => answerQuestion(guide.id, q.id)}
+                                >
+                                  <Sparkles size={13} />
+                                  {answering && answerTask?.question_id === q.id ? "Generating…" : "Answer"}
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                          {q.answer && (
+                            <tr className="guide-answer-row">
+                              <td colSpan={2}>
+                                <h4>Answer</h4>
+                                <p className="answer">{q.answer}</p>
+                              </td>
+                            </tr>
+                          )}
+                        </Fragment>
                       ))}
                   </tbody>
                 </table>
               </div>
-            </>
-          ) : tab === "plans" ? (
-            <>
-              {["7", "14", "30"].map((days) => (
-                <details key={days} className="panel">
-                  <summary>{days}-day preparation plan</summary>
-                  <StructuredData value={guide.plans[days]} />
-                </details>
-              ))}
-            </>
-          ) : tab === "context" ? (
-            <StructuredData
-              value={{
-                candidate_summary: guide.candidate_summary,
-                jd_analysis: guide.jd_analysis,
-                skills_matrix: guide.skills_matrix,
-                skill_gaps: guide.skill_gaps,
-                top_topics: guide.top_topics,
-                company_research: guide.company_research,
-                readiness_checklist: guide.readiness_checklist,
-                star_story_bank: guide.star_story_bank,
-              }}
-            />
-          ) : (
-            <>
-              <label>
-                Mock round
-                <select
-                  value={mockIndex}
-                  onChange={(e) => setMockIndex(Number(e.target.value))}
-                >
-                  {(Array.isArray(guide.mock_interviews)
-                    ? guide.mock_interviews
-                    : []
-                  ).map((m: Data, i: number) => (
-                    <option key={i} value={i}>
-                      {m.name || m.title || "Round " + (i + 1)}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <StructuredData value={guide.mock_interviews[mockIndex]} />
-              <label>
-                Your practice answers and self-assessment
-                <textarea
-                  rows={8}
-                  value={mock.answer || ""}
-                  onChange={(e) => setMock({ ...mock, answer: e.target.value })}
-                />
-              </label>
-              <label style={{ marginTop: 15 }}>
-                Self-score (0–5)
-                <input
-                  type="number"
-                  min={0}
-                  max={5}
-                  value={mock.score || 0}
-                  onChange={(e) =>
-                    setMock({ ...mock, score: Number(e.target.value) })
-                  }
-                />
-              </label>
-              <button
-                className="primary"
-                style={{ marginTop: 15 }}
-                onClick={() =>
-                  run(
-                    () =>
-                      api("/interviews/" + guide.id + "/sessions", "POST", {
-                        ...mock,
-                        round: mockIndex,
-                      }),
-                    "Practice session saved.",
-                  )
-                }
-              >
-                Save practice session
-              </button>
             </>
           )}
         </div>

@@ -4,10 +4,10 @@ Status: implemented local system with service adapters; production integrations 
 
 ```mermaid
 flowchart LR
-  Browser[React / Vite / TypeScript] -->|same-origin API, HttpOnly cookie, CSRF| Proxy[Vite dev proxy / Vercel rewrite]
+  Browser[React / Vite / TypeScript] -->|same-origin API, HttpOnly cookie, CSRF| Proxy[Vite local dev proxy]
   Proxy --> API[FastAPI]
-  API --> SQL[(PostgreSQL authoritative records)]
-  API --> Files[(Private shared disk or S3)]
+  API --> SQL[(Local SQLite records)]
+  API --> Files[(Local private files)]
   API --> Queue[Persisted tasks table]
   Worker[Python worker] --> Queue
   Worker --> SQL
@@ -23,16 +23,16 @@ flowchart LR
 
 | Concern | Choice and reason | Alternatives/trade-offs |
 | --- | --- | --- |
-| Frontend | React, TypeScript, Vite. Fixed Amber Desk light-mode theme, shared feature UI. | No server-rendered frontend required. Tables scroll horizontally because all specified columns remain present. |
+| Frontend | React, TypeScript, Vite. Fixed Cream & Brown light-mode theme, shared feature UI. | No server-rendered frontend required. Tables scroll horizontally because all specified columns remain present. |
 | Backend | FastAPI validated routes, SQLAlchemy 2 persistence, continuously running Python worker. | Containers/long-lived Python avoid serverless runtime limits for generation. |
-| Authority | PostgreSQL in production. SQLite only for development/tests. | JSON records keep domain evolution compact but have weaker domain-specific SQL constraints than a fully normalized 25-table schema. |
+| Authority | SQLite and local files for personal use; PostgreSQL remains supported for optional Compose/deployment setups. | JSON records keep domain evolution compact but have weaker domain-specific SQL constraints than a fully normalized 25-table schema. |
 | Vectors | Qdrant: persistent, explicit payload filters, remote deployment, optional local/free hosting. | Chroma is convenient embedded development; Qdrant fits separate API/worker hosts. Neither is a free hosted-service guarantee. |
 | Embeddings | Configurable `text-embedding-3-small`, model-specific collection and per-user hash cache. | Larger embeddings or locally hosted models need quality/cost/latency benchmarks, not assumed superiority. |
-| Generation | Configurable OpenAI-compatible primary/fallback; example defaults GPT-5.1 / GPT-4.1. | No live model benchmark or account entitlement established. Same-provider fallback does not protect against an account-wide outage; configure a second provider for that. |
+| Generation | Gemini Flash / Flash-Lite with independent OpenRouter Mistral Small 3.2 fallback using `OPEN_ROUTER_API_KEY`. | Highly resilient model pairing with structured JSON output and schema validation. |
 | Orchestration | LangGraph generation → validation. Deterministic sorting/dedup/scoring remain ordinary code. | No CrewAI multi-agent overhead. Task durability is implemented in SQL; LangGraph itself has no durable checkpointer here. |
 | Binaries | Private disk volume or optional S3 adapter; temporary render files separate from originals. | Stateless deployments need shared persistent storage. Direct authenticated downloads avoid bearer links. |
 
-Official references: [Qdrant multitenancy](https://qdrant.tech/documentation/manage-data/multitenancy/), [LangGraph overview](https://docs.langchain.com/oss/python/langgraph/overview), [OpenAI embeddings](https://developers.openai.com/api/docs/guides/embeddings), [OpenAI text generation](https://developers.openai.com/api/docs/guides/text), [Greenhouse Job Board API](https://docs.greenhouse.io/job-board), [Lever Postings API](https://github.com/lever/postings-api), [Vercel rewrites](https://vercel.com/docs/routing/rewrites).
+Official references: [Qdrant multitenancy](https://qdrant.tech/documentation/manage-data/multitenancy/), [LangGraph overview](https://docs.langchain.com/oss/python/langgraph/overview), [OpenAI embeddings](https://developers.openai.com/api/docs/guides/embeddings), [OpenAI text generation](https://developers.openai.com/api/docs/guides/text), [Greenhouse Job Board API](https://docs.greenhouse.io/job-board), [Lever Postings API](https://github.com/lever/postings-api).
 
 ## Modules and data contracts
 
@@ -104,7 +104,7 @@ The requested 400–800 token target is currently approximated using word counts
 
 ## Discovery, evidence and matching
 
-Public board adapters enumerate configured employer boards, collect publication evidence/time, extract JD text, filter India/eligible international locations and merge deduplicated records. They do not search the entire market or assert third-party jobs were found on company websites. Manual records carry user-provided evidence labels. Positive sponsorship sentences and negative/conditional exclusions are deterministic heuristics; country ambiguity excludes listings from main visa results. Regions/countries from AI research are saved suggestions only. Job RAG namespace indexing for discovery evidence is not yet fully integrated.
+Public board adapters enumerate configured employer boards, collect publication evidence/time, extract JD text, filter India/eligible international locations and merge deduplicated records. They do not search the entire market or assert third-party jobs were found on company websites. Manual records carry user-provided evidence labels. Positive sponsorship sentences and negative/conditional exclusions are deterministic heuristics; country ambiguity excludes listings from main visa results. Saved title and country recommendations now constrain discovery by module and region. Job RAG namespace indexing for discovery evidence is not yet fully integrated.
 
 Matching uses requested 30/20/15/15/10/5/5 weights. Structured requirements contribute mandatory/preferred/experience/domain/responsibility/eligibility evidence; missing components score zero. Skill mentions fall back to a known-skill vocabulary and must not be interpreted as a complete JD requirement analysis. Explainable details are visible in the job dialog. Default sorting uses descending fit, NOT APPLIED, relevant date, deterministic ID. Retention filters active results after 60 days, preserving all stored history.
 
@@ -114,9 +114,9 @@ Bulk preparation checks user ownership, previous status, declared mandatory requ
 
 ## Generation, review and rendering
 
-Content cache keys bind profile/resume, job identity/company/title/country/JD and prompt version. Primary/fallback JSON calls are bounded to one attempt per provider. Untrusted resume/JD instructions are separated into data; the model has no tools. Structural validators reject incomplete documents/questions. This mitigates prompt injection but cannot formally guarantee semantic truth or eliminate malicious input effects. Generated claims require user review. AI token usage returned by the provider is stored with content; there is no billing dashboard or enforced user budget yet.
+Content cache keys bind profile/resume, job identity/company/title/country/JD and prompt version. JSON calls try each eligible provider once per pass, with at most two passes normally or four for interviews. Untrusted resume/JD instructions are separated into data; the model has no tools. Structural validators reject incomplete documents/questions. This mitigates prompt injection but cannot formally guarantee semantic truth or eliminate malicious input effects. Generated claims require user review. AI token usage returned by the provider is stored with content; there is no billing dashboard or enforced user budget yet.
 
-Generated content records include type, structured sections, Markdown, source resume, JD hash, model/prompt/version/time/hash and validation status. Edits preserve prior content records and expire old render files. Approving text enables application-document rendering. DOCX, PDF, escaped LaTeX and ZIP come exclusively from persisted text; cache hits and format conversions never invoke the LLM. PDF layout is direct ReportLab rather than LaTeX compilation. Interview guides flatten their structured question/plan material into export sections, retaining coding and follow-up answers as readable text.
+Generated content records include type, structured sections, Markdown, source resume, JD hash, model/prompt/version/time/hash and validation status. Edits preserve prior content records and expire old render files. Approving text enables application-document rendering. DOCX, PDF, escaped LaTeX and ZIP come exclusively from persisted text; cache hits and format conversions never invoke the LLM. PDF layout is direct ReportLab rather than LaTeX compilation. Interview guides export numbered questions and only answers already generated on demand. Explicit logout clears answers and invalidates cached exports; page closure does not.
 
 ## Worker and lifecycle
 
@@ -126,9 +126,22 @@ Temporary binaries expire at creation+24h. API enforces expiry even if cleanup i
 
 ## Deployment and operational limits
 
-Vercel serves the static Vite build and rewrites same-origin `/api` calls to the separately hosted backend. A disconnected preview includes an explicit 503 API handler and a frontend notice. Dockerfile and Compose provide API/worker/PostgreSQL/Qdrant/private-volume wiring; containers and live external services were not available for verification. The initial schema migration is idempotent creation, not a complete alteration-migration framework.
+For personal use, `start.ps1` (Windows) or `start.sh` (macOS/Linux) checks or installs the required runtimes, prepares dependencies, then supervises the Vite frontend, FastAPI API and queue worker in one terminal. SQLite data and private files persist under `backend/data`. The Vite development proxy forwards same-origin `/api` calls to the local API. Dockerfile and Compose remain optional PostgreSQL/Qdrant/private-volume wiring. Vercel and Render deployment files were removed from this source project; an already-published Vercel frontend is not connected to the local API. The initial schema migration is idempotent creation, not a complete alteration-migration framework.
 
 Before launch: provision actual services; authenticate deployment through permitted tooling; configure source boards/secrets/email; validate PostgreSQL constraints/Qdrant filters/S3 privacy; test real AI quality and facts; implement permitted automated submission if required; address remaining requirement gaps and concurrency/security hardening; run end-to-end production acceptance. Never mark the application production-ready merely because frontend assets build or deploy.
 
 
-Final appearance: **Amber Desk only**. All alternative theme assets and switching controls are removed. Preference data migration 002 preserves existing search settings.
+Final appearance: **Cream & Brown only**. All alternative theme assets and switching controls are removed. Preference data migration 002 preserves existing search settings.
+
+
+## Task priorities, deletion and fresh-candidate reset
+
+See [task progress and reset controls](docs/TASK_PROGRESS_AND_RESET.md) for worker priorities, concurrent processing, approximate ETA, job deletion, transient notices, and the destructive `--keep-login` reset. Profile saves remain synchronous. These notes supersede older descriptions of a single sequential worker.
+
+Live Google grounding and an actual LaTeX/Pandoc conversion path are now implemented. Local exports use `DOCUMENT_RENDERER=latex` with installed portable tools; older limitations stating that LaTeX is never compiled are superseded by the current task-progress/reset notes. Live grounding verification hit the Gemini project HTTP429 quota limit; no live research success is claimed for that check.
+
+
+Current appearance and AI configuration: [Cream & Brown and automatic OpenRouter fallback](docs/THEME_AND_AI_ROUTING.md). This documents provider order, cooldowns, token limits, and the separate live-search and embedding requirements.
+
+
+Current interview/search behaviour: [On-demand answers and candidate-based discovery](docs/ON_DEMAND_INTERVIEWS_AND_SEARCH.md). Questions are generated first; answers are saved on request until explicit logout and included in exports. Saved regional title/country suggestions constrain searches. Gemini grounding failures use the authorized OpenRouter/Exa fallback (one search per request).

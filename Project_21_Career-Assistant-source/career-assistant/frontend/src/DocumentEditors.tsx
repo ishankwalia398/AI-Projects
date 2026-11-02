@@ -31,7 +31,9 @@ export function ContentEditor({
                       sections,
                     },
                   }),
-                "Edits saved. Review and approve the updated content.",
+                content.source === "documents_tab"
+                  ? "Edits saved. Downloads now use the updated text."
+                  : "Edits saved. Review and approve the updated content.",
               )
             )
               setEditing(false);

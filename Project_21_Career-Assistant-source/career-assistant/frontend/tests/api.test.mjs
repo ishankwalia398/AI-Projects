@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { api } from "../src/api.ts";
 
-test("plain Vercel 404 explains that the backend API is unavailable", async () => {
+test("non-JSON API errors report the HTTP status", async () => {
   const originalFetch = globalThis.fetch;
   globalThis.fetch = async () =>
     new Response("The page could not be found", { status: 404 });
@@ -13,7 +13,7 @@ test("plain Vercel 404 explains that the backend API is unavailable", async () =
         username: "person",
         password: "not-a-real-password",
       }),
-      /API is unavailable on this deployment/,
+      /invalid response \(HTTP 404\)/,
     );
   } finally {
     globalThis.fetch = originalFetch;

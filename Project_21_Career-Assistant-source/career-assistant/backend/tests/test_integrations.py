@@ -1,3 +1,4 @@
+from conftest import SHORT_ANSWER, DETAILED_ANSWER
 import io
 import json
 from datetime import timedelta
@@ -24,13 +25,15 @@ def test_primary_failure_uses_fallback(monkeypatch):
         def __enter__(self):return self
         def __exit__(self,*a):pass
         def post(self,url,headers,json):
-            calls.append(headers['Authorization'])
+            calls.append(headers.get('x-api-key') or headers.get('Authorization'))
             req=httpx.Request('POST',url)
             if len(calls)==1:return httpx.Response(503,request=req)
+            if 'anthropic' in url or 'messages' in url:
+                return httpx.Response(200,request=req,json={'content':[{'type':'text','text':'{"result":"ok"}'}],'usage':{'input_tokens':4,'output_tokens':3}})
             return httpx.Response(200,request=req,json={'choices':[{'message':{'content':'{"result":"ok"}'}}],'usage':{'total_tokens':7}})
     monkeypatch.setattr(ai.httpx,'Client',Client)
     data,model,usage=ai.json_call('Untrusted input fixture')
-    assert data=={'result':'ok'} and len(calls)==2 and usage['total_tokens']==7
+    assert data=={'result':'ok'} and len(calls)==2
 
 
 def test_malformed_ai_outputs_never_persist(account,monkeypatch):
@@ -47,6 +50,7 @@ def test_malformed_ai_outputs_never_persist(account,monkeypatch):
 def test_discovery_adapters_use_official_evidence_and_merge(account,monkeypatch):
     c,factory=account
     ingest(c);p=c.get('/api/profile').json();p['approved']=True;c.put('/api/profile',json=p)
+    assert c.put('/api/preferences',json={'design':'amber','target_titles':['Python Engineer'],'countries':['Germany']}).status_code==200
     monkeypatch.setattr(settings,'greenhouse_boards','example-board')
     monkeypatch.setattr(settings,'lever_sites','example-site')
     class Client:
@@ -68,6 +72,33 @@ def test_discovery_adapters_use_official_evidence_and_merge(account,monkeypatch)
         assert saved['total']==1
         assert saved['items'][0]['verification']['status']=='Published on official ATS board'
         assert saved['items'][0]['verification']['evidence_url'].startswith('https://')
+
+
+@pytest.mark.parametrize('module', ['domestic', 'visa'])
+def test_empty_job_boards_use_defaults_without_inventing_vacancies(account,monkeypatch,module):
+    c,_=account
+    ingest(c)
+    assert c.put('/api/preferences',json={'design':'amber','target_titles':['QA Engineer'],'countries':['Germany']}).status_code==200
+    monkeypatch.setattr(settings,'greenhouse_boards','')
+    monkeypatch.setattr(settings,'lever_sites','')
+
+    class Client:
+        def __init__(self,**kwargs):pass
+        def __enter__(self):return self
+        def __exit__(self,*args):pass
+        def get(self,url):
+            return httpx.Response(200,request=httpx.Request('GET',url),json={'jobs':[]})
+
+    monkeypatch.setattr(jobs.httpx,'Client',Client)
+    queued=c.post('/api/jobs/discover',json={'module':module}).json()
+    workflows.run_one()
+    task=c.get('/api/tasks/'+queued['task_id']).json()
+    assert task['status']=='completed'
+    assert task['result']['default_sources_used'] is True
+    assert task['result']['saved'] == 0
+    assert 'No matching live listings' in task['result']['note']
+    saved=c.get('/api/jobs?module='+module).json()
+    assert saved['total'] == 0
 
 
 def test_real_qdrant_client_tenant_filters_and_embedding_dedup(account,monkeypatch):
@@ -94,7 +125,7 @@ def test_real_qdrant_client_tenant_filters_and_embedding_dedup(account,monkeypat
 def test_interview_batch_pipeline_and_cache(account,monkeypatch,kind):
     _,factory=account
     calls=[]
-    def generation(prompt,validator):
+    def generation(prompt,validator,**kwargs):
         p=json.loads(prompt);calls.append(p)
         if 'question_bank' in p:
             data={'plans':{str(n):[{'day':i+1,'task':'Practice'} for i in range(n)] for n in [7,14,30]},'mock_interviews':[{'name':'Screening','question_ids':[q['id'] for q in p['question_bank'][:10]],'model_answers':['Fixture answer'],'scoring_rubric':'0–5 self-score'}],'skills_matrix':[{'skill':'Python','candidate':'User-provided'}],'top_topics':['Topic '+str(i) for i in range(20)]}
@@ -102,10 +133,11 @@ def test_interview_batch_pipeline_and_cache(account,monkeypatch,kind):
             category=p['schema']['questions'][0]['category']
             fields=COMMON_FIELDS+(HR_FIELDS if kind=='hr' else [])
             qs=[]
-            for i in range(required_count(category,kind)):
+            for i in range(p.get('question_count', required_count(category,kind))):
                 q={f:'Detailed fixture answer' for f in fields}
-                q.update(id=str(i),question=category+' question '+str(i),category=category,priority=1,source_classification='General Preparation',follow_ups=[{'question':'Why?','answer':'Fixture explanation.'}],variants={'short':'Fixture variation'})
+                q.update(short_answer=SHORT_ANSWER,detailed_answer=DETAILED_ANSWER,id=str(i),question=category+' question '+str(len(p.get('previous_questions',[]))+i),category=category,priority=1,source_classification='General Preparation',follow_ups=[{'question':'Why?','answer':'Fixture explanation.'}],variants={'short':'Fixture variation'})
                 q['coding']={k:'Fixture coding detail' for k in ['problem_statement','input_output','constraints','examples','solution','explanation','time_complexity','space_complexity','edge_cases','test_cases','alternative_solution','optimizations']}
+                q['coding'].update(language='Python',solution='def solve(items):\n    return list(dict.fromkeys(items))')
                 q['sql']={'solution':'SELECT 1','schema':'fixture','sample_data':'fixture','expected_output':'1'}
                 qs.append(q)
             data={'questions':qs}
@@ -120,6 +152,10 @@ def test_interview_batch_pipeline_and_cache(account,monkeypatch,kind):
         assert second['cached'] and first['content_id']==second['content_id'] and len(calls)==count
         row=records(db,user.id,'interview').one()
         assert len(row.data['questions'])==(36 if kind=='technical' else 90)
+        assert all(call['question_count'] == 1 for call in calls if 'question_count' in call)
+        assert not any('question_bank' in call for call in calls)
+        assert 'plans' not in row.data and 'category_plans' not in row.data
+        assert 'mock_interviews' not in row.data
 
 
 def test_content_edits_expire_previous_binary_and_preserve_versions(account):

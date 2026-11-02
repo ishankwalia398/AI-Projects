@@ -1,98 +1,128 @@
-# Free-tier trial deployment
+# Personal local setup (no hosting provider)
 
-The Vercel site is the frontend. This optional free-tier setup runs FastAPI and
-the queue worker together in one Render free web service, uses Render free
-PostgreSQL, and stores uploads in Cloudflare R2's included Standard storage
-allowance. The Vercel `/api/*` function forwards requests to FastAPI using the
-server-only `CAREER_API_URL` environment variable.
+For the automatic one-command setup on Windows, macOS, or Linux, use
+[guide.md](guide.md). This document describes the same local setup in more
+detail.
 
-This is for a trial, not a reliable production service. Render may sleep the
-web service after 15 minutes without inbound traffic; waking it can take about
-a minute. The free PostgreSQL database is limited to 1 GB, expires after 30
-days, has no backups, and may be restarted or temporarily unavailable. Export
-your data and migrate it before the expiry date. Free service plans, quotas,
-and terms can change; review the provider dashboards before setup.
+This setup runs the complete application on your Windows PC. It does not use
+Render, Railway, Vercel functions, a hosted database, or cloud file storage.
+The frontend, FastAPI API, background worker, SQLite database, and uploaded
+files all run locally. Your computer must be on while you use the app; the
+service is not accessible from the public internet.
 
-## 1. Create a Cloudflare R2 bucket
+## Requirements
 
-R2 is S3-compatible and currently includes 10 GB-month of Standard storage, 1
-million Class A requests, and 10 million Class B requests per month. Usage above
-the free allowance may be billed. Create a private bucket, then create an R2
-API token with read/write access only to that bucket. Keep the token secret.
+- Python 3.12 or newer
+- Node.js 22.12 or newer and npm
+- PowerShell
 
-You will need the bucket name, the account's S3 API endpoint
-(`https://<account-id>.r2.cloudflarestorage.com`), the access key ID, and the
-secret access key. R2 uses `auto` as its region. Do not use a public bucket.
+No Docker, PostgreSQL account, or hosted service is needed for this setup.
 
-## 2. Create Render services from the Blueprint
+## First-time setup
 
-The repository Blueprint is
-`Project_21_Career-Assistant-source/career-assistant/render.yaml`. In Render,
-create a Blueprint from `ishankwalia398/AI-Projects`, branch `main`, and use
-that file path. Review the resources and ensure the web service and database
-both show **Free** before confirming. This Blueprint creates a free PostgreSQL
-database and one free Docker web service; it does not create a separate worker.
-The worker runs in a managed thread inside the API process so queued workflows
-are still handled without a paid worker service.
+Open three PowerShell terminals in the project folder:
+`Project_21_Career-Assistant-source/career-assistant`.
 
-During Blueprint setup, enter the R2 values when prompted:
+### Terminal 1: start the API
 
-| Name | Value |
-| --- | --- |
-| `S3_BUCKET` | Your private R2 bucket name |
-| `S3_ENDPOINT_URL` | `https://<account-id>.r2.cloudflarestorage.com` |
-| `AWS_ACCESS_KEY_ID` | R2 token access key ID |
-| `AWS_SECRET_ACCESS_KEY` | R2 token secret access key |
+```powershell
+Set-Location backend
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+$env:APP_ENV = "development"
+$env:DATABASE_URL = "sqlite:///./data/career.db"
+$env:FRONTEND_URL = "http://127.0.0.1:5173"
+$env:COOKIE_SECURE = "false"
+$env:STORAGE_DIR = "./data/files"
+$env:QDRANT_URL = ""
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+```
 
-The Blueprint sets production mode, secure cookies, PostgreSQL, the frontend
-origin, and `INLINE_WORKER=true`. Production startup refuses to run without the
-private object store because Render's local filesystem is ephemeral. The API
-initializes the schema automatically. Wait until the service is live and its
-health check returns `{"status":"ok","service":"Career Assistant"}`.
+The API creates its local database schema on startup. Keep this terminal open.
+API documentation is available at `http://127.0.0.1:8000/docs`.
 
-## 3. Connect Vercel to the backend
+### Terminal 2: start background processing
 
-In the Vercel project settings, add the following environment variables for
-Production:
+```powershell
+Set-Location backend
+.\.venv\Scripts\Activate.ps1
+$env:APP_ENV = "development"
+$env:DATABASE_URL = "sqlite:///./data/career.db"
+$env:FRONTEND_URL = "http://127.0.0.1:5173"
+$env:COOKIE_SECURE = "false"
+$env:STORAGE_DIR = "./data/files"
+$env:QDRANT_URL = ""
+python -m app.worker
+```
 
-| Name | Value |
-| --- | --- |
-| `CAREER_API_URL` | The backend's HTTPS origin, for example `https://career-assistant-api.onrender.com` (no `/api` suffix). |
-| `VITE_BACKEND_CONFIGURED` | `true` |
+Keep the worker running while using queued features such as resume parsing,
+job discovery, and interview-material generation.
 
-Redeploy the Vercel project after saving these settings. The Vercel API function
-forwards the browser's session cookie, CSRF token, and origin to FastAPI, so the
-browser continues to call the same-origin `/api/*` path.
+### Terminal 3: start the frontend
 
-To check the connection, open
-`https://jobsearchandtracker.vercel.app/api/health`. It should return the
-FastAPI health JSON, not a Vercel 404 or the configuration 503. Then register a
-test account and log in.
+```powershell
+Set-Location frontend
+npm ci
+npm run dev
+```
 
-Do not put database URLs, AI provider keys, storage credentials, or API secrets
-in `VITE_*` variables; those are included in browser-visible frontend bundles.
-Add AI, SMTP and Qdrant settings only to Render when those integrations are
-ready.
+Open `http://127.0.0.1:5173`, register your personal account, and use the app.
+The Vite development server forwards `/api` requests to the local API. Use
+`127.0.0.1` consistently; `localhost` is a different browser origin for
+security checks.
 
-## 4. What stays limited on free services
+## Start it on later days
 
-- Render's free web service sleeps after 15 minutes without inbound traffic;
-  task processing pauses while it is asleep. The next request may wait about a
-  minute for startup.
-- The free Render database expires after 30 days. There are no automatic
-  backups. Plan an export/migration before expiry; database expiry can make
-  accounts and app records unavailable.
-- R2's free usage has monthly quotas. Set billing alerts and monitor usage;
-  above-quota usage can incur charges.
-- AI generation requires a separately configured provider key and may incur
-  API charges. Qdrant is optional; without it the app uses lexical retrieval.
-- Password-reset email requires an SMTP provider; without it, email reset is
-  unavailable. Render blocks outbound SMTP ports 25, 465 and 587 on Free web
-  services, so the current SMTP adapter cannot deliver reset email from this
-  free deployment. Registration and login do not require AI or SMTP.
-- Keep `CAREER_API_URL` as an origin only, without `/api`. Vercel variables are
-  server-side except `VITE_*`, which are exposed in the browser bundle.
-- Keep `FRONTEND_URL` exactly aligned with the browser origin; the API enforces
-  it for state-changing requests.
-- After connecting Vercel, test health, registration, login, resume upload,
-  task processing, logout, and file download.
+Start the API and worker again in their own terminals using the commands
+above, but skip `python -m venv` and `pip install` after the first setup. In
+the frontend terminal, run `npm run dev`; run `npm ci` again only if the
+frontend dependencies change. Stop each process with `Ctrl+C`.
+
+## Data, backups, and privacy
+
+- SQLite data is stored in `backend/data/career.db`.
+- Uploaded resumes and generated files are stored under `backend/data/files`.
+- These files are local and are not synced to Vercel or another computer.
+- Stop the API and worker before copying both paths to a backup location.
+- Do not commit `backend/data`, `.env`, API keys, or personal resumes.
+- A disk failure, accidental deletion, or loss of the PC can still lose data;
+  keep a separate backup if the app contains anything important.
+
+The Vercel site at `https://jobsearchandtracker.vercel.app` is a separate
+public static frontend. A browser on Vercel cannot reach the API running on
+your PC, so registration and app workflows must be opened at the local URL
+above. No backend has been connected to the Vercel deployment.
+
+## Optional integrations
+
+The app's code and screens are unchanged, but services requiring third-party
+systems need those systems' configuration:
+
+- AI-assisted resume extraction, generation, and interview content need an
+  Gemini API key in `LLM_API_KEY`, with optional OpenRouter fallback via `OPEN_ROUTER_API_KEY`. Set them in `.env` before starting the API.
+- Greenhouse/Lever discovery requires configured board identifiers; no general
+  job-site crawling is enabled.
+- Qdrant vector retrieval is optional. With `QDRANT_URL` blank, the app uses
+  its labelled lexical retrieval path. To enable vector retrieval locally,
+  run Qdrant yourself and set `QDRANT_URL` in both backend terminals.
+- Password-reset delivery requires SMTP settings. Without them, registration
+  and login work, but reset email cannot be delivered.
+- OCR for scanned resumes and employer-authorized submission connectors also
+  require their respective external services or credentials.
+
+Never put provider secrets in frontend `VITE_*` variables or commit them to
+the repository. The `.env.example` file documents configuration names; plain
+Python commands do not automatically load `.env`, so set optional values in
+the backend terminals before starting their processes.
+
+## Optional Docker Compose stack
+
+The existing `compose.yaml` can be used instead of the native API/worker
+terminals if Docker Desktop is installed. It runs PostgreSQL and Qdrant with
+persistent Docker volumes. Follow the Compose-specific configuration in the
+README; the frontend can still run locally with Vite. This is optional and not
+needed for single-user local use.
+
+
+Current appearance and AI configuration: [Cream & Brown and automatic OpenRouter fallback](docs/THEME_AND_AI_ROUTING.md). This documents provider order, cooldowns, token limits, and the separate Gemini grounding/embedding requirements.

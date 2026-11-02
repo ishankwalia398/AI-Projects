@@ -1,14 +1,30 @@
-# Career Assistant — Amber Desk
+# Career Assistant — Cream & Brown
 
-Amber Desk is the only theme in this final package. All other theme options and the picker were removed. Existing accounts are migrated to the chosen appearance while retaining their search preferences.
+This package is set up for personal local use without Render, Railway, or a
+hosted backend. See [guide.md](guide.md) for the one-command setup on Windows,
+macOS, and Linux, including restart and backup instructions.
 
-This download contains frontend and backend source, a built frontend, tests, dependency manifests, environment examples, Docker configuration, migration instructions, documentation and the selected-theme preview.
+1. Open a terminal in this project directory and run `.\start.ps1` on Windows
+   or `bash start.sh` on macOS/Linux.
+2. Open `http://127.0.0.1:5173` and register your personal account.
+3. Keep the launcher terminal running while you use the app. Back up
+   `backend/data/career.db` and `backend/data/files` with the app stopped.
 
-1. Open `docs/Amber-Desk-preview.html` to see the chosen design.
-2. Follow `README.md` to install dependencies and run the FastAPI API, background worker and React frontend.
-3. Register your own account and upload your resume. No real credentials are included.
-4. Configure the services you need using `.env.example`. AI, live sources, email and hosted infrastructure require their own credentials/configuration.
+The public Vercel page is a static frontend and cannot connect to a backend
+running privately on your PC. Use the local URL above for working registration
+and app workflows.
 
-Validation: 59 backend tests and 11 frontend tests passed; TypeScript and the production frontend build passed. The built frontend is in `frontend/dist` and needs an HTTP server with the API proxy for integrated workflows.
+The main app features remain in the code. AI providers, email, job-board
+integrations, Qdrant vector retrieval, OCR, and employer-authorized submission
+connectors are optional integrations that need their own service setup or
+credentials. Without Qdrant, the app uses its labelled lexical retrieval
+fallback; without AI or SMTP credentials, AI features or password-reset email
+cannot use those providers.
 
-For a free-tier trial deployment, follow `DEPLOYMENT.md`. Free Render services sleep, and its free PostgreSQL expires after 30 days; this setup is not production-durable. Read `DEVELOPMENT_REPORT.md` for the remaining integration limitations and `docs/REQUIREMENT_COVERAGE.md` for the requirements ledger.
+Cream & Brown is the only theme in this package. Existing accounts are migrated
+to the chosen appearance while retaining search preferences. Read
+`DEVELOPMENT_REPORT.md` for implementation and validation details and
+`docs/REQUIREMENT_COVERAGE.md` for the requirements ledger.
+
+
+Current appearance and AI configuration: [Cream & Brown and automatic OpenRouter fallback](docs/THEME_AND_AI_ROUTING.md). This documents provider order, cooldowns, token limits, and the separate Gemini grounding/embedding requirements.

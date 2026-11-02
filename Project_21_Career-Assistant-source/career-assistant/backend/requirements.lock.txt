@@ -1,6 +1,7 @@
 # Windows Python 3.12 verification snapshot. Use requirements.txt on Linux; pywin32 is Windows-only.
 annotated-doc==0.0.5
 annotated-types==0.8.0
+anthropic==2.3.0
 anyio==4.15.1
 argon2-cffi==25.1.0
 argon2-cffi-bindings==26.1.0
@@ -12,6 +13,7 @@ charset-normalizer==3.5.2
 click==8.5.0
 colorama==0.4.6
 distro==1.9.0
+docstring_parser==0.18.0
 fastapi==0.156.8
 grpcio==1.84.0
 h11==0.16.0
@@ -24,6 +26,7 @@ httpx2==2.16.0
 hyperframe==6.1.0
 idna==3.20
 iniconfig==2.3.1
+jiter==0.18.0
 jmespath==1.1.0
 jsonpatch==1.36
 jsonpointer==3.4
@@ -68,8 +71,8 @@ SQLAlchemy==2.1.5
 starlette==1.9.0
 tenacity==9.2.1
 truststore==0.10.5
-typing-inspection==0.4.4
 typing_extensions==4.16.0
+typing-inspection==0.4.4
 tzdata==2026.5
 urllib3==2.8.0
 uuid_utils==0.18.0

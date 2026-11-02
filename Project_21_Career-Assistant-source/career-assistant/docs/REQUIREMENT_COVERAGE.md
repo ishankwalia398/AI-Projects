@@ -57,22 +57,22 @@ This is a traceability ledger, not a production-completion claim. Original wordi
 | 51 | Generate comprehensive HR questions and answers. | Configured integration | 90-question HR pipeline tested with fixtures; no live personalized quality check. |
 | 52 | Preserve all five mandatory HR question groups. | Configured integration | All five groups requested, with required variants; exact timing quality remains unverified. |
 | 53 | Generate STAR examples. | Configured integration | STAR data requested and hypothetical cases labelled; real output not verified. |
-| 54 | Generate mock interviews. | Configured integration | Saved mock rounds/self-scores; automated interviewer/scoring and all requested round quotas remain partial. |
-| 55 | Generate interview preparation plans. | Configured integration | 7/14/30-day counts validated; live quality not measured. |
+| 54 | Generate mock interviews. | Removed by user request (2026-10-25) | Mock interview and skills/research views are no longer exposed. |
+| 55 | Generate interview preparation plans. | Configured integration | Seven-day plans are available for each saved batch and category. 14/30-day options removed by user request (2026-10-25). |
 | 56 | Display interview questions and answers in tables. | Implemented/local | See README, Architecture, source modules and automated/local browser checks; production acceptance remains required. |
 | 57 | Support Word and PDF interview-guide exports. | Configured integration | Guide rendering pipeline implemented; live AI guide layout/depth not validated. |
 | 58 | Use React and Vite. | Implemented/local | See README, Architecture, source modules and automated/local browser checks; production acceptance remains required. |
 | 59 | Use Python. | Implemented/local | See README, Architecture, source modules and automated/local browser checks; production acceptance remains required. |
 | 60 | Use a suitable free or free-tier vector database. | Configured integration | Qdrant code/deployment config; no cloud service provisioned. |
-| 61 | Support configurable primary and fallback LLMs. | Configured integration | Configurable JSON-compatible primary/fallback with fixture-tested failover; account/model entitlement unknown. |
+| 61 | Support configurable primary and fallback LLMs. | Configured integration | Configurable Gemini Flash / Flash-Lite with OpenRouter Mistral Small 3.2 fallback; bounded retries and cooldowns. |
 | 62 | Optimize token usage and latency. | Partial | Hash/batch caches and bounded fallback; no production cost/latency/load benchmarks. |
 | 63 | Use light-mode UI only. | Implemented/local | See README, Architecture, source modules and automated/local browser checks; production acceptance remains required. |
-| 64 | Provide three UI design previews. | Implemented/local | Design alternatives were presented; the user selected Amber Desk and explicitly requested removal of the others. The final app retains only Amber Desk. |
+| 64 | Provide three UI design previews. | Implemented/local | Design alternatives were presented; the user selected Cream & Brown and explicitly requested removal of the others. The final app retains only Cream & Brown. |
 | 65 | Protect private data and credentials. | Partial | Core session/CSRF/isolation/private-file controls tested; full security audit and operational hardening outstanding. |
 | 66 | Maintain README.md. | Implemented/local | See README, Architecture, source modules and automated/local browser checks; production acceptance remains required. |
 | 67 | Maintain Architecture.md. | Implemented/local | See README, Architecture, source modules and automated/local browser checks; production acceptance remains required. |
 | 68 | Update related files after changes. | Implemented/local | See README, Architecture, source modules and automated/local browser checks; production acceptance remains required. |
-| 69 | Deploy the frontend to the requested Vercel URL. | Blocked | Not deployed. Vercel token input was rejected by automatic approval review because sandbox approval is disabled. |
+| 69 | Deploy the frontend to the requested Vercel URL. | Not in selected local setup | The user selected local-only personal use. The existing static Vercel site, if still available, has no connected backend; deployment files and helper were removed from this source project. |
 | 70 | Never fabricate candidate facts, job listings, sponsorship evidence or application submission results. | Partial | No fabricated live data or success; model factuality and heuristic sponsorship still require review/validation. |
 | 71 | Never conceal unfinished integrations with mock success messages. | Implemented/local | Unavailable integrations return explicit errors or 503; no success fallback data. |
 | 72 | Preserve all original core functionality. | Partial | Empty initial workspace; all source requirements preserved. Remaining gaps explicitly documented. |
@@ -87,3 +87,16 @@ This is a traceability ledger, not a production-completion claim. Original wordi
 - No live PostgreSQL/Qdrant/S3/SMTP/AI connection acceptance, distributed load tests or continuous production worker/cleanup verification.
 - Manual status APPLIED is retained as explicitly requested, separately labelled from verified connector submissions.
 - No unsupported claim that the entire production definition of done has been reached.
+
+
+## Task priorities, deletion and fresh-candidate reset
+
+See [task progress and reset controls](TASK_PROGRESS_AND_RESET.md) for worker priorities, concurrent processing, approximate ETA, job deletion, transient notices, and the destructive `--keep-login` reset. Profile saves remain synchronous. These notes supersede older descriptions of a single sequential worker.
+
+Live Google grounding and an actual LaTeX/Pandoc conversion path are now implemented. Local exports use `DOCUMENT_RENDERER=latex` with installed portable tools; older limitations stating that LaTeX is never compiled are superseded by the current task-progress/reset notes. Live grounding verification hit the Gemini project HTTP429 quota limit; no live research success is claimed for that check.
+
+
+Current appearance and AI configuration: [Cream & Brown and automatic OpenRouter fallback](THEME_AND_AI_ROUTING.md). This documents provider order, cooldowns, token limits, and the separate live-search and embedding requirements.
+
+
+Current interview/search behaviour: [On-demand answers and candidate-based discovery](ON_DEMAND_INTERVIEWS_AND_SEARCH.md). Questions are generated first; answers are saved on request until explicit logout and included in exports. Saved regional title/country suggestions constrain searches. Gemini grounding failures use the authorized OpenRouter/Exa fallback (one search per request).

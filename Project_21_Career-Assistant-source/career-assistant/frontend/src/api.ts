@@ -10,12 +10,6 @@ export async function responsePayload(res: Response): Promise<any> {
   try {
     return JSON.parse(text);
   } catch {
-    if (res.status === 404 || res.status === 503) {
-      return {
-        detail:
-          "The Career Assistant API is unavailable on this deployment. Account and career features need a connected backend.",
-      };
-    }
     return {
       detail: `The server returned an invalid response (HTTP ${res.status}).`,
     };
@@ -53,7 +47,7 @@ export async function api(
     );
   return payload;
 }
-export async function downloadContent(id: string, format: string) {
+export async function downloadContent(id: string, format: string, label = "") {
   const result = await api(
     "/content/" + id + "/render?format=" + format,
     "POST",
@@ -64,7 +58,7 @@ export async function downloadContent(id: string, format: string) {
   const url = URL.createObjectURL(await res.blob());
   const a = document.createElement("a");
   a.href = url;
-  a.download = "Career-Assistant-" + id.slice(0, 8) + "." + format;
+  a.download = (label ? label.replace(/[^A-Za-z0-9]+/g, "-") + "-" : "Career-Assistant-") + id.slice(0, 8) + "." + format;
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 10000);
 }

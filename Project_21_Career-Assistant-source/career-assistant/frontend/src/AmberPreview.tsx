@@ -14,10 +14,10 @@ export default function AmberPreview() {
   return (
     <div className="design-page standalone amber-preview">
       <div className="design-heading">
-        <span className="eyebrow">CAREER ASSISTANT · AMBER DESK</span>
+        <span className="eyebrow">CAREER ASSISTANT · CREAM &amp; BROWN</span>
         <h1>Your next chapter, in a warmer light.</h1>
         <p>
-          Warm cream, burnt orange and a focused workspace. Your selected
+          Warm cream, walnut brown and a focused workspace. Your selected
           design.
         </p>
       </div>
@@ -112,7 +112,7 @@ export default function AmberPreview() {
         </div>
         <div className="design-info">
           <span className="eyebrow">FINAL SELECTED THEME</span>
-          <h2>Amber Desk</h2>
+          <h2>Cream &amp; Brown</h2>
           <p>
             This is the only theme in Career Assistant. The application uses
             this palette throughout login, your workspace, forms and interview

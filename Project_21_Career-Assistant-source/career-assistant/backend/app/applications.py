@@ -73,7 +73,7 @@ def submit_one(db,user_id,job_id):
                     if row:
                         files[key]=(row.name,read_bytes(row.key),'application/pdf' if row.name.lower().endswith('.pdf') else 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
                 elif generated:
-                    files[key]=(kind+'.pdf',render(generated.data['structured_content'],'pdf'),'application/pdf')
+                    files[key]=(kind+'.pdf',render({**generated.data['structured_content'],'letter':kind=='motivational_letter'},'pdf'),'application/pdf')
             if 'resume' not in files:
                 raise ValueError('An approved resume or typed resume attachment is required.')
             required=[]

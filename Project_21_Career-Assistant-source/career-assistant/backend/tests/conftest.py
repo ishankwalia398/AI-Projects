@@ -14,6 +14,21 @@ from app.config import settings
 from app.main import app
 
 
+@pytest.fixture(autouse=True)
+def isolate_provider_cooldowns(monkeypatch):
+    from app import ai, live_research
+    monkeypatch.setattr(ai, '_model_cooldowns', {})
+    monkeypatch.setattr(ai, '_model_failures', {})
+    monkeypatch.setattr(live_research, '_search_cooldowns', {})
+    monkeypatch.setattr(settings, 'openrouter_key', '')
+    monkeypatch.setattr(settings, 'anthropic_key', '')
+    monkeypatch.setattr(settings, 'extra_job_sources', False)
+    # Tests opt in to the extra fallback models and to waiting for recovery explicitly.
+    monkeypatch.setattr(settings, 'gemini_models', '')
+    monkeypatch.setattr(settings, 'openrouter_models', '')
+    monkeypatch.setattr(settings, 'llm_max_wait', 0)
+
+
 @pytest.fixture
 def env(tmp_path,monkeypatch):
     engine=database_module.make_engine('sqlite:///'+(tmp_path/'test.db').as_posix())
@@ -53,3 +68,6 @@ def account(env):
     assert register(client).status_code==201
     assert login(client).status_code==200
     return client,factory
+
+SHORT_ANSWER = "I prioritize API coverage by business impact, likelihood of failure, and the consequences of a missed defect."
+DETAILED_ANSWER = "I begin with the critical business journeys and identify which API operations can lose data, expose another tenant's information, or interrupt revenue. I combine that impact with change frequency, production incidents, dependency complexity, and usage to rank the risks. For the highest risks, I test successful behavior, validation failures, authorization boundaries, retries, and partial outages. I verify both the response and the resulting database state or emitted events. For example, a payment retry must create one charge rather than two. I document uncovered risks and revisit priorities when production evidence or requirements change."

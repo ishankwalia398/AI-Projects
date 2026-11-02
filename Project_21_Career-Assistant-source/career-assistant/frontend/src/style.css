@@ -1,16 +1,16 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;450;500;550;600;650;700&family=Manrope:wght@400;500;600;650;700;750;800&display=swap");
 :root {
   font-family: "DM Sans", sans-serif;
-  color: #352d25;
-  background: #fbf8f0;
+  color: #3f3027;
+  background: #f5eedf;
   font-synthesis: none;
   font-weight: 400;
   font-size: 14px;
-  --accent: #a34d22;
-  --accent-soft: #fbefdf;
-  --border: #e9e1d4;
-  --muted: #827669;
-  --panel: #fff;
+  --accent: #674633;
+  --accent-soft: #e6d7c4;
+  --border: #d7c7b2;
+  --muted: #736254;
+  --panel: #fffaf1;
   --radius: 12px;
 }
 * {
@@ -45,7 +45,7 @@ button {
   justify-content: center;
   gap: 8px;
   border: 1px solid var(--border);
-  background: #fff;
+  background: var(--panel);
   color: inherit;
   border-radius: 8px;
   padding: 10px 14px;
@@ -67,7 +67,7 @@ button.primary,
   border-color: var(--accent);
 }
 button.secondary {
-  background: white;
+  background: var(--panel);
 }
 button.ghost {
   border-color: transparent;
@@ -104,7 +104,7 @@ p {
 .standalone {
   min-height: 100vh;
   padding-top: 60px;
-  background: radial-gradient(ellipse at top, #fbefdf 0, transparent 60%);
+  background: radial-gradient(ellipse at top, #e6d7c4 0, transparent 60%);
 }
 .design-heading {
   text-align: center;
@@ -123,7 +123,7 @@ p {
   gap: 24px;
 }
 .design-card {
-  background: white;
+  background: var(--panel);
   border: 1px solid #e2dbd0;
   border-radius: 16px;
   overflow: hidden;
@@ -131,7 +131,7 @@ p {
 }
 .design-card.chosen {
   border-color: var(--accent);
-  box-shadow: 0 0 0 2px #a34d2226;
+  box-shadow: 0 0 0 2px #67463326;
 }
 .design-info {
   padding: 24px;
@@ -159,16 +159,16 @@ p {
 .mini {
   height: 325px;
   font-size: 7px;
-  --mini-accent: #a34d22;
-  --mini-bg: #fbf8f0;
+  --mini-accent: #674633;
+  --mini-bg: #f5eedf;
   background: var(--mini-bg);
   color: #40372e;
   pointer-events: none;
 }
 .mini-top {
   height: 42px;
-  background: white;
-  border-bottom: 1px solid #e9e1d4;
+  background: var(--panel);
+  border-bottom: 1px solid #d7c7b2;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -198,7 +198,7 @@ p {
 }
 .mini aside {
   padding: 19px 7px;
-  background: white;
+  background: var(--panel);
   position: relative;
   border-right: 1px solid #eee5d8;
 }
@@ -259,8 +259,8 @@ p {
   margin: 14px 0 10px;
 }
 .mini-stats > div {
-  background: white;
-  border: 1px solid #e9e1d4;
+  background: var(--panel);
+  border: 1px solid #d7c7b2;
   border-radius: 5px;
   padding: 9px;
   flex: 1;
@@ -323,7 +323,7 @@ p {
   gap: 6px;
   align-items: center;
   padding: 8px 0;
-  border-top: 1px solid #e9e1d4;
+  border-top: 1px solid #d7c7b2;
 }
 .company-icon {
   width: 21px;
@@ -367,7 +367,7 @@ p {
   min-height: 100vh;
 }
 .sidebar {
-  background: #fff;
+  background: var(--panel);
   border-right: 1px solid var(--border);
   padding: 28px 18px;
   display: flex;
@@ -428,7 +428,9 @@ p {
   height: 18px;
 }
 .nav-end {
-  margin-top: auto;
+  margin-top: 20px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
 }
 .side-note {
   padding: 17px 14px;
@@ -455,7 +457,7 @@ p {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #fff;
+  background: var(--panel);
   border-bottom: 1px solid var(--border);
   padding: 0 38px;
   gap: 16px;
@@ -535,7 +537,7 @@ p {
   margin: 26px 0;
 }
 .stat {
-  background: white;
+  background: var(--panel);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 21px 22px;
@@ -575,7 +577,7 @@ p {
   grid-template-columns: 1fr auto;
   gap: 30px;
   align-items: center;
-  background: linear-gradient(105deg, #fbefdf, #fffcf6);
+  background: linear-gradient(105deg, #e6d7c4, #fffcf6);
   border: 1px solid #eedac3;
   border-radius: var(--radius);
   padding: 27px 29px;
@@ -614,7 +616,7 @@ p {
   transform: rotate(-10deg);
 }
 .panel {
-  background: white;
+  background: var(--panel);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 24px;
@@ -663,7 +665,7 @@ textarea {
   border: 1px solid #e2dbd0;
   border-radius: 7px;
   padding: 10px 12px;
-  background: white;
+  background: var(--panel);
   color: #4c4035;
 }
 input,
@@ -675,7 +677,7 @@ input:focus,
 textarea:focus,
 select:focus {
   border-color: var(--accent);
-  outline: 2px solid #a34d2222;
+  outline: 2px solid #67463322;
 }
 label {
   display: grid;
@@ -881,7 +883,7 @@ td .company-cell {
 }
 .upload-zone {
   border: 1.5px dashed #e2cbae;
-  background: #fffdf8;
+  background: #fffaf1;
   border-radius: 12px;
   padding: 34px 20px;
   text-align: center;
@@ -930,10 +932,10 @@ td .company-cell {
   min-height: 100vh;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  background: white;
+  background: var(--panel);
 }
 .auth-story {
-  background: #fbefdf;
+  background: #e6d7c4;
   padding: 55px;
   display: flex;
   flex-direction: column;
@@ -1004,7 +1006,7 @@ td .company-cell {
   font-size: 12px;
 }
 .auth-tabs button.active {
-  background: #fff;
+  background: var(--panel);
   box-shadow: 0 2px 5px #00000008;
   color: var(--accent);
 }
@@ -1041,7 +1043,7 @@ td .company-cell {
   backdrop-filter: blur(3px);
 }
 .modal {
-  background: white;
+  background: var(--panel);
   width: min(760px, 100%);
   max-height: 90vh;
   overflow: auto;
@@ -1382,25 +1384,25 @@ td .company-cell {
   min-width: 0;
 }
 
-/* Amber Desk is the sole application theme. */
+/* Cream & Brown is the sole application theme; legacy amber preference IDs remain compatible. */
 .sidebar,
 .mini aside {
-  background: #fffaf0;
+  background: #e9decd;
 }
 .topbar,
 .mini-top {
-  background: #fffdf8;
+  background: #fffaf1;
 }
 .welcome {
-  background: linear-gradient(110deg, #fbefdf, #fffcf6);
+  background: linear-gradient(110deg, #e6d7c4, #fffcf6);
   border-color: #eedac3;
 }
 .auth-story {
-  background: #fbefdf;
+  background: #e6d7c4;
 }
 .mini {
-  --mini-accent: #a34d22;
-  --mini-bg: #fbf8f0;
+  --mini-accent: #674633;
+  --mini-bg: #f5eedf;
 }
 .mini-banner {
   border-style: dashed;
@@ -1487,4 +1489,163 @@ td .company-cell {
   .amber-preview .mini-list p {
     font-size: 6px;
   }
+}
+
+/* Cream & Brown: shared surfaces across every workspace and authentication page. */
+input::placeholder { color: var(--muted); opacity: 1; }
+.sidebar { background: #e9decd; }
+.nav-caption, .nav-button, .breadcrumb, .stat small { color: var(--muted); }
+.brand, .breadcrumb strong { color: #3f3027; }
+.nav-button.active, .mini-nav.active { background: var(--accent); color: #fffaf1; }
+.page-title h1, .design-heading h1 { font-family: Georgia, serif; font-weight: 400; }
+.welcome { background: linear-gradient(110deg, #e6d7c4, #fffaf1); border-color: var(--border); }
+.auth-story, .side-note { background: #e6d7c4; }
+.avatar, .tag:not(.green):not(.amber) { background: #e6d7c4; }
+input, select, textarea { background-color: #fffaf1; color: #3f3027; }
+input:focus, select:focus, textarea:focus { outline-color: var(--accent); }
+
+/* Top navigation: tabs replace the sidebar; account actions live in the user menu. */
+.shell { display: block; }
+.workspace { grid-column: auto; }
+.topbar { position: sticky; top: 0; z-index: 30; height: 68px; }
+.page-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 10px 38px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: thin;
+  position: sticky;
+  top: 68px;
+  z-index: 25;
+}
+.page-tab {
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  padding: 9px 15px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 550;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+.page-tab:hover { background: var(--accent-soft); color: #3f3027; }
+.page-tab:active { transform: scale(0.97); }
+.page-tab.active {
+  background: var(--accent);
+  color: #fffaf1;
+  box-shadow: 0 6px 16px -10px #67463399;
+}
+.page-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tab-panel { animation: tab-enter 0.32s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+@keyframes tab-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+.account { position: relative; }
+.account-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  padding: 4px 10px 4px 4px;
+  border-radius: 999px;
+  font-size: 13px;
+  color: #3f3027;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.account-trigger:hover, .account-trigger[aria-expanded="true"] { background: var(--accent-soft); border-color: var(--border); }
+.chevron { transition: transform 0.2s ease; }
+.chevron.open { transform: rotate(180deg); }
+.account-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  min-width: 190px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 18px 40px -18px #3f302766;
+  padding: 6px;
+  display: grid;
+  gap: 2px;
+  z-index: 40;
+  transform-origin: top right;
+  animation: menu-enter 0.16s ease-out both;
+}
+@keyframes menu-enter {
+  from { opacity: 0; transform: translateY(-4px) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+.account-menu button {
+  justify-content: flex-start;
+  border: 0;
+  background: transparent;
+  padding: 10px 12px;
+  border-radius: 8px;
+  gap: 10px;
+  font-size: 13px;
+  width: 100%;
+}
+.account-menu button:hover, .account-menu button:focus-visible { background: var(--accent-soft); }
+
+/* Interview guide: wide question column, compact action column, answers in their own row. */
+.guide-table { table-layout: fixed; width: 100%; min-width: 560px; }
+.guide-question-col { width: auto; }
+.guide-action-col { width: 140px; }
+.guide-table td:first-child { width: auto; }
+.guide-table h3 { font-size: 14px; line-height: 1.55; margin: 0 0 4px; font-weight: 600; }
+.guide-category { margin: 0; font-size: 11px; color: var(--muted); }
+.guide-action { text-align: right; vertical-align: middle !important; }
+.guide-table tr.has-answer > td { border-bottom: 0; }
+.guide-answer-row td { background: #fcf6ec; border-top: 0; padding: 4px 18px 18px; }
+.guide-answer-row h4 { margin: 8px 0 6px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.guide-answer-row .answer { margin: 0; white-space: pre-wrap; line-height: 1.7; }
+
+/* Required documents in job tables. */
+.doc-chips { display: flex; flex-wrap: wrap; gap: 4px; min-width: 150px; }
+
+/* Generated document preview and LaTeX source. */
+.doc-preview {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 34px 40px;
+  margin: 16px 0;
+  color: #1f1a16;
+  font-size: 13px;
+  line-height: 1.55;
+  max-width: 860px;
+  box-shadow: 0 10px 30px -24px #3f302766;
+}
+.doc-preview header { text-align: center; margin-bottom: 14px; }
+.doc-preview header h3 { margin: 0; font-size: 22px; letter-spacing: 0.02em; }
+.doc-preview header p { margin: 4px 0 0; font-size: 12px; color: #4b4038; }
+.doc-preview h4 { margin: 14px 0 6px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid #1f1a16; padding-bottom: 2px; }
+.doc-preview p { margin: 0 0 4px; }
+.doc-preview p.role { font-weight: 650; margin-top: 8px; }
+.doc-preview ul { margin: 2px 0 6px; padding-left: 20px; }
+.doc-preview li { margin-bottom: 2px; }
+.doc-preview.letter p { margin-bottom: 12px; }
+.latex-source { border: 1px solid var(--border); border-radius: 10px; margin: 0 0 14px; background: #fcf8f1; max-width: 860px; }
+.latex-head { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px 6px 4px; gap: 10px; }
+.latex-code { margin: 0; padding: 14px 16px; max-height: 420px; overflow: auto; font-size: 11.5px; line-height: 1.5; border-top: 1px solid var(--border); background: #fffdf8; white-space: pre; }
+
+@media (max-width: 760px) {
+  .topbar { height: 60px; padding: 0 16px; }
+  .page-tabs { top: 60px; padding: 8px 12px; }
+  .page-tab span { display: inline; }
+  .account-trigger > span:not(.avatar) { display: none; }
+  .doc-preview { padding: 22px 18px; }
+  .guide-action-col { width: 104px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tab-panel, .account-menu { animation: none; }
+  .page-tab, .chevron, .account-trigger { transition: none; }
 }

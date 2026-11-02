@@ -1,16 +1,16 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Career Assistant · Amber Desk</title><style>@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;450;500;550;600;650;700&family=Manrope:wght@400;500;600;650;700;750;800&display=swap");
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Career Assistant · Cream &amp; Brown</title><style>@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;450;500;550;600;650;700&family=Manrope:wght@400;500;600;650;700;750;800&display=swap");
 :root {
   font-family: "DM Sans", sans-serif;
-  color: #352d25;
-  background: #fbf8f0;
+  color: #3f3027;
+  background: #f5eedf;
   font-synthesis: none;
   font-weight: 400;
   font-size: 14px;
-  --accent: #a34d22;
-  --accent-soft: #fbefdf;
-  --border: #e9e1d4;
-  --muted: #827669;
-  --panel: #fff;
+  --accent: #674633;
+  --accent-soft: #e6d7c4;
+  --border: #d7c7b2;
+  --muted: #736254;
+  --panel: #fffaf1;
   --radius: 12px;
 }
 * {
@@ -45,7 +45,7 @@ button {
   justify-content: center;
   gap: 8px;
   border: 1px solid var(--border);
-  background: #fff;
+  background: var(--panel);
   color: inherit;
   border-radius: 8px;
   padding: 10px 14px;
@@ -67,7 +67,7 @@ button.primary,
   border-color: var(--accent);
 }
 button.secondary {
-  background: white;
+  background: var(--panel);
 }
 button.ghost {
   border-color: transparent;
@@ -104,7 +104,7 @@ p {
 .standalone {
   min-height: 100vh;
   padding-top: 60px;
-  background: radial-gradient(ellipse at top, #fbefdf 0, transparent 60%);
+  background: radial-gradient(ellipse at top, #e6d7c4 0, transparent 60%);
 }
 .design-heading {
   text-align: center;
@@ -123,7 +123,7 @@ p {
   gap: 24px;
 }
 .design-card {
-  background: white;
+  background: var(--panel);
   border: 1px solid #e2dbd0;
   border-radius: 16px;
   overflow: hidden;
@@ -131,7 +131,7 @@ p {
 }
 .design-card.chosen {
   border-color: var(--accent);
-  box-shadow: 0 0 0 2px #a34d2226;
+  box-shadow: 0 0 0 2px #67463326;
 }
 .design-info {
   padding: 24px;
@@ -159,16 +159,16 @@ p {
 .mini {
   height: 325px;
   font-size: 7px;
-  --mini-accent: #a34d22;
-  --mini-bg: #fbf8f0;
+  --mini-accent: #674633;
+  --mini-bg: #f5eedf;
   background: var(--mini-bg);
   color: #40372e;
   pointer-events: none;
 }
 .mini-top {
   height: 42px;
-  background: white;
-  border-bottom: 1px solid #e9e1d4;
+  background: var(--panel);
+  border-bottom: 1px solid #d7c7b2;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -198,7 +198,7 @@ p {
 }
 .mini aside {
   padding: 19px 7px;
-  background: white;
+  background: var(--panel);
   position: relative;
   border-right: 1px solid #eee5d8;
 }
@@ -259,8 +259,8 @@ p {
   margin: 14px 0 10px;
 }
 .mini-stats > div {
-  background: white;
-  border: 1px solid #e9e1d4;
+  background: var(--panel);
+  border: 1px solid #d7c7b2;
   border-radius: 5px;
   padding: 9px;
   flex: 1;
@@ -323,7 +323,7 @@ p {
   gap: 6px;
   align-items: center;
   padding: 8px 0;
-  border-top: 1px solid #e9e1d4;
+  border-top: 1px solid #d7c7b2;
 }
 .company-icon {
   width: 21px;
@@ -367,7 +367,7 @@ p {
   min-height: 100vh;
 }
 .sidebar {
-  background: #fff;
+  background: var(--panel);
   border-right: 1px solid var(--border);
   padding: 28px 18px;
   display: flex;
@@ -428,7 +428,9 @@ p {
   height: 18px;
 }
 .nav-end {
-  margin-top: auto;
+  margin-top: 20px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
 }
 .side-note {
   padding: 17px 14px;
@@ -455,7 +457,7 @@ p {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #fff;
+  background: var(--panel);
   border-bottom: 1px solid var(--border);
   padding: 0 38px;
   gap: 16px;
@@ -535,7 +537,7 @@ p {
   margin: 26px 0;
 }
 .stat {
-  background: white;
+  background: var(--panel);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 21px 22px;
@@ -575,7 +577,7 @@ p {
   grid-template-columns: 1fr auto;
   gap: 30px;
   align-items: center;
-  background: linear-gradient(105deg, #fbefdf, #fffcf6);
+  background: linear-gradient(105deg, #e6d7c4, #fffcf6);
   border: 1px solid #eedac3;
   border-radius: var(--radius);
   padding: 27px 29px;
@@ -614,7 +616,7 @@ p {
   transform: rotate(-10deg);
 }
 .panel {
-  background: white;
+  background: var(--panel);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 24px;
@@ -663,7 +665,7 @@ textarea {
   border: 1px solid #e2dbd0;
   border-radius: 7px;
   padding: 10px 12px;
-  background: white;
+  background: var(--panel);
   color: #4c4035;
 }
 input,
@@ -675,7 +677,7 @@ input:focus,
 textarea:focus,
 select:focus {
   border-color: var(--accent);
-  outline: 2px solid #a34d2222;
+  outline: 2px solid #67463322;
 }
 label {
   display: grid;
@@ -881,7 +883,7 @@ td .company-cell {
 }
 .upload-zone {
   border: 1.5px dashed #e2cbae;
-  background: #fffdf8;
+  background: #fffaf1;
   border-radius: 12px;
   padding: 34px 20px;
   text-align: center;
@@ -930,10 +932,10 @@ td .company-cell {
   min-height: 100vh;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  background: white;
+  background: var(--panel);
 }
 .auth-story {
-  background: #fbefdf;
+  background: #e6d7c4;
   padding: 55px;
   display: flex;
   flex-direction: column;
@@ -961,6 +963,12 @@ td .company-cell {
   line-height: 1.2;
   position: relative;
   z-index: 1;
+}
+.auth-story > div > .eyebrow {
+  display: inline-block;
+  position: relative;
+  z-index: 1;
+  line-height: 1.6;
 }
 .auth-story p {
   max-width: 370px;
@@ -998,7 +1006,7 @@ td .company-cell {
   font-size: 12px;
 }
 .auth-tabs button.active {
-  background: #fff;
+  background: var(--panel);
   box-shadow: 0 2px 5px #00000008;
   color: var(--accent);
 }
@@ -1035,7 +1043,7 @@ td .company-cell {
   backdrop-filter: blur(3px);
 }
 .modal {
-  background: white;
+  background: var(--panel);
   width: min(760px, 100%);
   max-height: 90vh;
   overflow: auto;
@@ -1376,25 +1384,25 @@ td .company-cell {
   min-width: 0;
 }
 
-/* Amber Desk is the sole application theme. */
+/* Cream & Brown is the sole application theme; legacy amber preference IDs remain compatible. */
 .sidebar,
 .mini aside {
-  background: #fffaf0;
+  background: #e9decd;
 }
 .topbar,
 .mini-top {
-  background: #fffdf8;
+  background: #fffaf1;
 }
 .welcome {
-  background: linear-gradient(110deg, #fbefdf, #fffcf6);
+  background: linear-gradient(110deg, #e6d7c4, #fffcf6);
   border-color: #eedac3;
 }
 .auth-story {
-  background: #fbefdf;
+  background: #e6d7c4;
 }
 .mini {
-  --mini-accent: #a34d22;
-  --mini-bg: #fbf8f0;
+  --mini-accent: #674633;
+  --mini-bg: #f5eedf;
 }
 .mini-banner {
   border-style: dashed;
@@ -1482,4 +1490,18 @@ td .company-cell {
     font-size: 6px;
   }
 }
-</style></head><body><div class="design-page standalone amber-preview"><div class="design-heading"><span class="eyebrow">CAREER ASSISTANT · AMBER DESK</span><h1>Your next chapter, in a warmer light.</h1><p>Warm cream, burnt orange and a focused workspace. Your selected design.</p></div><article class="design-card"> <div class="mini amber"><div class="mini-top"><span class="mini-logo"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-briefcase-business"><path d="M12 12h.01"></path><path d="M16 6V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"></path><path d="M22 13a18.15 18.15 0 0 1-20 0"></path><rect width="20" height="14" x="2" y="6" rx="2"></rect></svg> Career Assistant</span><span class="mini-avatar">YA</span></div><div class="mini-layout"><aside><span class="mini-nav active"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layout-dashboard"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>Overview</span><span class="mini-nav"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-briefcase-business"><path d="M12 12h.01"></path><path d="M16 6V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"></path><path d="M22 13a18.15 18.15 0 0 1-20 0"></path><rect width="20" height="14" x="2" y="6" rx="2"></rect></svg>Domestic Jobs</span><span class="mini-nav"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-earth"><path d="M21.54 15H17a2 2 0 0 0-2 2v4.54"></path><path d="M7 3.34V5a3 3 0 0 0 3 3a2 2 0 0 1 2 2c0 1.1.9 2 2 2a2 2 0 0 0 2-2c0-1.1.9-2 2-2h3.17"></path><path d="M11 21.95V18a2 2 0 0 0-2-2a2 2 0 0 1-2-2v-1a2 2 0 0 0-2-2H2.05"></path><circle cx="12" cy="12" r="10"></circle></svg>Visa Sponsored</span><span class="mini-nav"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-square-text"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M13 8H7"></path><path d="M17 12H7"></path></svg>Interview Questions</span><div class="mini-aside-end"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M10 9H8"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg>Your resume <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg></div></aside><main><div class="mini-breadcrumb">YOUR CAREER, IN MOTION <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sparkles"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"></path><path d="M20 3v4"></path><path d="M22 5h-4"></path><path d="M4 17v2"></path><path d="M5 18H3"></path></svg></div><h2>Your next chapter starts here.</h2><p>A little progress today. A world of possibilities tomorrow.</p><div class="mini-stats"><div><span>Saved opportunities</span><strong>12 <small>↗ 3 this week</small></strong></div><div><span>Applications in progress</span><strong>4 <small>Keep going</small></strong></div></div><div class="mini-banner"><div><b>Find your next great role</b><p>Opportunities that fit your experience and ambition.</p></div><button tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg> Explore jobs</button></div><div class="mini-list-title"><b>Your opportunities</b><span>View all <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up-right"><path d="M7 7h10v10"></path><path d="M7 17 17 7"></path></svg></span></div><div class="mini-list"><span class="company-icon">N</span><div><b>Senior Software Engineer</b><p>Northstar · Bengaluru, India</p></div><span class="fit">92% fit</span></div><div class="mini-list"><span class="company-icon alt">A</span><div><b>Engineering Lead</b><p>Arc Labs · Remote</p></div><span class="fit">88% fit</span></div><div class="mini-disclaimer">ILLUSTRATIVE DESIGN DATA · NOT LIVE JOB RESULTS</div></main></div></div><div class="design-info"><span class="eyebrow">FINAL SELECTED THEME</span><h2>Amber Desk</h2><p>This is the only theme in Career Assistant. The application uses this palette throughout login, your workspace, forms and interview preparation.</p></div></article><p class="preview-note">Illustrative design data · not live job results.</p></div></body></html>
+
+/* Cream & Brown: shared surfaces across every workspace and authentication page. */
+input::placeholder { color: var(--muted); opacity: 1; }
+.sidebar { background: #e9decd; }
+.nav-caption, .nav-button, .breadcrumb, .stat small { color: var(--muted); }
+.brand, .breadcrumb strong { color: #3f3027; }
+.nav-button.active, .mini-nav.active { background: var(--accent); color: #fffaf1; }
+.page-title h1, .design-heading h1 { font-family: Georgia, serif; font-weight: 400; }
+.welcome { background: linear-gradient(110deg, #e6d7c4, #fffaf1); border-color: var(--border); }
+.auth-story, .side-note { background: #e6d7c4; }
+.avatar, .tag:not(.green):not(.amber) { background: #e6d7c4; }
+input, select, textarea { background-color: #fffaf1; color: #3f3027; }
+input:focus, select:focus, textarea:focus { outline-color: var(--accent); }
+
+</style></head><body><div class="design-page standalone amber-preview"><div class="design-heading"><span class="eyebrow">CAREER ASSISTANT · CREAM &amp; BROWN</span><h1>Your next chapter, in a warmer light.</h1><p>Warm cream, walnut brown and a focused workspace. Your selected design.</p></div><article class="design-card"> <div class="mini amber"><div class="mini-top"><span class="mini-logo"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-briefcase-business"><path d="M12 12h.01"></path><path d="M16 6V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"></path><path d="M22 13a18.15 18.15 0 0 1-20 0"></path><rect width="20" height="14" x="2" y="6" rx="2"></rect></svg> Career Assistant</span><span class="mini-avatar">YA</span></div><div class="mini-layout"><aside><span class="mini-nav active"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layout-dashboard"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>Overview</span><span class="mini-nav"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-briefcase-business"><path d="M12 12h.01"></path><path d="M16 6V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"></path><path d="M22 13a18.15 18.15 0 0 1-20 0"></path><rect width="20" height="14" x="2" y="6" rx="2"></rect></svg>Domestic Jobs</span><span class="mini-nav"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-earth"><path d="M21.54 15H17a2 2 0 0 0-2 2v4.54"></path><path d="M7 3.34V5a3 3 0 0 0 3 3a2 2 0 0 1 2 2c0 1.1.9 2 2 2a2 2 0 0 0 2-2c0-1.1.9-2 2-2h3.17"></path><path d="M11 21.95V18a2 2 0 0 0-2-2a2 2 0 0 1-2-2v-1a2 2 0 0 0-2-2H2.05"></path><circle cx="12" cy="12" r="10"></circle></svg>Visa Sponsored</span><span class="mini-nav"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-square-text"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M13 8H7"></path><path d="M17 12H7"></path></svg>Interview Questions</span><div class="mini-aside-end"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M10 9H8"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg>Your resume <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg></div></aside><main><div class="mini-breadcrumb">YOUR CAREER, IN MOTION <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sparkles"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"></path><path d="M20 3v4"></path><path d="M22 5h-4"></path><path d="M4 17v2"></path><path d="M5 18H3"></path></svg></div><h2>Your next chapter starts here.</h2><p>A little progress today. A world of possibilities tomorrow.</p><div class="mini-stats"><div><span>Saved opportunities</span><strong>12 <small>↗ 3 this week</small></strong></div><div><span>Applications in progress</span><strong>4 <small>Keep going</small></strong></div></div><div class="mini-banner"><div><b>Find your next great role</b><p>Opportunities that fit your experience and ambition.</p></div><button tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg> Explore jobs</button></div><div class="mini-list-title"><b>Your opportunities</b><span>View all <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up-right"><path d="M7 7h10v10"></path><path d="M7 17 17 7"></path></svg></span></div><div class="mini-list"><span class="company-icon">N</span><div><b>Senior Software Engineer</b><p>Northstar · Bengaluru, India</p></div><span class="fit">92% fit</span></div><div class="mini-list"><span class="company-icon alt">A</span><div><b>Engineering Lead</b><p>Arc Labs · Remote</p></div><span class="fit">88% fit</span></div><div class="mini-disclaimer">ILLUSTRATIVE DESIGN DATA · NOT LIVE JOB RESULTS</div></main></div></div><div class="design-info"><span class="eyebrow">FINAL SELECTED THEME</span><h2>Cream &amp; Brown</h2><p>This is the only theme in Career Assistant. The application uses this palette throughout login, your workspace, forms and interview preparation.</p></div></article><p class="preview-note">Illustrative design data · not live job results.</p></div></body></html>
