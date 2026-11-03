@@ -21,7 +21,7 @@ backend at `http://127.0.0.1:8000`. The API creates a local SQLite database
 and stores files under `backend/data`. Keep the API and worker processes
 running while using queued workflows.
 
-Cream & Brown is the only application theme. Login, navigation, cards, forms and interview preparation use its cream and walnut-brown palette. The read-only preview is at `/?view=designs` or `docs/Amber-Desk-preview.html`. There is no theme picker or browser-stored theme choice. Migration 002 updates existing accounts to Cream & Brown while preserving their search settings. Sessions use HttpOnly cookies; CSRF tokens stay in memory.
+Cream & Brown is the only application theme. Login, navigation, cards, forms and interview preparation use its cream and walnut-brown palette. There is no theme picker or browser-stored theme choice. Migration 002 updates existing accounts to Cream & Brown while preserving their search settings. Sessions use HttpOnly cookies; CSRF tokens stay in memory.
 
 ## Clear all local data / prepare a clean copy
 
@@ -32,7 +32,7 @@ Cream & Brown is the only application theme. Login, navigation, cards, forms and
 > Deleting a resume in the library preserves RAG; this full reset deletes RAG too.
 
 Stop the app and any separate workers first (Ctrl+C in the launcher terminal).
-Run these commands from this folder or `Project_21_Career-Assistant-source`:
+Run these commands from this folder (`career-assistant`):
 
 ```powershell
 # Preview only; nothing is deleted

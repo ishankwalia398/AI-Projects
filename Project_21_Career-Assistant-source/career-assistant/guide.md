@@ -12,14 +12,8 @@ local API.
 
 ## 1. Get the project
 
-Clone or download the repository. You can run the launcher either from the
-repository's `Project_21_Career-Assistant-source` folder or from the nested
-`career-assistant` folder (the one containing `backend`, `frontend`, and
-`scripts`).
-
-If you use the repository folder, root-level launcher scripts forward to the
-Career Assistant app. If you use the nested folder, its launcher scripts run
-the app directly.
+Clone or download the repository. Run the launcher from the `career-assistant`
+folder (the one containing `backend`, `frontend`, and `scripts`).
 
 ## 2. Run the one command for your system
 
@@ -29,7 +23,7 @@ the app directly.
 .\start.ps1
 ```
 
-Run that from either folder described above.
+Run that from the `career-assistant` folder.
 
 If PowerShell blocks the script, run it with a process-only policy bypass:
 
@@ -43,7 +37,7 @@ powershell -ExecutionPolicy Bypass -File .\start.ps1
 bash start.sh
 ```
 
-Run that from either folder described above.
+Run that from the `career-assistant` folder.
 
 The launcher checks for Python 3.12+, Node.js 22.12+, and npm. If needed, it
 uses:

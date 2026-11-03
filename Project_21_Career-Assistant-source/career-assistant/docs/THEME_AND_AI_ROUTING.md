@@ -1,8 +1,7 @@
 # Cream & Brown and automatic AI fallback
 
 The selected application theme is **Cream & Brown**, applied to login, navigation, jobs,
-interview questions, resume library, candidate profile, settings and the built-in preview
-at `/?view=designs`. It replaces the previous appearance. There is no theme picker.
+interview questions, generated documents, resume library, candidate profile and settings. It replaces the previous appearance. There is no theme picker.
 
 | Element | Colour |
 | --- | --- |
