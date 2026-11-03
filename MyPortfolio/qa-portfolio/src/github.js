@@ -8,10 +8,68 @@ const PROJECT_NAME_OVERRIDES = {
   AnswerRelevancyTest: 'Answer Relevancy Test',
   DeepEvalFramework: 'DeepEval Framework',
   JobTracker: 'Job Tracker',
-  LinkedInContentGenerator: 'LinkedIn Content Generator'
+  LinkedInContentGenerator: 'LinkedIn Content Generator',
+  'Project_18_CrewAI(LogAnalyzer)': 'Log Analyzer (using CrewAI)',
+  'Project_19_Langchain(LogAnalyzer)': 'Log Analyzer (using Langchain)'
 }
 
-function formatProjectName(rawName) {
+const EXCLUDED_PROJECTS = new Set([
+  'Project_1_(using_Skills)',
+  'Skills_Created',
+  'Project_3_(AIJobTracker)',
+  'Project_4_(JobTracker)',
+  'Project_5_(ai-global-career-and-resume-suite)',
+  'MyPortfolio'
+])
+
+// Creation dates based on project directory creation
+const PROJECT_CREATION_DATES = {
+  'Project_1_(using_Skills)': '2026-07-14T21:49:21.898Z',
+  'Project_2_(n8n_Agents)': '2026-07-14T21:49:21.997Z',
+  'Project_3_(AIJobTracker)': '2026-07-14T21:49:22.009Z',
+  'Project_4_(JobTracker)': '2026-07-14T21:49:22.226Z',
+  'Project_5_(ai-global-career-and-resume-suite)': '2026-07-14T21:49:22.283Z',
+  'Project_6_(Postman_To_Playwright)': '2026-07-14T21:49:22.343Z',
+  'Project_7_(LinkedInContentGenerator)': '2026-07-14T21:49:22.372Z',
+  'Project_8_(LangFlow_Agents)': '2026-07-14T21:49:36.097Z',
+  'Project_9_(RAGs)': '2026-07-14T21:49:36.121Z',
+  'Project_10_(Porfolio_Builder)': '2026-08-11T16:33:55.942Z',
+  'Project_12_(OTT_DRM_AI_Troubleshooting_Copilot)': '2026-08-17T12:13:46.325Z',
+  'Project_13_Simple_CrewAI_Agent': '2026-08-31T20:44:01.597Z',
+  'Project_14_CrewAI_QA_Pipeline': '2026-09-02T17:24:00.900Z',
+  'Project_15_DeepEval(AnswerRelevancy_Test)': '2026-09-05T19:15:01.415Z',
+  'Project_16_DeepEvalFramework': '2026-09-10T21:58:39.151Z',
+  'Project_17_(QA_Sherlock)': '2026-09-15T21:34:41.578Z',
+  'Project_20_Langchain(QABugTriage)': '2026-09-21T16:46:16.892Z',
+  'Project_18_CrewAI(LogAnalyzer)': '2026-09-21T17:00:04.858Z',
+  'Project_19_Langchain(LogAnalyzer)': '2026-09-21T17:00:19.165Z',
+  'Project_21_Career-Assistant': '2026-10-21T18:41:03.954Z',
+  'Project_21_Career-Assistant-source': '2026-10-21T18:41:03.954Z'
+}
+
+function getProjectCreationDate(entryName) {
+  if (PROJECT_CREATION_DATES[entryName]) {
+    return new Date(PROJECT_CREATION_DATES[entryName]).getTime()
+  }
+
+  // Fallback based on project number if a new project directory is added
+  const numMatch = entryName.match(/^Project_(\d+)/)
+  if (numMatch) {
+    return parseInt(numMatch[1], 10) * 1000000000
+  }
+
+  return 0
+}
+
+function formatProjectName(rawName, fullName) {
+  if (fullName && PROJECT_NAME_OVERRIDES[fullName]) {
+    return PROJECT_NAME_OVERRIDES[fullName]
+  }
+
+  if (PROJECT_NAME_OVERRIDES[rawName]) {
+    return PROJECT_NAME_OVERRIDES[rawName]
+  }
+
   const normalizedName = rawName
     .replace(/^Project_\d+_?/, '')
     .replaceAll('_', ' ')
@@ -19,10 +77,6 @@ function formatProjectName(rawName) {
     .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
     .replace(/\s+/g, ' ')
     .trim()
-
-  if (PROJECT_NAME_OVERRIDES[rawName]) {
-    return PROJECT_NAME_OVERRIDES[rawName]
-  }
 
   return normalizedName
     .split(' ')
@@ -63,19 +117,21 @@ export async function fetchAiProjects() {
   const entries = await githubFetch(`/repos/${PROJECT_REPOSITORY}/contents`)
 
   return entries
-    .filter(entry => entry.type === 'dir' && entry.name !== 'Project_1_(using_Skills)' && entry.name !== 'Skills_Created' && !/my[_-]?portfolio/i.test(entry.name))
+    .filter(entry => entry.type === 'dir' && !EXCLUDED_PROJECTS.has(entry.name) && !/my[_-]?portfolio/i.test(entry.name))
     .map(entry => {
       const match = entry.name.match(/\(([^)]+)\)/)
-      const name = formatProjectName(match ? match[1] : entry.name)
+      const rawName = match ? match[1] : entry.name
+      const name = formatProjectName(rawName, entry.name)
 
       return {
         name,
         path: entry.path,
         url: `https://github.com/${PROJECT_REPOSITORY}/tree/main/${entry.path}`,
-        description: `Explore the ${name} project and its implementation on GitHub.`
+        description: `Explore the ${name} project and its implementation on GitHub.`,
+        createdAt: getProjectCreationDate(entry.name)
       }
     })
-    .sort((first, second) => first.name.localeCompare(second.name))
+    .sort((first, second) => first.createdAt - second.createdAt)
 }
 
 export async function fetchGithubSnapshot() {
