@@ -10,17 +10,14 @@ import Contact from './components/Contact'
 import './App.css'
 
 function App() {
-  const [theme, setTheme] = useState(() => {
-    try { return localStorage.getItem('theme') === 'dark' ? 'dark' : 'light' }
-    catch { return 'light' }
-  })
+  const [theme, setTheme] = useState('light')
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
     document.documentElement.removeAttribute('data-palette')
     document.documentElement.style.colorScheme = theme
     try {
-      localStorage.setItem('theme', theme)
+      localStorage.removeItem('theme')
       localStorage.removeItem('palette')
     } catch { /* Keep theme switching available when storage is disabled. */ }
   }, [theme])

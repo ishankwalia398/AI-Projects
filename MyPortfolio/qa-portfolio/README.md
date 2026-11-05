@@ -15,9 +15,9 @@ A modern, professional portfolio website showcasing my 14+ years of Quality Engi
 
 ## Appearance
 
-Use the Light/Dark control in the top-right corner. Light always uses Sand & Copper; dark always uses Black & Blue. Light is the default for new visitors and when browser storage is unavailable. Existing saved preferences are preserved. The selected mode is saved in the browser and restored on reload.
+Use the Light/Dark control in the top-right corner. Light always uses Sand & Copper; dark always uses Black & Blue. Every visit and page reload starts in light mode, including for visitors who previously selected dark mode. Dark mode can be selected for the current visit; it is not saved across reloads.
 
-All sections, cards, buttons, hover effects, and the contribution calendar use the selected theme. Colors are defined in `src/App.css`; the control is in `src/components/ThemePicker.jsx`. Previous gallery palette preferences are automatically removed while preserving the saved light/dark mode.
+All sections, cards, buttons, hover effects, and the contribution calendar use the selected theme. Colors are defined in `src/App.css`; the control is in `src/components/ThemePicker.jsx`. Previous saved theme and gallery palette preferences are automatically removed.
 
 ## 🛠️ Tech Stack
 

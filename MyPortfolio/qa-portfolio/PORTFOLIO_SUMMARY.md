@@ -52,8 +52,8 @@ Your professional QA portfolio website showcasing 14+ years of experience with m
 ## 🎨 Design Features
 
 - **Light Theme: Sand & Copper** - Sand backgrounds with copper accents (default)
-- **Dark Theme: Black & Blue** - Near-black backgrounds with blue accents (optional, saved preference preserved)
-- **Theme Control** - Two accessible Light/Dark buttons; selection persists on reload
+- **Dark Theme: Black & Blue** - Near-black backgrounds with blue accents (optional for the current visit)
+- **Theme Control** - Two accessible Light/Dark buttons; every visit and reload starts in light mode
 - **Consistent Accents** - Banners, cards, hover effects, and contribution calendar follow the selected mode
 - **Fully Responsive** - Mobile, tablet, desktop optimized
 - **Smooth Animations** - Hover effects, transitions
@@ -182,7 +182,7 @@ The two supported themes are defined in `src/App.css`:
 - `:root`: Black & Blue (dark), background `#080b12`, accent `#60a5fa`.
 - `[data-theme="light"]`: Sand & Copper (light), background `#f8f2e9`, accent `#8b4b20`.
 
-Use these shared variables for component colors. The Light/Dark control lives in `src/components/ThemePicker.jsx`; `src/App.jsx` saves the selected mode and clears obsolete gallery palette preferences.
+Use these shared variables for component colors. The Light/Dark control lives in `src/components/ThemePicker.jsx`; `src/App.jsx` starts every visit in light mode and clears previous saved theme and gallery palette preferences. Switching to dark mode applies only until the next reload.
 
 ### Update Photo
 Replace `public/ishank.png` with new image

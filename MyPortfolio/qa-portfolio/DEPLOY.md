@@ -65,10 +65,10 @@ No environment variables needed for this static portfolio.
 ## Theme Verification
 
 After deploying, verify both modes with the top-right Light/Dark control:
-- Light: Sand & Copper throughout the page, including the contribution calendar; this is the default for new visitors and when browser storage is unavailable.
-- Dark: Black & Blue throughout the page when selected or previously saved.
-- Reload after switching: the chosen mode is retained.
-- Existing visitors retain their saved light/dark mode; old gallery palette settings are cleared.
+- Light: Sand & Copper throughout the page, including the contribution calendar; every visit starts in light mode.
+- Dark: Black & Blue throughout the page when selected during the current visit.
+- Reload after switching to dark: the page returns to light mode.
+- Existing visitors with a saved dark preference also start in light mode; previous theme and gallery palette settings are cleared.
 - Check both modes on desktop and mobile.
 
 No additional environment variables or deployment settings are required for themes.
