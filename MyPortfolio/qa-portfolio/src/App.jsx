@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { FaSun, FaMoon } from 'react-icons/fa'
+import ThemePicker from './components/ThemePicker'
 import Hero from './components/Hero'
 import About from './components/About'
 import Skills from './components/Skills'
@@ -11,27 +11,23 @@ import './App.css'
 
 function App() {
   const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('theme') || 'dark'
+    try { return localStorage.getItem('theme') === 'light' ? 'light' : 'dark' }
+    catch { return 'dark' }
   })
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
-    localStorage.setItem('theme', theme)
+    document.documentElement.removeAttribute('data-palette')
+    document.documentElement.style.colorScheme = theme
+    try {
+      localStorage.setItem('theme', theme)
+      localStorage.removeItem('palette')
+    } catch { /* Keep theme switching available when storage is disabled. */ }
   }, [theme])
-
-  const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === 'dark' ? 'light' : 'dark')
-  }
 
   return (
     <div className="app">
-      <button
-        className="theme-toggle"
-        onClick={toggleTheme}
-        aria-label="Toggle theme"
-      >
-        {theme === 'dark' ? <FaSun /> : <FaMoon />}
-      </button>
+      <ThemePicker theme={theme} onSelect={setTheme} />
       <Hero />
       <About />
       <Skills />

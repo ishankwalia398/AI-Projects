@@ -9,8 +9,8 @@ const PROJECT_NAME_OVERRIDES = {
   DeepEvalFramework: 'DeepEval Framework',
   JobTracker: 'Job Tracker',
   LinkedInContentGenerator: 'LinkedIn Content Generator',
-  'Project_18_CrewAI(LogAnalyzer)': 'Log Analyzer (using CrewAI)',
-  'Project_19_Langchain(LogAnalyzer)': 'Log Analyzer (using Langchain)'
+  'Project_18_CrewAI(LogAnalyzer)': 'Log Analyzer (CrewAI)',
+  'Project_19_Langchain(LogAnalyzer)': 'Log Analyzer (Langchain)'
 }
 
 const EXCLUDED_PROJECTS = new Set([
@@ -131,7 +131,7 @@ export async function fetchAiProjects() {
         createdAt: getProjectCreationDate(entry.name)
       }
     })
-    .sort((first, second) => first.createdAt - second.createdAt)
+    .sort((first, second) => second.createdAt - first.createdAt)
 }
 
 export async function fetchGithubSnapshot() {

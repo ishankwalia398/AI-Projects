@@ -10,10 +10,10 @@
 
 .hero-banner {
   width: 100%;
-  background: linear-gradient(135deg, #1e40af, #7c3aed);
+  background: linear-gradient(135deg, var(--hero-start), var(--hero-end));
   padding: 1.5rem 2rem;
   text-align: center;
-  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.3);
+  box-shadow: 0 4px 20px color-mix(in srgb, var(--accent-secondary) 30%, transparent);
 }
 
 .banner-content {
@@ -36,6 +36,8 @@
 }
 
 .banner-title {
+  background: none;
+  -webkit-text-fill-color: #ffffff;
   font-size: 2rem;
   font-weight: 800;
   color: #ffffff;
@@ -71,7 +73,7 @@
   position: absolute;
   width: 500px;
   height: 500px;
-  background: radial-gradient(circle, rgba(0, 217, 255, 0.1) 0%, transparent 70%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--accent-primary) 10%, transparent) 0%, transparent 70%);
   top: -200px;
   right: -200px;
   border-radius: 50%;

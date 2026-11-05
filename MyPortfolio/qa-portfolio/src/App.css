@@ -4,26 +4,44 @@
   box-sizing: border-box;
 }
 
+/* Dark mode: Black & Green. */
 :root {
-  --bg-primary: #0f172a;
-  --bg-secondary: #1e293b;
-  --bg-card: #1e293b;
-  --accent-primary: #38bdf8;
-  --accent-secondary: #8b5cf6;
-  --text-primary: #f1f5f9;
-  --text-secondary: #94a3b8;
-  --border: rgba(148, 163, 184, 0.2);
+  color-scheme: dark;
+  --bg-primary: #080b09;
+  --bg-secondary: #121a15;
+  --bg-card: #121a15;
+  --accent-primary: #4ade80;
+  --accent-secondary: #6ee7b7;
+  --text-primary: #edf9f0;
+  --text-secondary: #a8bdae;
+  --border: #2e4736;
+  --hero-start: #103c26;
+  --hero-end: #080b09;
+  --contribution-empty: #1c2920;
+  --contribution-1: #16452a;
+  --contribution-2: #22713e;
+  --contribution-3: #32a85a;
+  --contribution-4: #4ade80;
 }
 
+/* Light mode: Sand & Copper. */
 [data-theme="light"] {
-  --bg-primary: #f5f7fa;
-  --bg-secondary: #ffffff;
-  --bg-card: #ffffff;
-  --accent-primary: #0099cc;
-  --accent-secondary: #6d28d9;
-  --text-primary: #1a202c;
-  --text-secondary: #4a5568;
-  --border: rgba(0, 0, 0, 0.1);
+  color-scheme: light;
+  --bg-primary: #f8f2e9;
+  --bg-secondary: #fffcf7;
+  --bg-card: #fffcf7;
+  --accent-primary: #8b4b20;
+  --accent-secondary: #816017;
+  --text-primary: #33291f;
+  --text-secondary: #71604b;
+  --border: #dbccb5;
+  --hero-start: #57401b;
+  --hero-end: #35281d;
+  --contribution-empty: #eae0d2;
+  --contribution-1: #dcc2a6;
+  --contribution-2: #c7956a;
+  --contribution-3: #a86b3b;
+  --contribution-4: #8b4b20;
 }
 
 body {
@@ -40,43 +58,6 @@ body {
 .app {
   min-height: 100vh;
   position: relative;
-}
-
-.theme-toggle {
-  position: fixed;
-  top: 2rem;
-  right: 2rem;
-  z-index: 1000;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  border: 2px solid var(--accent-primary);
-  background: var(--bg-card);
-  color: var(--accent-primary);
-  font-size: 1.3rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(0, 217, 255, 0.2);
-}
-
-.theme-toggle:hover {
-  background: var(--accent-primary);
-  color: var(--bg-primary);
-  transform: scale(1.1) rotate(20deg);
-  box-shadow: 0 6px 25px rgba(0, 217, 255, 0.4);
-}
-
-@media (max-width: 768px) {
-  .theme-toggle {
-    top: 1rem;
-    right: 1rem;
-    width: 45px;
-    height: 45px;
-    font-size: 1.1rem;
-  }
 }
 
 section {

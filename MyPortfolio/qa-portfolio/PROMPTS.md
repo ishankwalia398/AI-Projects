@@ -1,5 +1,11 @@
 # QA Portfolio Website - Build Prompts
 
+## Current Theme Decision - November 5, 2026
+
+The final selection is **Sand & Copper for light mode** and **Black & Green for dark mode**. The portfolio offers only these two modes through the top-right Light/Dark control, and remembers the selected mode. The earlier multi-palette gallery and Netflix-inspired preview were exploratory and are not part of the final UI. Colors, hover effects, and the contribution calendar follow the active mode.
+
+The prompts below are the historical development record.
+
 This document contains all the prompts used to build the professional QA portfolio website for Ishank Walia.
 
 ---

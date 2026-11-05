@@ -51,8 +51,10 @@ Your professional QA portfolio website showcasing 14+ years of experience with m
 
 ## 🎨 Design Features
 
-- **Dark Theme** - Professional developer portfolio aesthetic
-- **Gradient Accents** - Cyan to purple (modern tech look)
+- **Light Theme: Sand & Copper** - Sand backgrounds with copper accents
+- **Dark Theme: Black & Green** - Near-black backgrounds with green accents (default)
+- **Theme Control** - Two accessible Light/Dark buttons; selection persists on reload
+- **Consistent Accents** - Banners, cards, hover effects, and contribution calendar follow the selected mode
 - **Fully Responsive** - Mobile, tablet, desktop optimized
 - **Smooth Animations** - Hover effects, transitions
 - **GitHub Integration** - Live data from GitHub APIs
@@ -176,11 +178,11 @@ Add portfolio URL to:
 Edit `src/components/Projects.jsx` to add/remove projects
 
 ### Change Colors
-Edit CSS variables in `src/App.css`:
-```css
---accent-primary: #00d9ff;  /* Cyan */
---accent-secondary: #7c3aed; /* Purple */
-```
+The two supported themes are defined in `src/App.css`:
+- `:root`: Black & Green (dark), background `#080b09`, accent `#4ade80`.
+- `[data-theme="light"]`: Sand & Copper (light), background `#f8f2e9`, accent `#8b4b20`.
+
+Use these shared variables for component colors. The Light/Dark control lives in `src/components/ThemePicker.jsx`; `src/App.jsx` saves the selected mode and clears obsolete gallery palette preferences.
 
 ### Update Photo
 Replace `public/ishank.png` with new image

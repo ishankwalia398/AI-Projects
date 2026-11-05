@@ -52,8 +52,8 @@
 
 .contribution-card {
   grid-column: 1 / -1;
-  background: #0d1117;
-  border-color: #30363d;
+  background: var(--bg-card);
+  border-color: var(--border);
 }
 
 .contribution-heading {
@@ -71,7 +71,7 @@
 }
 
 .contribution-heading h3 {
-  color: #f0f6fc;
+  color: var(--text-primary);
   font-size: 1rem;
   margin: 0;
 }
@@ -95,9 +95,9 @@
 
 .contribution-years button.selected,
 .contribution-years button:hover {
-  background: #238636;
-  border-color: #238636;
-  color: #fff;
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--bg-primary);
 }
 
 .featured-repositories {
@@ -218,31 +218,31 @@
   width: 11px;
   height: 11px;
   border-radius: 2px;
-  background: #161b22;
+  background: var(--contribution-empty);
 }
 
 .contribution-cell.level-1,
 .contribution-legend .level-1 {
-  background: #0e4429;
+  background: var(--contribution-1);
 }
 
 .contribution-cell.level-2,
 .contribution-legend .level-2 {
-  background: #006d32;
+  background: var(--contribution-2);
 }
 
 .contribution-cell.level-3,
 .contribution-legend .level-3 {
-  background: #26a641;
+  background: var(--contribution-3);
 }
 
 .contribution-cell.level-4,
 .contribution-legend .level-4 {
-  background: #39d353;
+  background: var(--contribution-4);
 }
 
 .contribution-cell.future {
-  background: #161b22;
+  background: var(--contribution-empty);
 }
 
 .contribution-legend {
@@ -288,7 +288,7 @@
 
 .stat-card-uniform:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 30px rgba(56, 189, 248, 0.15);
+  box-shadow: 0 8px 30px color-mix(in srgb, var(--accent-primary) calc(0.15 * 100%), transparent);
 }
 
 .stat-card-large {
@@ -306,7 +306,7 @@
 
 .stat-card-large:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 30px rgba(56, 189, 248, 0.15);
+  box-shadow: 0 8px 30px color-mix(in srgb, var(--accent-primary) calc(0.15 * 100%), transparent);
 }
 
 .stat-card-large img {
@@ -516,7 +516,7 @@
 .repo-card:hover {
   transform: translateY(-5px);
   border-color: var(--accent-primary);
-  box-shadow: 0 8px 30px rgba(0, 217, 255, 0.2);
+  box-shadow: 0 8px 30px color-mix(in srgb, var(--accent-primary) calc(0.2 * 100%), transparent);
 }
 
 .repo-header {
@@ -579,7 +579,7 @@
 
 .github-profile-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(0, 217, 255, 0.3);
+  box-shadow: 0 8px 30px color-mix(in srgb, var(--accent-primary) calc(0.3 * 100%), transparent);
 }
 
 .repo-content {
