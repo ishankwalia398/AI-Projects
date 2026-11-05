@@ -2,7 +2,7 @@
 
 ## Current Theme Decision - November 5, 2026
 
-The final selection is **Sand & Copper for light mode** and **Black & Green for dark mode**. The portfolio offers only these two modes through the top-right Light/Dark control, and remembers the selected mode. Light is the default for new visitors and when browser storage is unavailable; existing saved preferences are preserved. The earlier multi-palette gallery and Netflix-inspired preview were exploratory and are not part of the final UI. Colors, hover effects, and the contribution calendar follow the active mode.
+The final selection is **Sand & Copper for light mode** and **Black & Blue for dark mode**. The portfolio offers only these two modes through the top-right Light/Dark control, and remembers the selected mode. Light is the default for new visitors and when browser storage is unavailable; existing saved preferences are preserved. The earlier multi-palette gallery and Netflix-inspired preview were exploratory and are not part of the final UI. Colors, hover effects, and the contribution calendar follow the active mode.
 
 The prompts below are the historical development record.
 

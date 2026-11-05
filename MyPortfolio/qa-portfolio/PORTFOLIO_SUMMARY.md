@@ -52,7 +52,7 @@ Your professional QA portfolio website showcasing 14+ years of experience with m
 ## 🎨 Design Features
 
 - **Light Theme: Sand & Copper** - Sand backgrounds with copper accents (default)
-- **Dark Theme: Black & Green** - Near-black backgrounds with green accents (optional, saved preference preserved)
+- **Dark Theme: Black & Blue** - Near-black backgrounds with blue accents (optional, saved preference preserved)
 - **Theme Control** - Two accessible Light/Dark buttons; selection persists on reload
 - **Consistent Accents** - Banners, cards, hover effects, and contribution calendar follow the selected mode
 - **Fully Responsive** - Mobile, tablet, desktop optimized
@@ -179,7 +179,7 @@ Edit `src/components/Projects.jsx` to add/remove projects
 
 ### Change Colors
 The two supported themes are defined in `src/App.css`:
-- `:root`: Black & Green (dark), background `#080b09`, accent `#4ade80`.
+- `:root`: Black & Blue (dark), background `#080b12`, accent `#60a5fa`.
 - `[data-theme="light"]`: Sand & Copper (light), background `#f8f2e9`, accent `#8b4b20`.
 
 Use these shared variables for component colors. The Light/Dark control lives in `src/components/ThemePicker.jsx`; `src/App.jsx` saves the selected mode and clears obsolete gallery palette preferences.

@@ -4,24 +4,24 @@
   box-sizing: border-box;
 }
 
-/* Dark mode: Black & Green. */
+/* Dark mode: Black & Blue. */
 :root {
   color-scheme: dark;
-  --bg-primary: #080b09;
-  --bg-secondary: #121a15;
-  --bg-card: #121a15;
-  --accent-primary: #4ade80;
-  --accent-secondary: #6ee7b7;
-  --text-primary: #edf9f0;
-  --text-secondary: #a8bdae;
-  --border: #2e4736;
-  --hero-start: #103c26;
-  --hero-end: #080b09;
-  --contribution-empty: #1c2920;
-  --contribution-1: #16452a;
-  --contribution-2: #22713e;
-  --contribution-3: #32a85a;
-  --contribution-4: #4ade80;
+  --bg-primary: #080b12;
+  --bg-secondary: #111a29;
+  --bg-card: #111a29;
+  --accent-primary: #60a5fa;
+  --accent-secondary: #93c5fd;
+  --text-primary: #eff6ff;
+  --text-secondary: #a8bad1;
+  --border: #2d4261;
+  --hero-start: #153563;
+  --hero-end: #080b12;
+  --contribution-empty: #1b293e;
+  --contribution-1: #1e3a5f;
+  --contribution-2: #245a91;
+  --contribution-3: #3984cb;
+  --contribution-4: #60a5fa;
 }
 
 /* Light mode: Sand & Copper. */
