@@ -11,8 +11,8 @@ import './App.css'
 
 function App() {
   const [theme, setTheme] = useState(() => {
-    try { return localStorage.getItem('theme') === 'light' ? 'light' : 'dark' }
-    catch { return 'dark' }
+    try { return localStorage.getItem('theme') === 'dark' ? 'dark' : 'light' }
+    catch { return 'light' }
   })
 
   useEffect(() => {

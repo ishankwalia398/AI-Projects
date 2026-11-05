@@ -51,8 +51,8 @@ Your professional QA portfolio website showcasing 14+ years of experience with m
 
 ## 🎨 Design Features
 
-- **Light Theme: Sand & Copper** - Sand backgrounds with copper accents
-- **Dark Theme: Black & Green** - Near-black backgrounds with green accents (default)
+- **Light Theme: Sand & Copper** - Sand backgrounds with copper accents (default)
+- **Dark Theme: Black & Green** - Near-black backgrounds with green accents (optional, saved preference preserved)
 - **Theme Control** - Two accessible Light/Dark buttons; selection persists on reload
 - **Consistent Accents** - Banners, cards, hover effects, and contribution calendar follow the selected mode
 - **Fully Responsive** - Mobile, tablet, desktop optimized
