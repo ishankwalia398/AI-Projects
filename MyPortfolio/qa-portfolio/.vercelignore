@@ -1,0 +1,6 @@
+# Never upload local secrets or scratch files with `vercel deploy`.
+.env*
+.git_backup
+previews.local
+node_modules
+dist
