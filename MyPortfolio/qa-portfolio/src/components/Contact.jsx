@@ -1,64 +1,45 @@
-import { FaGithub, FaLinkedin, FaEnvelope, FaPhone, FaMapMarkerAlt, FaGlobe } from 'react-icons/fa'
+import { FaGithub, FaLinkedin, FaEnvelope, FaFileDownload } from 'react-icons/fa'
+import { EMAIL, GITHUB_URL, GITHUB_USER, LINKEDIN_URL, RESUME_URL } from '../profile'
 import './Contact.css'
+
+const CONTACT_LINKS = [
+  { label: 'Email', value: EMAIL, href: `mailto:${EMAIL}`, Icon: FaEnvelope },
+  { label: 'LinkedIn', value: 'linkedin.com/in/ishankwalia', href: LINKEDIN_URL, Icon: FaLinkedin, external: true },
+  { label: 'GitHub', value: `github.com/${GITHUB_USER}`, href: GITHUB_URL, Icon: FaGithub, external: true },
+  { label: 'Résumé', value: 'Download PDF', href: RESUME_URL, Icon: FaFileDownload, download: true }
+]
 
 function Contact() {
   return (
-    <section className="contact">
+    <section className="contact" id="contact">
       <h2>Let's Connect</h2>
       <div className="contact-content">
         <div className="contact-text">
           <p>
-            I'm actively seeking opportunities in <strong>Quality Engineering, QA Automation, and AI-Augmented Testing</strong>.
-            Open to remote work and relocation.
+            I'm open to roles in <strong>Quality Engineering, QA Automation and AI-Augmented Testing</strong>, remote or
+            with relocation. Based in Noida, India.
           </p>
           <p>
-            Looking for a senior QA engineer who can bring 15+ years of experience, AI expertise,
-            and a proven track record of reducing defects while accelerating releases? Let's talk.
+            Looking for a quality engineering lead who brings 15+ years of QA, deep DRM and streaming expertise, hands-on AI
+            tooling and a record of cutting defects while speeding up releases? Let's talk.
           </p>
         </div>
         <div className="contact-links">
-          <a href="mailto:ishank.walia398@gmail.com" className="contact-link">
-            <FaEnvelope className="contact-icon" />
-            <div>
-              <span className="contact-label">Email</span>
-              <span className="contact-value">ishank.walia398@gmail.com</span>
-            </div>
-          </a>
-          <a href="tel:+919899467741" className="contact-link">
-            <FaPhone className="contact-icon" />
-            <div>
-              <span className="contact-label">Phone</span>
-              <span className="contact-value">+91-9899467741</span>
-            </div>
-          </a>
-          <a href="https://www.linkedin.com/in/ishankwalia/" target="_blank" rel="noopener noreferrer" className="contact-link">
-            <FaLinkedin className="contact-icon" />
-            <div>
-              <span className="contact-label">LinkedIn</span>
-              <span className="contact-value">linkedin.com/in/ishankwalia</span>
-            </div>
-          </a>
-          <a href="https://ishank-walia.vercel.app/" target="_blank" rel="noopener noreferrer" className="contact-link">
-            <FaGlobe className="contact-icon" />
-            <div>
-              <span className="contact-label">Portfolio</span>
-              <span className="contact-value">ishank-walia.vercel.app</span>
-            </div>
-          </a>
-          <a href="https://github.com/ishankwalia398" target="_blank" rel="noopener noreferrer" className="contact-link">
-            <FaGithub className="contact-icon" />
-            <div>
-              <span className="contact-label">GitHub</span>
-              <span className="contact-value">github.com/ishankwalia398</span>
-            </div>
-          </a>
-          <div className="contact-link">
-            <FaMapMarkerAlt className="contact-icon" />
-            <div>
-              <span className="contact-label">Location</span>
-              <span className="contact-value">Noida, India</span>
-            </div>
-          </div>
+          {CONTACT_LINKS.map(({ label, value, href, Icon, external, download }) => (
+            <a
+              key={label}
+              href={href}
+              className="contact-link"
+              {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+              {...(download ? { download: true } : {})}
+            >
+              <Icon className="contact-icon" aria-hidden="true" />
+              <div>
+                <span className="contact-label">{label}</span>
+                <span className="contact-value">{value}</span>
+              </div>
+            </a>
+          ))}
         </div>
       </div>
     </section>

@@ -1,83 +1,69 @@
 import './Skills.css'
 
-function Skills() {
-  const skillCategories = [
-    {
-      title: "AI & Automation",
-      skills: [
-        "AI-Augmented Testing",
-        "Agentic AI for QA",
-        "Large Language Models (LLMs)",
-        "RAG (Retrieval-Augmented Generation)",
-        "Prompt Engineering",
-        "AI Workflow Automation (n8n, Langchain, CrewAI)",
-        "LLM Evaluation using Eval & DeepEval",
-        "AI Application Prototyping (Langflow)",
-        "Playwright + AI",
-        "Intelligent Test Case Generation",
-        "AI-powered Defect Analysis"
-      ]
-    },
-    {
-      title: "DRM & Streaming",
-      skills: [
-        "Widevine, FairPlay, PlayReady",
-        "DRM License Acquisition",
-        "Token Expiry Testing",
-        "HLS / DASH Streaming",
-        "ABR (Adaptive Bitrate)",
-        "CDN Failover Testing",
-        "Playback Validation",
-        "Codec Testing"
-      ]
-    },
-    {
-      title: "Testing & QA",
-      skills: [
-        "Multi-Platform QA (Web, iOS, Android, Smart TV)",
-        "REST & GraphQL API Testing",
-        "Playwright Automation",
-        "Node.js Test Frameworks",
-        "Integration Testing",
-        "Regression Testing",
-        "Risk-Based Testing",
-        "Shift-Left Testing"
-      ]
-    },
-    {
-      title: "Tools & Technologies",
-      skills: [
-        "Playwright",
-        "Postman",
-        "Node.js",
-        "JavaScript",
-        "TypeScript",
-        "Python",
-        "Langchain",
-        "CrewAI",
-        "Shell scripting",
-        "Git / GitHub / GitLab",
-        "Jenkins CI/CD",
-        "Jira",
-        "n8n",
-        "Langflow",
-        "MCP (Model Context Protocol)"
-      ]
-    }
-  ]
+const SKILL_CATEGORIES = [
+  {
+    title: 'AI & LLM Engineering',
+    skills: [
+      'Agentic AI for QA',
+      'Multi-agent systems (CrewAI, LangChain)',
+      'RAG (Pinecone, ChromaDB, Qdrant)',
+      'LLM evaluation (DeepEval)',
+      'Prompt engineering',
+      'Workflow automation (n8n, Langflow)',
+      'MCP (Model Context Protocol)'
+    ]
+  },
+  {
+    title: 'DRM & Streaming',
+    skills: [
+      'Widevine, FairPlay, PlayReady',
+      'License acquisition & token expiry',
+      'HLS / DASH',
+      'Adaptive bitrate (ABR)',
+      'CDN failover',
+      'Playback & codec validation',
+      'Smart TV (Tizen, webOS)'
+    ]
+  },
+  {
+    title: 'Testing & Automation',
+    skills: [
+      'Multi-platform QA (Web, iOS, Android, TV)',
+      'REST & GraphQL API testing',
+      'Playwright',
+      'Node.js test frameworks',
+      'Risk-based & shift-left testing',
+      'ATDD / BDD',
+      'Regression & integration testing'
+    ]
+  },
+  {
+    title: 'Languages & Tooling',
+    skills: [
+      'JavaScript',
+      'TypeScript',
+      'Python',
+      'Postman',
+      'Jenkins',
+      'Git, GitHub, GitLab',
+      'Jira'
+    ]
+  }
+]
 
+function Skills() {
   return (
-    <section className="skills">
+    <section className="skills" id="skills">
       <h2>Core Skills & Technologies</h2>
       <div className="skills-grid">
-        {skillCategories.map((category, index) => (
-          <div key={index} className="skill-category">
+        {SKILL_CATEGORIES.map(category => (
+          <div key={category.title} className="skill-category">
             <h3>{category.title}</h3>
-            <div className="skill-tags">
-              {category.skills.map((skill, idx) => (
-                <span key={idx} className="skill-tag">{skill}</span>
+            <ul className="skill-tags">
+              {category.skills.map(skill => (
+                <li key={skill} className="skill-tag">{skill}</li>
               ))}
-            </div>
+            </ul>
           </div>
         ))}
       </div>

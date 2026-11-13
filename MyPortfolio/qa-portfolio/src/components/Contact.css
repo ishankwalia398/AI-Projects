@@ -1,6 +1,5 @@
 .contact {
   background: var(--bg-primary);
-  padding-bottom: 40px;
 }
 
 .contact-content {
@@ -30,15 +29,15 @@
 
 .contact-links {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
 }
 
 .contact-link {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
-  padding: 1.25rem 1.5rem;
+  gap: 1rem;
+  padding: 1.1rem 1.25rem;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -52,9 +51,9 @@
 }
 
 .contact-icon {
-  font-size: 2rem;
+  font-size: 1.6rem;
   color: var(--accent-primary);
-  min-width: 2rem;
+  min-width: 1.6rem;
 }
 
 .contact-link > div {
@@ -75,23 +74,17 @@
   font-weight: 600;
 }
 
-.footer {
-  margin-top: 5rem;
-  padding-top: 2rem;
-  border-top: 1px solid var(--border);
-  text-align: center;
-}
-
-.footer p {
-  color: var(--text-secondary);
-  font-size: 0.9rem;
+.contact-value {
+  overflow-wrap: anywhere;
 }
 
 @media (max-width: 968px) {
   .contact-content {
     gap: 2rem;
   }
+}
 
+@media (max-width: 560px) {
   .contact-links {
     grid-template-columns: 1fr;
   }

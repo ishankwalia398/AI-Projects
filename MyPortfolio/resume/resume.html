@@ -1,0 +1,327 @@
+<!doctype html>
+<!--
+  Source for Ishank_Walia_Resume.pdf. Keep it consistent with the portfolio
+  (qa-portfolio/src): same title, years, metrics and company attribution.
+
+  Rebuild the PDF (writes both copies):
+    node resume/build-resume.mjs
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Ishank Walia - Resume</title>
+<meta name="author" content="Ishank Walia">
+<meta name="description" content="Quality Engineering Lead - DRM, OTT streaming QA and AI-augmented testing">
+<style>
+  @page { size: Letter; margin: 0.5in 0.6in 0.55in; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --accent: #000;
+    --accent-strong: #000;
+    --text: #000;
+    --muted: #000;
+    --rule: #9a9a9a;
+    --band: #f2f2f2;
+  }
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 9.6pt;
+    line-height: 1.38;
+    color: var(--text);
+  }
+  a { color: inherit; text-decoration: none; }
+  strong { color: var(--accent-strong); font-weight: 600; }
+
+  header { text-align: center; padding-bottom: 7pt; border-bottom: 1.4pt solid var(--accent); }
+  h1 { font-size: 21pt; letter-spacing: 1.5pt; color: var(--accent); font-weight: 700; line-height: 1.1; }
+  .headline { font-size: 11pt; font-weight: 600; color: var(--text); margin-top: 2pt; }
+  .contact { display: flex; flex-wrap: wrap; justify-content: center; margin-top: 2pt; font-size: 8.9pt; color: var(--muted); }
+  .headline + .contact { margin-top: 4pt; }
+  .contact span { white-space: nowrap; }
+  .contact span + span::before { content: "|"; margin: 0 5pt; color: var(--text); }
+  .availability { margin-top: 2pt; font-size: 8.9pt; font-style: italic; color: var(--muted); }
+
+  h2 {
+    margin: 10pt 0 5pt;
+    padding-bottom: 2pt;
+    border-bottom: 0.8pt solid var(--rule);
+    font-size: 10.8pt;
+    letter-spacing: 0.8pt;
+    color: var(--accent);
+    text-transform: uppercase;
+    break-after: avoid;
+  }
+  p { margin-bottom: 4pt; }
+
+  .stats {
+    display: flex;
+    justify-content: space-around;
+    margin: 6pt 0 2pt;
+    padding: 5pt 0;
+    background: var(--band);
+    border-radius: 3pt;
+    text-align: center;
+  }
+  .stats div { flex: 1; }
+  .stats b { display: block; font-size: 13pt; color: var(--accent); }
+  .stats span { font-size: 8pt; color: var(--muted); }
+
+  ul { list-style: none; }
+  li { position: relative; padding-left: 10pt; margin-bottom: 2.2pt; break-inside: avoid; }
+  li::before { content: ""; position: absolute; left: 1pt; top: 4.6pt; width: 3.6pt; height: 3.6pt; background: var(--accent); }
+
+  .columns { columns: 3; column-gap: 14pt; }
+  .columns li { break-inside: avoid; }
+
+  .job { margin-bottom: 6pt; }
+  .job-head { display: flex; justify-content: space-between; align-items: baseline; break-after: avoid; }
+  .job-title { font-weight: 700; font-size: 10pt; }
+  .job-type { font-weight: 400; color: var(--muted); }
+  .job-dates { font-style: italic; color: var(--muted); white-space: nowrap; }
+  .job-company { font-style: italic; color: var(--accent); margin-bottom: 2pt; break-after: avoid; }
+
+  .project-link { color: var(--muted); font-size: 8.6pt; }
+
+  table.skills { width: 100%; border-collapse: collapse; }
+  table.skills th { width: 1.15in; text-align: left; vertical-align: top; padding: 1.2pt 8pt 1.2pt 0; color: var(--accent-strong); font-weight: 600; }
+  table.skills td { padding: 1.2pt 0; }
+  table.skills tr { break-inside: avoid; }
+
+  .edu { display: flex; justify-content: space-between; margin-bottom: 3pt; break-inside: avoid; }
+  .edu span:last-child { font-style: italic; color: var(--muted); }
+  .keep { break-inside: avoid; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>ISHANK WALIA</h1>
+  <div class="headline">Quality Engineering Lead · DRM &amp; OTT Streaming QA · AI-Augmented Testing</div>
+  <div class="contact">
+    <span>+91-9899467741</span>
+    <span><a href="mailto:ishank.walia398@gmail.com">ishank.walia398@gmail.com</a></span>
+    <span><a href="https://www.linkedin.com/in/ishankwalia/">linkedin.com/in/ishankwalia</a></span>
+  </div>
+  <div class="contact">
+    <span><a href="https://github.com/ishankwalia398">github.com/ishankwalia398</a></span>
+    <span><a href="https://ishank-walia.vercel.app/">ishank-walia.vercel.app</a></span>
+  </div>
+  <div class="availability">Noida, India · Open to GenAI roles · EU / US / APAC / Remote · Open to relocation</div>
+</header>
+
+<h2>Professional Summary</h2>
+<p>
+  Quality Engineering Lead with <strong>15+ years</strong> of enterprise QA experience, the last <strong>8+ in OTT/TV
+  streaming</strong>, specializing in <strong>DRM validation (Widevine, FairPlay, PlayReady)</strong> and secure content
+  delivery. At Kaltura, raised <strong>DRM-protected playback success by 30%</strong> and cut <strong>regression execution
+  time by 73%</strong>; at GlobalLogic, reduced <strong>production defect leakage by 60%</strong>. Expert in
+  <strong>multi-platform streaming QA</strong> (Web, iOS, Android, Smart TV), REST/GraphQL API testing, CI/CD pipeline
+  integration, and end-to-end license acquisition and entitlement validation. Now building <strong>AI agents, RAG pipelines
+  and LLM evaluation</strong> for QA with CrewAI, LangChain, DeepEval and Playwright. Proven track record of
+  zero-critical-defect releases in high-concurrency streaming and billing environments.
+</p>
+<div class="stats">
+  <div><b>30%</b><span>Higher DRM playback success · Kaltura</span></div>
+  <div><b>73%</b><span>Faster regression runs · Kaltura</span></div>
+  <div><b>60%</b><span>Less production defect leakage · GlobalLogic</span></div>
+</div>
+
+<h2>Core Competencies</h2>
+<ul class="columns">
+  <li>DRM Testing (Widevine, FairPlay, PlayReady)</li>
+  <li>OTT / TV Streaming Platform QA</li>
+  <li>Playback &amp; Content Delivery Validation</li>
+  <li>License Acquisition &amp; Token Expiry Testing</li>
+  <li>Entitlement &amp; Subscription Flow Testing</li>
+  <li>Multi-Platform QA (Web, iOS, Android, TV)</li>
+  <li>REST &amp; GraphQL API Testing</li>
+  <li>CDN &amp; Geo-restriction Validation</li>
+  <li>CI/CD Integration (Jenkins, GitLab, GitHub)</li>
+  <li>Node.js Automation Frameworks</li>
+  <li>Playwright Automation</li>
+  <li>Agentic AI &amp; LLM-Powered QA Tools</li>
+  <li>RAG &amp; LLM Evaluation (DeepEval)</li>
+  <li>Risk-Based &amp; Shift-Left Testing</li>
+  <li>Agile / Scrum QA Delivery, ATDD</li>
+  <li>Defect Management (Jira) &amp; RCA</li>
+</ul>
+
+<h2>DRM &amp; Streaming QA Expertise</h2>
+<ul>
+  <li><strong>DRM Validation (Widevine / FairPlay / PlayReady):</strong> Validated DRM license acquisition flows, token expiry
+    handling, key rotation, offline playback entitlement and cross-platform DRM compatibility, directly improving
+    DRM-protected playback success by 30%.</li>
+  <li><strong>Entitlement &amp; Subscription Testing:</strong> End-to-end validation of subscription tiers, concurrent stream
+    limits, geo-blocking, regional content access rules and paywall enforcement across Web, iOS, Android and Smart TV.</li>
+  <li><strong>Playback &amp; Content Delivery:</strong> Validated adaptive bitrate (ABR) streaming, HLS/DASH manifest
+    integrity, CDN failover, buffering under degraded network conditions and codec-level playback.</li>
+  <li><strong>Edge-Case &amp; Resilience Testing:</strong> Simulated concurrent stream conflicts, network interruptions,
+    expired licenses and geo-spoofed access, strengthening platform reliability under live traffic.</li>
+  <li><strong>Multi-Platform Coverage:</strong> Consistent DRM and playback QA across Web (Chrome, Firefox, Safari), iOS
+    (AVFoundation/FairPlay), Android (ExoPlayer/Widevine) and Smart TV (Tizen, webOS).</li>
+  <li><strong>API-First Security Testing:</strong> Validated DRM license server endpoints and secure token exchange flows
+    through REST API testing.</li>
+</ul>
+
+<h2>Professional Experience</h2>
+
+<div class="job">
+  <div class="job-head">
+    <span class="job-title">Quality Engineering Lead <span class="job-type">— OTT / DRM / Streaming</span></span>
+    <span class="job-dates">April 2024 – Present</span>
+  </div>
+  <div class="job-company">Kaltura — Noida, India</div>
+  <ul>
+    <li>Increased <strong>DRM-protected playback success rate by 30%</strong> by identifying and resolving critical failures in
+      license acquisition, token expiry and entitlement validation flows across Widevine and FairPlay.</li>
+    <li>Reduced <strong>critical production incidents by 40%</strong> in 6 months through risk-based QA focused on high-impact
+      streaming, subscription and content-access journeys.</li>
+    <li>Built a <strong>Node.js automation framework</strong> achieving <strong>95% regression coverage</strong>, cutting
+      execution time by <strong>73%</strong> and enabling daily confident release validation.</li>
+    <li>Shifted defect detection left, catching <strong>80% of issues pre-integration</strong> via CI/CD pipelines (Jenkins,
+      GitLab), significantly reducing release rollbacks.</li>
+    <li>Prevented high-severity content access failures by simulating <strong>geo-blocking, concurrent stream limits and DRM
+      edge cases</strong>, improving platform reliability under real-world conditions.</li>
+    <li>Improved <strong>defect resolution turnaround by 50%</strong> through structured triage, precise defect reporting and
+      tight cross-functional engineering collaboration.</li>
+    <li>Championed <strong>ATDD-driven validation</strong> in Agile sprints, reducing rework cycles by <strong>35%</strong> and
+      improving acceptance-criteria accuracy.</li>
+  </ul>
+</div>
+
+<div class="job">
+  <div class="job-head">
+    <span class="job-title">Consultant – Senior QA Engineer <span class="job-type">— Automation &amp; Streaming</span></span>
+    <span class="job-dates">January 2018 – April 2024</span>
+  </div>
+  <div class="job-company">GlobalLogic — Noida, India</div>
+  <ul>
+    <li>Reduced <strong>production defect leakage by 60%</strong> by redesigning QA strategy around high-risk OTT workflows,
+      playback services and user-critical content-access scenarios.</li>
+    <li>Accelerated <strong>regression cycles by 80%</strong> through scalable <strong>Node.js automation frameworks</strong>
+      for API and integration-layer testing.</li>
+    <li>Increased <strong>early-stage defect detection by 50%+</strong> by validating backend systems (content delivery,
+      subscriptions, playback services) prior to release.</li>
+    <li>Eliminated <strong>75% of redundant test cases</strong>, improving CI/CD signal quality and enabling faster,
+      data-driven release decisions.</li>
+    <li>Enabled leadership visibility through <strong>QA dashboards and defect analytics</strong>, improving release
+      predictability across multiple concurrent product lines.</li>
+    <li>Improved <strong>acceptance criteria quality</strong> through cross-functional collaboration, reducing requirement gaps
+      and rework by <strong>30%</strong>.</li>
+  </ul>
+</div>
+
+<div class="job">
+  <div class="job-head">
+    <span class="job-title">Senior QA Engineer <span class="job-type">— Automation &amp; Integration Testing</span></span>
+    <span class="job-dates">June 2017 – December 2017</span>
+  </div>
+  <div class="job-company">Zenith System Solutions — Mumbai, India</div>
+  <ul>
+    <li>Reduced <strong>end-to-end test cycle time by 83%</strong> by implementing automation-first testing with reusable,
+      maintainable components.</li>
+    <li>Prevented critical production failures by strengthening <strong>integration coverage</strong> across distributed
+      system boundaries.</li>
+    <li>Improved team productivity by mentoring engineers on structured test design and reporting practices.</li>
+  </ul>
+</div>
+
+<div class="job">
+  <div class="job-head">
+    <span class="job-title">Solution Integrator (QA) <span class="job-type">— System &amp; Integration Testing</span></span>
+    <span class="job-dates">November 2013 – June 2017</span>
+  </div>
+  <div class="job-company">Ericsson — Gurgaon, India</div>
+  <ul>
+    <li>Achieved <strong>98% system test coverage</strong> across complex, high-volume telecom platforms handling
+      mission-critical transactions.</li>
+    <li>Reduced <strong>manual regression effort by 60%</strong> through automation of critical billing and workflow
+      validation.</li>
+    <li>Prevented <strong>revenue-impacting defects</strong> through rigorous end-to-end billing and transaction system
+      validation.</li>
+    <li>Improved <strong>defect turnaround time by 55%</strong> via structured triage and cross-functional defect lifecycle
+      management.</li>
+  </ul>
+</div>
+
+<div class="job">
+  <div class="job-head">
+    <span class="job-title">QA Subject Matter Expert <span class="job-type">— Billing &amp; CRM Platforms</span></span>
+    <span class="job-dates">July 2011 – November 2013</span>
+  </div>
+  <div class="job-company">Amdocs — Pune, India</div>
+  <ul>
+    <li>Delivered <strong>zero critical production defects</strong> across multiple large-scale enterprise CRM and charging
+      system releases.</li>
+    <li>Standardized <strong>QA reporting and defect tracking</strong>, increasing fix rates and release transparency across
+      distributed teams.</li>
+  </ul>
+</div>
+
+<div class="keep">
+<h2>AI-Augmented Testing Projects</h2>
+<p>Open source in <a href="https://github.com/ishankwalia398/AI-Projects">github.com/ishankwalia398/AI-Projects</a>; live demos linked.</p>
+<ul>
+  <li><strong>OTT DRM AI Troubleshooting Copilot:</strong> Deterministic diagnostic rules plus RAG (Pinecone) over knowledge
+    cards and past incidents to rank likely root causes of playback and DRM failures and recommend the next verification
+    tests; FastAPI, PDF reports. <a class="project-link" href="https://ott-drm-troubleshooting-copilot.vercel.app/">ott-drm-troubleshooting-copilot.vercel.app</a></li>
+  <li><strong>QA Sherlock:</strong> Six CrewAI agents investigate defects using Pinecone retrieval and Jira (MCP with REST
+    failover), generate a Playwright regression test and are judged with DeepEval.
+    <a class="project-link" href="https://qasherlock.vercel.app/">qasherlock.vercel.app</a></li>
+  <li><strong>QA Bug Triage:</strong> Three LangChain agents return severity, ranked root-cause hypotheses and a test strategy
+    for a Jira defect, using Gemini with automatic Groq fallback.
+    <a class="project-link" href="https://qa-bug-triage-lc.vercel.app/">qa-bug-triage-lc.vercel.app</a></li>
+  <li><strong>DeepEval Live Lab:</strong> Runs 25 DeepEval metrics against a support chatbot and a RAG assistant with a
+    100-case test dataset. <a class="project-link" href="https://deepeval-dashboard.vercel.app/">deepeval-dashboard.vercel.app</a></li>
+  <li><strong>Reusable QA skills and agents:</strong> AI workflows (Claude Code skills, n8n, Langflow) that generate test
+    plans, test cases and Playwright scripts from requirements and upload test cases to PractiTest.</li>
+</ul>
+</div>
+
+<div class="keep">
+<h2>Technical Skills</h2>
+<table class="skills">
+  <tr><th>DRM &amp; Security</th><td>Widevine, FairPlay, PlayReady, license acquisition, CDM validation, PSSH, token/key testing</td></tr>
+  <tr><th>Streaming QA</th><td>HLS, DASH, ABR, playback validation, CDN failover, buffering, codec testing, manifest integrity</td></tr>
+  <tr><th>Platforms</th><td>Web (Chrome, Safari, Firefox), iOS, Android, Smart TV (Tizen, webOS)</td></tr>
+  <tr><th>API Testing</th><td>REST, GraphQL, Postman, entitlement API testing</td></tr>
+  <tr><th>Automation</th><td>Node.js test frameworks, Playwright</td></tr>
+  <tr><th>AI &amp; LLM</th><td>CrewAI, LangChain, Langflow, n8n, RAG (Pinecone, ChromaDB, Qdrant), DeepEval, prompt engineering, MCP</td></tr>
+  <tr><th>Languages</th><td>JavaScript, TypeScript, Python</td></tr>
+  <tr><th>CI/CD</th><td>Jenkins, GitLab, GitHub, pipeline-embedded quality validation</td></tr>
+  <tr><th>Defect Mgmt</th><td>Jira, structured triage, RCA, defect lifecycle management, QA dashboards</td></tr>
+  <tr><th>Methodologies</th><td>Agile/Scrum, Risk-Based Testing, Shift-Left Testing, ATDD, BDD</td></tr>
+</table>
+</div>
+
+<div class="keep">
+<h2>Certifications &amp; Training</h2>
+<ul>
+  <li><strong>ISTQB Foundation Level</strong> – International Software Testing Qualifications Board</li>
+  <li><strong>CAST</strong> – Certified Associate in Software Testing (QAI)</li>
+  <li><strong>ITIL V3 Certified</strong> – IT Infrastructure Library (Service Management)</li>
+  <li><strong>CCNA</strong> – Cisco Certified Network Associate</li>
+  <li><strong>Playwright Automation</strong> – Trained (modern browser automation &amp; API testing)</li>
+</ul>
+</div>
+
+<div class="keep">
+<h2>Awards &amp; Recognition</h2>
+<ul>
+  <li><strong>Star Performer</strong> — Kaltura: Recognized for 30% DRM playback improvement and zero-rollback release delivery.</li>
+  <li><strong>League of Extraordinaire</strong> — GlobalLogic: Recognized for scaling OTT QA practices across distributed teams
+    with 60% defect reduction.</li>
+  <li><strong>Fast &amp; Flawless</strong> — Ericsson: Recognized for 98% system coverage and billing system defect prevention.</li>
+  <li><strong>Star Award</strong> — Amdocs: Recognized for delivering critical releases ahead of schedule while maintaining zero
+    production defects.</li>
+</ul>
+</div>
+
+<div class="keep">
+<h2>Education</h2>
+<div class="edu"><span><strong>Master of Computer Applications (MCA)</strong> — Pune University, India</span><span>2008 – 2011</span></div>
+<div class="edu"><span><strong>Bachelor of Computer Applications (BCA)</strong> — Panjab University, India</span><span>2005 – 2008</span></div>
+</div>
+
+</body>
+</html>

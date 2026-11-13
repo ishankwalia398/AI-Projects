@@ -1,0 +1,50 @@
+{
+  "projectFolders": [
+    "Project_10_(Porfolio_Builder)",
+    "Project_12_(OTT_DRM_AI_Troubleshooting_Copilot)",
+    "Project_13_Simple_CrewAI_Agent",
+    "Project_14_CrewAI_QA_Pipeline",
+    "Project_15_DeepEval(AnswerRelevancy_Test)",
+    "Project_16_DeepEvalFramework",
+    "Project_17_(QA_Sherlock)",
+    "Project_18_CrewAI(LogAnalyzer)",
+    "Project_19_Langchain(LogAnalyzer)",
+    "Project_1_(using_Skills)",
+    "Project_20_Langchain(QABugTriage)",
+    "Project_21_Career-Assistant",
+    "Project_2_(n8n_Agents)",
+    "Project_3_(AIJobTracker)",
+    "Project_4_(JobTracker)",
+    "Project_5_(ai-global-career-and-resume-suite)",
+    "Project_6_(Postman_To_Playwright)",
+    "Project_7_(LinkedInContentGenerator)",
+    "Project_8_(LangFlow_Agents)",
+    "Project_9_(RAGs)"
+  ],
+  "languages": [
+    {
+      "name": "TypeScript",
+      "percent": 45
+    },
+    {
+      "name": "Python",
+      "percent": 30
+    },
+    {
+      "name": "HTML",
+      "percent": 11
+    },
+    {
+      "name": "JavaScript",
+      "percent": 10
+    },
+    {
+      "name": "CSS",
+      "percent": 3
+    },
+    {
+      "name": "Shell",
+      "percent": 1
+    }
+  ]
+}

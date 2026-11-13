@@ -16,6 +16,10 @@
   line-height: 1.8;
 }
 
+.about-text p:last-child {
+  margin-bottom: 0;
+}
+
 .about-text strong {
   color: var(--accent-primary);
   font-weight: 600;
@@ -30,19 +34,41 @@
 
 .about-highlights h3 {
   color: var(--accent-primary);
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
   font-size: 1.3rem;
 }
 
 .about-highlights ul {
   list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
 }
 
 .about-highlights li {
-  margin-bottom: 1rem;
-  color: var(--text-secondary);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding-left: 1.5rem;
+  color: var(--text-primary);
   font-size: 0.95rem;
-  line-height: 1.6;
+  line-height: 1.5;
+}
+
+.about-highlights li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--accent-primary);
+  font-weight: 700;
+}
+
+.achievement-source {
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 @media (max-width: 968px) {

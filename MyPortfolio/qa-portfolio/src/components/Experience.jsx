@@ -68,8 +68,37 @@ function Experience() {
     }
   ]
 
+  const credentials = [
+    {
+      title: 'Certifications',
+      items: [
+        'ISTQB Foundation Level',
+        'CAST: Certified Associate in Software Testing (QAI)',
+        'ITIL V3',
+        'CCNA: Cisco Certified Network Associate',
+        'Playwright Automation (trained)'
+      ]
+    },
+    {
+      title: 'Recognition',
+      items: [
+        'Star Performer, Kaltura: 30% DRM playback improvement and zero-rollback releases',
+        'League of Extraordinaire, GlobalLogic: scaling OTT QA practices across distributed teams',
+        'Fast & Flawless, Ericsson: 98% system coverage and billing defect prevention',
+        'Star Award, Amdocs: critical releases ahead of schedule with zero production defects'
+      ]
+    },
+    {
+      title: 'Education',
+      items: [
+        'Master of Computer Applications (MCA), Pune University, 2008–2011',
+        'Bachelor of Computer Applications (BCA), Panjab University, 2005–2008'
+      ]
+    }
+  ]
+
   return (
-    <section className="experience">
+    <section className="experience" id="experience">
       <h2>Professional Experience</h2>
       <div className="experience-timeline">
         {experiences.map((exp, index) => (
@@ -92,6 +121,16 @@ function Experience() {
                 ))}
               </ul>
             </div>
+          </div>
+        ))}
+      </div>
+      <div className="credentials">
+        {credentials.map(group => (
+          <div key={group.title} className="credential-card">
+            <h3>{group.title}</h3>
+            <ul>
+              {group.items.map(item => <li key={item}>{item}</li>)}
+            </ul>
           </div>
         ))}
       </div>

@@ -7,12 +7,12 @@ export default function ThemePicker({ theme, onSelect }) {
       <button type="button" aria-pressed={theme === 'light'}
         aria-label="Light: Sand & Copper" title="Sand & Copper"
         onClick={() => onSelect('light')}>
-        <FaSun aria-hidden="true" /> Light
+        <FaSun aria-hidden="true" /> <span className="theme-label">Light</span>
       </button>
       <button type="button" aria-pressed={theme === 'dark'}
         aria-label="Dark: Black & Blue" title="Black & Blue"
         onClick={() => onSelect('dark')}>
-        <FaMoon aria-hidden="true" /> Dark
+        <FaMoon aria-hidden="true" /> <span className="theme-label">Dark</span>
       </button>
     </div>
   )

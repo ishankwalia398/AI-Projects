@@ -1,5 +1,5 @@
 .experience {
-  background: var(--bg-secondary);
+  background: var(--bg-primary);
 }
 
 .experience-timeline {
@@ -19,8 +19,12 @@
 
 .experience-item {
   position: relative;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
   padding-left: 2rem;
+}
+
+.experience-item:last-child {
+  margin-bottom: 0;
 }
 
 .experience-marker {
@@ -31,8 +35,57 @@
   height: 12px;
   background: var(--accent-primary);
   border-radius: 50%;
-  border: 3px solid var(--bg-secondary);
+  border: 3px solid var(--bg-primary);
   z-index: 1;
+}
+
+.credentials {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-top: 3rem;
+}
+
+.credential-card {
+  background: var(--bg-card);
+  padding: 1.75rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.credential-card h3 {
+  color: var(--accent-primary);
+  font-size: 1.15rem;
+  margin-bottom: 1rem;
+}
+
+.credential-card ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.credential-card li {
+  position: relative;
+  padding-left: 1.25rem;
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.credential-card li::before {
+  content: '▹';
+  position: absolute;
+  left: 0;
+  color: var(--accent-primary);
+}
+
+@media (max-width: 968px) {
+  .credentials {
+    grid-template-columns: 1fr;
+    margin-top: 2rem;
+  }
 }
 
 .experience-content {

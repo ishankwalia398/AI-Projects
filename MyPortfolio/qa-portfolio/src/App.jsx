@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
-import ThemePicker from './components/ThemePicker'
+import Nav from './components/Nav'
 import Hero from './components/Hero'
 import About from './components/About'
-import Skills from './components/Skills'
-import Projects from './components/Projects'
-import GitHub from './components/GitHub'
 import Experience from './components/Experience'
+import Projects from './components/Projects'
+import Skills from './components/Skills'
+import GitHub from './components/GitHub'
 import Contact from './components/Contact'
+import Footer from './components/Footer'
 import './App.css'
 
 function App() {
@@ -24,14 +25,17 @@ function App() {
 
   return (
     <div className="app">
-      <ThemePicker theme={theme} onSelect={setTheme} />
-      <Hero />
-      <About />
-      <Skills />
-      <Projects />
-      <GitHub />
-      <Experience />
-      <Contact />
+      <Nav theme={theme} onThemeChange={setTheme} />
+      <main>
+        <Hero />
+        <About />
+        <Experience />
+        <Projects />
+        <Skills />
+        <GitHub />
+        <Contact />
+      </main>
+      <Footer />
     </div>
   )
 }
