@@ -1,444 +1,149 @@
 ---
 name: TestPlan
-description: Create comprehensive Software Test Plans (STP) from requirements in any format - Jira tickets, Confluence URLs, documents (PDF, Word, MD), or text - and output in .md, .docx, .pdf, and .xlsx formats. ALWAYS use this skill when the user mentions test plans, STP, test planning, QA planning, testing strategy, test documentation, test design, or asks to create/generate tests from requirements, PRDs, specifications, user stories, or acceptance criteria. Also trigger when user provides a Jira ticket/Confluence page/requirement doc and wants testing documentation, asks to convert requirements into test cases, needs QA documentation, or wants to structure test scenarios. This skill focuses on backend/microservice testing with comprehensive positive, negative, edge-case, and configuration validation scenarios. Make sure to use this even if they say "create a test plan" without explicitly mentioning the skill name.
+description: Generate a Software Test Plan (STP) that follows the team's fixed Test Plan template exactly (same sections, headings, order and tables) from a PRD, specification, Jira or Confluence link, Word/.md/.txt file or pasted requirements, delivered as matching Word (.docx) and PDF files named STP_<FeatureName>_<Timestamp>. Uses strict anti-hallucination rules, asks batched clarifying questions instead of guessing, and saves checkpoints so an interrupted plan can be resumed. Use this skill whenever the user says "create a test plan", "write an STP", "STP for", "test plan for this PRD", "test plan from this Jira/Confluence page", "QA plan for this feature", or shares requirements and asks for a test plan, even without naming the skill.
 ---
 
-# TestPlan Skill
+# TestPlan
 
-Create a comprehensive Software Test Plan (STP) from various requirement sources focusing on backend/microservice testing with thorough scenario coverage including positive, negative, edge-case, and configuration validation scenarios.
+Produce a Test Plan that matches the user's template section for section, using only facts from the input. The output is one `.docx` and one `.pdf` with identical content.
 
-## Core Principles
+Bundled files (paths relative to this skill's folder):
 
-**Testing Focus:**
-- Backend and microservice (MS) logic, APIs, and data flows
-- DO NOT include frontend (FE) or UI logic, flows, or caching
-- All scenarios validate backend services, APIs, or databases
+- `references/template.md`: the template itself, for exact wording and table layout. Read it before drafting.
+- `references/template-structure.md`: what each section needs, and which content must come from the input versus the template's standard wording. Read it before drafting.
+- `references/content-schema.md`: the JSON format the generator accepts.
+- `scripts/build_test_plan.py`: validates the content and writes both files.
+- `assets/template_base.docx`: the template's Word styles, used by the script.
 
-**Scenario Coverage Philosophy:**
-- Every use case includes both positive and negative scenarios
-- Cover technical failures (database/service errors, retries)
-- Cover business logic failures (thresholds not met, missing configuration)
-- Include edge cases that unit tests may not cover
-- Validate all filtering, inclusion, exclusion logic
-- Validate all thresholds and limits affecting feature behavior
+## Anti-Hallucination Rules
+
+**Author:** Ishank Walia | **Role:** QA Lead | https://www.linkedin.com/in/ishankwalia/
+
+You are a QA assistant operating under strict verification rules.
+
+**Scope of knowledge.** Use ONLY information explicitly provided in: PRD, API documentation, logs, screenshots, test data, and user input (including fetched Jira/Confluence content).
+
+**Strict rules (mandatory)**
+1. Do NOT invent features, APIs, error codes, UI elements or behavior.
+2. Do NOT assume default or "typical" system behavior.
+3. If information is missing or unclear, state: "Insufficient information to determine."
+4. Every assertion must be traceable to the provided input (cite the source section or line where possible).
+5. If a detail is inferred, label it explicitly: "Inference (low confidence)".
+6. Output must be deterministic and repeatable.
+
+**Process (must follow in order)**
+1. Extract verifiable facts from the input.
+2. List unknown or missing information.
+3. Generate output ONLY from the Step 1 facts.
+4. Self-check for hallucinations and contradictions.
+
+If any step cannot be completed, stop and report why.
+
+**Working output format (shown in chat before the final files are generated):**
+- Verified Facts:
+- Missing / Unknown Information:
+- Generated Output:
+- Self-Validation Check:
+
+Do NOT put these four headings into the Test Plan files. Show them in chat for review only. The Word and PDF files follow the template's structure. Where information is missing, the template section says "Insufficient information to determine." and lists the open question.
+
+## Why these rules matter here
+
+A test plan is a contract for what QA will verify. An invented endpoint, error code or environment sends testers after behavior that doesn't exist and hides real gaps. An "Insufficient information to determine." line with a clear question is more useful than a confident guess, because someone can answer it. The user's template is also input: its generic process text (test design techniques, entry/exit criteria, approvals) is the team's standard practice and may be reused. Its sample facts (Restful Booker URLs, people's names, "2 Sprints") are not. `references/template-structure.md` marks which is which, section by section.
 
 ## Workflow
 
-### Step 1: Gather Requirements Source
-
-Ask the user to provide one of the following sources for PRD/Requirements:
-
-1. **Jira ID** - Jira ticket key (e.g., "PROJ-123")
-2. **Confluence URL** - Link to Confluence page with requirements
-3. **Document** - File path to requirements document (PDF, Word, MD, TXT, etc.)
-4. **Text** - Requirements provided directly in the conversation
-
-**Permission handling:** If you need access to Jira/Confluence MCP tools and don't have it, ask the user to either:
-- Grant permission to access Atlassian tools
-- Provide the requirements content manually (copy-paste or document upload)
-
-### Step 2: Read and Analyze Requirements
-
-Based on the source type, fetch and thoroughly read the requirements:
-
-**For Jira tickets:**
-- Use `mcp__atlassian__getJiraIssue` to fetch ticket details
-- Extract: summary, description, acceptance criteria, use cases, technical specs
-- Check for linked tickets or attachments with additional requirements
-- If access denied, ask user to grant permission or provide content manually
-
-**For Confluence URLs:**
-- Use `mcp__atlassian__getConfluencePage` for Confluence pages
-- Parse the content to identify requirements, acceptance criteria, specifications
-- If access denied, ask user to grant permission or provide content manually
-
-**For Documents:**
-- Use `Read` to access the file
-- Extract and structure the requirement details
-- If permission denied, ask user to paste content or grant file access
-
-**For Text:**
-- Requirements are already in the conversation
-- Parse and structure the information
-
-**Comprehensive Analysis:**
-Go through each requirement carefully and identify:
-- Business requirements and objectives
-- Technical specifications and APIs
-- Integration points and dependencies
-- Configuration parameters, flags, toggles, thresholds, limits, default values, environment variables
-- Filtering logic (inclusion/exclusion rules)
-- Thresholds or limits affecting feature behavior
-- Business rules and validation logic
-- Error handling requirements
-- Edge cases and boundary conditions
-
-### Step 3: Ask Clarifying Questions
-
-**CRITICAL: Do NOT assume or hallucinate anything.**
-
-Before proceeding, review what you've read and ask the user any questions about:
-- Ambiguous requirements or acceptance criteria
-- Missing technical details (API endpoints, data formats, error codes)
-- Unclear business logic or validation rules
-- Configuration parameters that need clarification
-- Integration points with other services
-- Expected error handling behavior
-- Edge cases not explicitly covered
-- Any assumptions you might need to make
-
-Present your questions clearly and wait for user responses before moving forward.
-
-### Step 4: Draft Test Scenario List
-
-Based on the requirements and clarifications, create a comprehensive list of test scenarios covering:
-
-**A. Positive Scenarios:**
-- Happy path with valid inputs and expected behavior
-- Successful API calls with correct responses
-- Proper data flow through the system
-
-**B. Negative Scenarios:**
-- Invalid inputs (malformed data, wrong types, out-of-range values)
-- Missing required fields or parameters
-- Unauthorized access attempts
-- Invalid state transitions
-
-**C. Technical Failure Scenarios:**
-- Database connection failures
-- Service/API unavailability or timeouts
-- Network errors and retries
-- Transaction rollbacks
-- Data consistency issues
-
-**D. Business Logic Failure Scenarios:**
-- Thresholds not met
-- Missing or invalid configuration
-- Business rules violated
-- Validation failures
-- Authorization failures based on business rules
-
-**E. Filtering & Exclusion Logic Scenarios:**
-For each filtering rule in the specification, validate:
-- Items correctly included based on criteria (completion, status, entitlement, type, etc.)
-- Items correctly excluded based on criteria
-- Behavior when all items are excluded
-- Behavior when no items match filters
-- Combination of multiple filter conditions
+Work through these stages in order. Save a checkpoint as each one completes, one save per stage (see Checkpoints).
 
-**F. Threshold & Limit Validation Scenarios:**
-For each threshold or limit, validate:
-- Behavior when threshold is met
-- Behavior when threshold is not met
-- Minimum and maximum boundary values
-- Edge cases around thresholds (just below, exactly at, just above)
+### Stage 0: Check for unfinished work
 
-**G. Configuration Validation Scenarios:**
-For EVERY configuration parameter mentioned or implied in the specification:
-- Correct/expected values (positive path)
-- Missing or unset values (default/fallback behavior)
-- Invalid, out-of-range, or unsupported values (negative path)
-- Edge cases (min/max, empty, null, special characters)
-- Cross-parameter dependencies or interactions
+Before anything else, look in the output folder (default `./test-plans/`, or the folder the user names) for `STP_*_checkpoint.json` files whose `stage` is not `files_generated`. If you find one, show a one-line summary, for example *"STP_UserLogin stopped after facts_extracted: 23 facts, 6 open questions (2 answered)"*, and offer:
 
-**Scenario Format:**
-Create a table with two columns:
-- **Test Name**: Clear, concise name describing what is being tested
-- **Test Description**: Brief description of the scenario without detailed steps
+1. **Resume** from the last completed stage.
+2. **Start fresh**, which discards the checkpoint.
 
-### Step 5: Get User Approval and Iterate
+Wait for the user's choice. If they resume, reload the facts, questions, answers and draft from the checkpoint and continue from the next stage. Don't re-ask answered questions.
 
-Present the scenario list to the user in tabular format and ask: **"Do you approve this scenario list, or would you like to add/update/delete any scenarios?"**
+When resuming, also re-read the original inputs listed in the checkpoint's `inputs`: the file paths, the URLs (re-fetch them) and the saved pasted text. The earlier session may have stopped before every fact was captured, and the source may have changed since. Keep the saved facts and their IDs. Add any facts that are missing, with sources and new IDs continuing the numbering. If the input now contradicts a saved fact, tell the user rather than silently overwriting it. If an input is no longer available, say so and continue from the saved facts and text.
 
-**A. If user approves:** Continue to Step 7
+### Stage 1: Get the input (`inputs_received`)
 
-**B. If user wants changes:** Enter an interactive loop:
+Accepted inputs, alone or combined:
 
-**Interactive Change Loop:**
-Ask the user: "What would you like to do? (Add / Update / Delete / Done)"
+- **Jira or Confluence URL**: fetch it with the Atlassian tools if they're available (issue description, acceptance criteria, comments, linked pages that are referenced). If the fetch fails or no tool is available, say so and ask the user to paste the content. Don't plan from the URL text alone.
+- **Files**: `.docx`, `.doc`, PRD documents (including PDF), `.md`, `.txt`. Read them in full. If a `.doc` can't be read, ask for a `.docx` copy or the pasted text.
+- **Text pasted in chat.**
 
-- **Add:**
-  1. Ask: "What is the test name you'd like to add?"
-  2. User provides test name
-  3. Ask: "Would you like to provide a description? (Yes / No)"
-     - If Yes: Ask for description and add test with provided name and description
-     - If No: Add test with provided name and auto-generate description based on test name
-  4. Return to "What would you like to do?" question
+If the user gave no document, link or text, ask for one and stop. Don't start drafting from the request sentence alone.
 
-- **Update:**
-  1. Ask: "Which test name would you like to update?"
-  2. User provides test name
-  3. Ask: "Do you want to update only the test name? (Yes / No)"
-     - If Yes: Ask for new test name, update name only, keep existing description
-     - If No: Ask "Do you want to update both name and description? Provide: [new name] / [new description] (leave blank to keep existing)"
-  4. Return to "What would you like to do?" question
+### Stage 2: Extract facts (`facts_extracted`)
 
-- **Delete:**
-  1. Ask: "Which test name would you like to delete?"
-  2. User provides test name
-  3. Delete the test from the list
-  4. Return to "What would you like to do?" question
+Pull out every verifiable fact and record where it came from (file and section, Jira field, line or quote). Typical facts: features and operations, endpoints and fields, validations, business rules, roles and permissions, error handling stated in the input, environments, platforms, tools, people, dates and constraints.
 
-- **Done:**
-  - Exit the loop and continue to Step 7
+Then list everything the template needs that the input doesn't answer. Use `references/template-structure.md` as the checklist: objective scope, environments and URLs, platforms and browsers, defect POCs and tool, tools, schedule dates and duration, deliverable dates, which testing types are in scope, and the feature name.
 
-Allow the user to make multiple changes in one session before moving forward.
+The feature name goes into the file names. If the input doesn't make it clear, include it in the questions.
 
-### Step 7: Final Approval
+### Stage 3: Ask, in one batch (`questions_answered`)
 
-Share the updated scenario list with the user again in tabular format (Test Name | Test Description).
+Send all open questions in a single numbered list, grouped by template section, so the user can answer in one reply. For each question say why it matters (which section it fills). Also tell the user which sections will reuse the template's standard wording, so they can object.
 
-Ask: **"Is this final scenario list approved? (Yes / No)"**
+When answers arrive, record them as facts with source `User answer Q<n>`. If the user can't answer some questions, those sections get `insufficient` blocks. That's fine, because the plan stays honest. Only ask a follow-up batch if an answer creates a real new ambiguity.
 
-- **If Yes:** Continue to Step 8
-- **If No:** Go back to Step 6 (interactive change loop)
+### Stage 4: Draft and self-check in chat (`draft_generated`)
 
-### Step 8: Generate the Test Plan Document
+Build the plan content as JSON following `references/content-schema.md`, using only Stage 2 facts, user answers and the template's standard wording. Give every block a `source`. Then show the working output in chat:
 
-Create a comprehensive test plan following this structure:
+- **Verified Facts:** the facts used, each with its source.
+- **Missing / Unknown Information:** what's still unknown and which section shows "Insufficient information to determine." for it.
+- **Generated Output:** a section-by-section summary of the draft (headings in template order, key content, tables).
+- **Self-Validation Check:** confirm all 14 template sections are present in order; no fact appears that isn't in the Verified Facts; no sample facts from the template leaked in; inferences are labelled "Inference (low confidence)"; and the content has no internal contradictions (e.g. an environment listed in Scope but missing from Test Environments).
 
-#### Document Structure
+Ask the user to confirm or correct the draft before generating files. Apply their corrections and re-run the self-check.
 
-**1. Introduction**
-- **Purpose:** Brief explanation of the test plan's purpose
-- **Scope:** Features and components covered (backend/MS focus)
-- **References:** Links or documents related to the specification (Jira tickets, Confluence pages, PRDs)
+### Stage 5: Generate the files (`files_generated`)
 
-**2. Test Items**
-- **Features to be tested:** List all features/components in scope
-- **Features not to be tested:** List what's explicitly out of scope (e.g., frontend, UI caching)
+Save the content JSON next to the checkpoint as `STP_<FeatureName>_content.json` and run:
 
-**3. Use Cases and Test Scenarios**
+```bash
+python <skill-folder>/scripts/build_test_plan.py --content <out-dir>/STP_<FeatureName>_content.json --out-dir <out-dir>
+```
 
-For each use case, include comprehensive detail:
+The script re-checks the structure before writing anything. It rejects a missing or unknown section, a block without a source, an empty section, a malformed table, or a working heading inside the file content. Then it writes `STP_<FeatureName>_<YYYYMMDD_HHMMSS>.docx` and `.pdf` with one shared timestamp.
 
-**Use Case Title**
+- **PDF engine:** Microsoft Word exports an exact copy of the `.docx` and fills in the table of contents. Without Word, a built-in renderer produces the same content and section order, and the `.docx` refreshes its table of contents when opened. Tell the user which engine was used; the script reports it.
+- **If validation fails:** fix the content and run again. Don't bypass the check.
+- **Dependencies:** `python-docx` and `reportlab`, plus `pywin32` for the Word path. If one is missing, tell the user the exact `pip install` command rather than installing silently.
 
-**Description:** What this use case represents and its business purpose
+Finally, report the two file paths, how many "Insufficient information to determine." sections remain with their questions, and the PDF engine used.
 
-**Actors:** Who/what interacts with this use case (services, APIs, users)
+## Checkpoints
 
-**Preconditions:** Required state before execution (system state, data setup, config)
+Write `<out-dir>/STP_<FeatureName>_checkpoint.json` once for every stage, as soon as that stage completes. Do this even when two stages finish back to back, for example when the user answers at once. Never skip or combine stages: if the session dies between two stages, the checkpoint must still show the last stage that actually finished. `stage` always names the last fully completed stage. Until the feature name is known, use `STP_Untitled_checkpoint.json`, then rename it. Overwrite it each time; it records the latest state, not a history.
 
-**Main Flow:**
-- Bulleted or numbered steps showing the typical execution path
-- Include API calls, data transformations, service interactions
+Read and write the checkpoint and the content JSON as UTF-8, and keep non-ASCII characters as they are: in Python, `open(path, encoding="utf-8")` and `json.dump(..., ensure_ascii=False)`. The platform default encoding (cp1252 on Windows) garbles characters such as "§" or "–" in fact sources and plan text.
 
-**Alternate Flows:**
-- Variations from the main flow (if any)
-- Optional paths or conditional logic
+```json
+{
+  "feature_name": "UserLogin",
+  "stage": "inputs_received | facts_extracted | questions_answered | draft_generated | files_generated",
+  "updated_at": "2026-11-13T14:30:00",
+  "inputs": [{"kind": "jira|confluence|file|text", "ref": "URL, path, or 'pasted text'", "summary": "one line"}],
+  "facts": [{"id": "F1", "fact": "...", "source": "PRD §2.1"}],
+  "open_questions": [{"id": "Q1", "section": "test_environments", "question": "...", "answer": null}],
+  "draft_content": null,
+  "outputs": {"docx": null, "pdf": null}
+}
+```
 
-**Postconditions / Expected Results:**
-- System state after successful execution
-- Data changes, API responses, side effects
+Store `draft_content` once Stage 4 starts, and `outputs` after Stage 5. Keep pasted input text in the checkpoint (or a sibling `STP_<FeatureName>_input.txt`) so a resumed session doesn't depend on the old chat.
 
-**Notes / Assumptions:**
-- Special considerations, dependencies, or assumptions
+## Before delivering
 
-**Test Scenarios (minimum 2-3 per use case):**
+Check every item:
 
-Present each test scenario with clear formatting:
-- Use bullets or table format
-- Write in full sentences
-- Include typical path, edge cases, and failure paths
-- Optionally use Given/When/Then format
-- **Add a line break between each scenario** - present each point as a distinct bullet, not in a row
-
-For each scenario, clearly state:
-- The filtering/threshold/business rule being validated (if applicable)
-- The expected system behavior
-- Both positive and negative outcomes
-
-**4. Configuration Validation**
-
-Create a dedicated section or table for configuration validation.
-
-For each configuration parameter from the specification:
-
-| Config Parameter | Test Scenario | Input/Condition | Expected Behavior | Type |
-|-----------------|---------------|-----------------|-------------------|------|
-| [config_name] | Correct value | [valid value] | [expected behavior] | Positive |
-| [config_name] | Missing/unset | [not set] | [default/fallback behavior] | Negative |
-| [config_name] | Invalid value | [invalid/out-of-range] | [error/rejection behavior] | Negative |
-| [config_name] | Edge case | [min/max/null/special] | [edge behavior] | Edge |
-
-**IMPORTANT:** 
-- Explicitly mention the config parameter name in each scenario description
-- Only include parameters explicitly described or clearly implied in the specification
-- Do NOT invent or assume config names not present in the spec
-
-**5. Unit Test Table (Negative Flows)**
-
-Generate a unit test table focused on negative flows:
-
-| # | Scenario | Input | Expected Output | Developer Test Name | Pass/Fail/NA |
-|---|----------|-------|-----------------|---------------------|--------------|
-| 1 | [negative scenario] | [malformed/missing/invalid input] | [error/empty/failure response] | test_[descriptive_name] | |
-| 2 | ... | ... | ... | ... | |
-
-Focus on:
-- Direct input to the service or component
-- Malformed, missing, or invalid data
-- Expected output (error codes, empty results, specific failure responses)
-- Clear developer test names
-
-**6. Dependencies**
-- External systems required for testing
-- Test data dependencies
-- Environment requirements
-- Configuration dependencies
-
-**7. Team/Responsibilities**
-- QA responsibilities
-- Dev responsibilities  
-- PM/SA responsibilities (if applicable)
-
-**8. Estimations**
-- Reasonable time estimate for test execution
-- Per use case or overall
-
-**9. Important Notes**
-- Special considerations
-- Risks or assumptions
-- Known limitations
-- Testing constraints
-
-#### Formatting Guidelines
-
-Use clear, readable formatting:
-- **Bold section titles**
-- Bulleted lists for actors, preconditions, flows, test items
-- Consistent indentation and formatting
-- Tables for test cases, scenarios, configurations, dependencies where appropriate
-- Line breaks between scenarios for clarity
-
-### Step 9: Generate Output Files
-
-Create the test plan in **FOUR** formats in the `./test-plans/` directory:
-
-**9.1 Markdown File** (`<project-name>-test-plan.md`)
-- Standard Markdown formatting
-- Tables for structured data
-- Headings for sections
-- Lists for dependencies and notes
-
-**9.2 Word Document** (`<project-name>-test-plan.docx`)
-- Use `python-docx` library
-- Apply heading styles (Heading 1, Heading 2, etc.)
-- Format tables with borders and headers
-- Include emphasis (bold, italic)
-
-**9.3 PDF File** (`<project-name>-test-plan.pdf`)
-- Convert from docx using `docx2pdf` (Windows/Mac) or `pypandoc`
-- If conversion tools unavailable, inform user
-
-**9.4 Excel Workbook** (`<project-name>-test-plan.xlsx`)
-
-Create a structured Excel workbook with multiple sheets using `openpyxl`:
-
-**Sheet 1: Test Scenarios**
-| # | Test Name | Test Description | Category | Priority |
-|---|-----------|------------------|----------|----------|
-
-**Sheet 2: Use Cases**
-| Use Case | Description | Actors | Preconditions | Main Flow | Expected Results |
-|----------|-------------|--------|---------------|-----------|------------------|
-
-**Sheet 3: Configuration Validation**
-| Config Parameter | Test Scenario | Input/Condition | Expected Behavior | Type |
-|------------------|---------------|-----------------|-------------------|------|
-
-**Sheet 4: Unit Tests (Negative Flows)**
-| # | Scenario | Input | Expected Output | Developer Test Name | Pass/Fail/NA |
-|---|----------|-------|-----------------|---------------------|--------------|
-
-**Sheet 5: Dependencies & Notes**
-| Type | Description | Impact | Owner |
-|------|-------------|--------|-------|
-
-**Document Generation Script:**
-Create a Python script to generate the .docx, .pdf, and .xlsx files. The script should:
-- Accept structured content as input (JSON or data structures)
-- Generate properly formatted documents
-- Handle errors gracefully
-- Report success/failure for each format
-
-**Required Python libraries:**
-- `python-docx` for Word documents
-- `docx2pdf` or `pypandoc` for PDF conversion
-- `openpyxl` for Excel workbooks
-
-If libraries are missing, attempt to install them (with user permission) or inform the user.
-
-### Step 10: Confirm Completion
-
-After generating all files:
-- List all four files created with their full paths
-- Confirm file sizes to ensure they were created successfully
-- Offer to make adjustments or regenerate if needed
-- Provide a summary of what was included in the test plan
-
-## Important Guidelines
-
-**Traceability:**
-- Every test scenario maps back to specific requirements
-- Reference requirement IDs, acceptance criteria, or spec sections
-- Maintain clear links between tests and sources
-
-**Thoroughness:**
-- Don't skip negative scenarios - they're as important as positive ones
-- Include edge cases that might seem obvious but need explicit validation
-- Configuration validation must be exhaustive for every parameter in the spec
-
-**Clarity:**
-- Test scenarios should be clear but high-level
-- Focus on what to test and why, not detailed step-by-step instructions
-- Use consistent terminology from the requirements
-
-**Backend Focus:**
-- All scenarios validate backend behavior, APIs, services, data flows
-- Explicitly exclude frontend/UI concerns
-- Mention API endpoints, service names, database tables where relevant
-
-## Error Handling and Permissions
-
-**Missing Requirements Source:**
-- If user doesn't provide a source, prompt them with the four options (Jira/Confluence/Document/Text)
-- Don't proceed without requirements
-
-**Access Issues:**
-- If Jira/Confluence access is denied, explain what you need and offer alternatives
-- If document reading is denied, ask to paste content or grant permission
-- Always explain the value: "I need to fetch X to understand Y for test planning"
-
-**Missing Dependencies:**
-- If Python libraries are missing, list them and ask permission to install
-- Provide pip install commands if user prefers manual installation
-- If installation fails, generate what you can and inform user of limitations
-
-**Clarification Needed:**
-- If requirements are ambiguous, always ask rather than assume
-- Document assumptions if user confirms them
-- Flag any gaps in requirements that might affect test coverage
-
-**Permission Strategy:**
-- Be specific about what you're accessing and why
-- Offer alternatives when permissions are denied
-- Batch permission requests when possible to reduce interruptions
-
-## Example Invocation
-
-**User:** "Create a test plan for Jira ticket PROJ-12345"
-
-**Assistant should:**
-1. Fetch the Jira ticket using MCP tools (or ask for permission/content)
-2. Read and analyze all requirements
-3. Ask clarifying questions about ambiguities
-4. Draft comprehensive scenario list (positive, negative, edge cases, config validation)
-5. Present scenario list and get approval
-6. Enter interactive loop for any changes user wants to make
-7. Get final approval
-8. Generate complete test plan with all sections
-9. Create all four output files (.md, .docx, .pdf, .xlsx)
-10. Report file locations and completion
-
+- [ ] All 14 template sections are present, in template order, with the template's exact headings.
+- [ ] Every statement traces to a fact, a user answer, or the template's standard wording.
+- [ ] Gaps say "Insufficient information to determine." with the open question; nothing is filled with "typical" behavior.
+- [ ] No sample facts from the template appear (Restful Booker, Devesh, Sonal, Prajeeth, herokuapp URLs, "2 Sprints").
+- [ ] The `.docx` and `.pdf` share one timestamp and were produced in the same run.

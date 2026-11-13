@@ -1,0 +1,78 @@
+{
+  "_comment": "Layout of the user's Test Case template (Test cases.xlsx), reproduced cell for cell in the generated .xlsx. Headings are copied from the template; the one misspelling ('Desciption') is corrected to 'Description'. Widths are Excel column widths (characters). A column with key null is an empty gap column the template has (kept so later columns stay in the template's positions).",
+  "template_source": "Test cases.xlsx (sheets: Main, General CRUD, TIPS, Common verification)",
+  "font": {
+    "name": "Lato",
+    "title_pt": 12,
+    "main_pt": 12,
+    "detail_header_pt": 14,
+    "detail_body_pt": 10
+  },
+  "colors": {
+    "header_fill": "FF6D01",
+    "header_text": "FFFFFF",
+    "row_fill": "F3F3F3",
+    "info_fill_odd": "FFFFFF",
+    "info_fill_even": "FEF8E3",
+    "border": "000000"
+  },
+  "main_sheet": {
+    "name": "Main",
+    "title": "Test Case Template for Project",
+    "title_cells": "C1:D1",
+    "header_label_col": "C",
+    "header_value_col": "D",
+    "header_first_row": 2,
+    "date_format": "mm/dd/yyyy",
+    "header_fields": [
+      {"key": "project_name", "label": "Project Name"},
+      {"key": "module_name", "label": "Module Name"},
+      {"key": "created_by", "label": "Created By"},
+      {"key": "created_date", "label": "Created Date"},
+      {"key": "peer_review_by", "label": "Peer Review By"},
+      {"key": "peer_reviewed_date", "label": "Peer Reviewed Date"}
+    ],
+    "summary_header_row": 10,
+    "summary_columns": [
+      {"key": "tid", "label": "Test Scenario TID", "width": 22.0},
+      {"key": "description", "label": "Test Scenario Description", "width": 70.9},
+      {"key": "priority", "label": "Priority", "width": 21.7},
+      {"key": "test_case_count", "label": "No. of Test cases", "width": 21.4},
+      {"key": "linked_document", "label": "Linked Document", "width": 40.4},
+      {"key": null, "label": "", "width": 20.3},
+      {"key": null, "label": "", "width": 25.7},
+      {"key": null, "label": "", "width": 20.4},
+      {"key": "executed_qa_name", "label": "Executed QA Name", "width": 31.9},
+      {"key": "comments", "label": "Misc (Comments)", "width": 24.9}
+    ]
+  },
+  "detail_sheet": {
+    "name": "General CRUD",
+    "header_row": 1,
+    "freeze_header": true,
+    "columns": [
+      {"key": "tid", "label": "Scenario TID", "width": 18.1},
+      {"key": "description", "label": "TestCase Description", "width": 25.0},
+      {"key": "precondition", "label": "PreCondition", "width": 21.7},
+      {"key": "steps", "label": "TestSteps", "width": 67.1},
+      {"key": "expected", "label": "Expected Result", "width": 57.2},
+      {"key": "actual_result", "label": "Actual Result", "width": 21.4},
+      {"key": "steps_to_execute", "label": "Steps to Execute", "width": 28.9},
+      {"key": "expected_2", "label": "Expected Result", "width": 20.3},
+      {"key": "actual_result_2", "label": "Actual Result", "width": 25.7},
+      {"key": "status", "label": "Status", "width": 20.4},
+      {"key": "executed_qa_name", "label": "Executed QA Name", "width": 31.9},
+      {"key": "comments", "label": "Misc (Comments)", "width": 24.9},
+      {"key": "priority", "label": "Priority", "width": 13.0},
+      {"key": "is_automated", "label": "Is Automated", "width": 20.0}
+    ]
+  },
+  "execution_fields": [
+    "actual_result",
+    "steps_to_execute",
+    "expected_2",
+    "actual_result_2",
+    "status",
+    "executed_qa_name"
+  ]
+}

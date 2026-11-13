@@ -1,227 +1,71 @@
-# TestPlan Skill - Creation Prompts and Discussion
+# Task: Create a Claude skill named "TestPlan"
 
-This document contains all the prompts and discussions used during the creation of the TestPlan skill.
+## Step 1: Learn the template
+Read the attached Test Plan Template fully. Treat its sections, headings, order, tables and wording style as the fixed structure for every test plan the skill produces. If the template is missing or unreadable, stop and ask me for it.
 
-## Initial Creation Prompt
+## Step 2: Build the skill
+Create a skill named `TestPlan` with the behavior below.
 
-**User Request:**
-Create a skill that generates comprehensive Software Test Plans (STP) from requirements in multiple formats (Jira tickets, Confluence pages, documents, or text). The skill should:
-- Read requirements from various sources (Jira, Confluence, documents, or text)
-- Focus on backend/microservice testing
-- Generate comprehensive test scenarios including positive, negative, edge-case, and configuration validation scenarios
-- Create output in multiple formats: .md, .docx, .pdf, and .xlsx
-- Include interactive approval process for test scenarios
+### 2.1 Purpose
+Generate a Test Plan that follows the attached template exactly (same sections, headings and order), based on a specification, PRD or requirements input supplied by the user.
 
-## Key Requirements Discussed
+### 2.2 Accepted inputs
+- Jira or Confluence URL
+- Files: Word (.doc/.docx), PRD, .md, .txt
+- Text pasted directly in chat
+- Any combination of the above
 
-### 1. Requirement Sources
-- Support multiple input sources: Jira tickets, Confluence URLs, document files, and direct text
-- Use MCP tools for Atlassian integration
-- Handle permission issues gracefully with alternatives
-- Extract all relevant details from requirements
+### 2.3 Missing input
+If the user provides no document, link or text, ask for one before doing anything else. Do not start drafting.
 
-### 2. Backend/Microservice Focus
-- All test scenarios must focus on backend logic, APIs, and data flows
-- Explicitly exclude frontend (FE) or UI logic
-- Cover service interactions, database operations, and API endpoints
+### 2.4 Unclear or missing information
+Never guess, assume or fill gaps with "typical" behavior. Ask the user to clarify, and batch all open questions into one list rather than asking one at a time. Apply the Anti-Hallucination Rules below throughout.
 
-### 3. Comprehensive Scenario Coverage
-- **Positive Scenarios**: Happy path with valid inputs and expected behavior
-- **Negative Scenarios**: Invalid inputs, missing fields, unauthorized access
-- **Technical Failure Scenarios**: Database failures, service unavailability, network errors
-- **Business Logic Failure Scenarios**: Thresholds not met, missing configuration, validation failures
-- **Filtering & Exclusion Logic**: Validate inclusion/exclusion criteria
-- **Threshold & Limit Validation**: Test boundary values and edge cases
-- **Configuration Validation**: Test every configuration parameter with valid, invalid, and edge cases
+### 2.5 Anti-Hallucination Rules (embed verbatim in the skill)
 
-### 4. Interactive Approval Process
-The skill implements a multi-step approval workflow:
+**Author:** Ishank Walia | **Role:** QA Lead | https://www.linkedin.com/in/ishankwalia/
 
-**Step 1**: Present initial scenario list in tabular format
-- Ask user: "Do you approve this scenario list, or would you like to add/update/delete any scenarios?"
+You are a QA assistant operating under strict verification rules.
 
-**Step 2**: If changes needed, enter interactive loop with options:
-- **Add**: Add new test scenarios with name and optional description
-- **Update**: Modify existing scenario name and/or description
-- **Delete**: Remove scenarios from the list
-- **Done**: Exit the loop and continue
+**Scope of knowledge.** Use ONLY information explicitly provided in: PRD, API documentation, logs, screenshots, test data, and user input (including fetched Jira/Confluence content).
 
-**Step 3**: Final approval before document generation
-- Show updated scenario list
-- Ask: "Is this final scenario list approved? (Yes / No)"
+**Strict rules (mandatory)**
+1. Do NOT invent features, APIs, error codes, UI elements or behavior.
+2. Do NOT assume default or "typical" system behavior.
+3. If information is missing or unclear, state: "Insufficient information to determine."
+4. Every assertion must be traceable to the provided input (cite the source section or line where possible).
+5. If a detail is inferred, label it explicitly: "Inference (low confidence)".
+6. Output must be deterministic and repeatable.
 
-### 5. Document Generation
-Generate test plan in four formats:
+**Process (must follow in order)**
+1. Extract verifiable facts from the input.
+2. List unknown or missing information.
+3. Generate output ONLY from the Step 1 facts.
+4. Self-check for hallucinations and contradictions.
 
-**Markdown (.md):**
-- Standard Markdown formatting with tables and headings
+If any step cannot be completed, stop and report why.
 
-**Word Document (.docx):**
-- Use python-docx library
-- Apply proper heading styles and formatting
-- Include tables with borders
+**Working output format (shown in chat before the final files are generated):**
+- Verified Facts:
+- Missing / Unknown Information:
+- Generated Output:
+- Self-Validation Check:
 
-**PDF (.pdf):**
-- Convert from docx using docx2pdf or pypandoc
-- Formatted and professional layout
+Do NOT put these four headings into the Test Plan files. Show them in chat for review only. The Word and PDF files follow the template's structure. Where information is missing, the template section says "Insufficient information to determine." and lists the open question.
 
-**Excel Workbook (.xlsx):**
-- Multiple sheets: Test Scenarios, Use Cases, Configuration Validation, Unit Tests, Dependencies
-- Structured data in tables
-- Use openpyxl library
+### 2.6 Final output
+1. Produce the Test Plan in the same format as the template.
+2. Deliver BOTH a Word file (.docx) and a PDF (.pdf), with identical content.
+3. File names: `STP_<FeatureName>_<Timestamp>` where `<Timestamp>` is `YYYYMMDD_HHMMSS`. Example: `STP_UserLogin_20261113_143000.docx` and `.pdf`.
+4. If the feature name can't be determined from the input, ask the user.
+5. Before delivering, confirm that every template section is present and no section contains unsourced content.
 
-### 6. Test Plan Structure
-The generated test plan includes:
+### 2.7 Interruption and resume
+- After each major stage (inputs received, facts extracted, open questions answered, draft generated, files generated), save progress to a checkpoint file (`STP_<FeatureName>_checkpoint.json`) recording the stage reached, extracted facts, open questions with the user's answers, and the draft so far.
+- If the session is interrupted, or the user comes back to an unfinished plan, offer two options:
+  1. **Resume** from the last completed stage (show a one-line summary of where it stopped).
+  2. **Start fresh** (discard the checkpoint).
+- Don't continue until the user chooses.
 
-1. **Introduction**: Purpose, scope, references
-2. **Test Items**: Features to be tested and not tested
-3. **Use Cases and Test Scenarios**: 
-   - Use case title, description, actors, preconditions
-   - Main flow and alternate flows
-   - Postconditions/expected results
-   - Notes/assumptions
-   - Test scenarios (minimum 2-3 per use case)
-4. **Configuration Validation**: Detailed table for each config parameter
-5. **Unit Test Table**: Focused on negative flows
-6. **Dependencies**: External systems, test data, environment requirements
-7. **Team/Responsibilities**: QA, Dev, PM/SA roles
-8. **Estimations**: Time estimates for test execution
-9. **Important Notes**: Special considerations, risks, assumptions
-
-### 7. Configuration Validation Emphasis
-For EVERY configuration parameter mentioned or implied in the specification:
-- Test correct/expected values (positive path)
-- Test missing or unset values (default/fallback behavior)
-- Test invalid, out-of-range, or unsupported values (negative path)
-- Test edge cases (min/max, empty, null, special characters)
-- Test cross-parameter dependencies
-
-### 8. No Assumptions or Hallucination
-**CRITICAL RULE**: Before proceeding with scenario generation, the skill must:
-- Review what was read from requirements
-- Ask clarifying questions about:
-  - Ambiguous requirements
-  - Missing technical details
-  - Unclear business logic
-  - Configuration parameters needing clarification
-  - Expected error handling behavior
-  - Edge cases not explicitly covered
-- Wait for user responses before moving forward
-- **NEVER assume or hallucinate details not in the requirements**
-
-### 9. Error Handling and Permissions
-- Handle missing requirement sources appropriately
-- Offer alternatives when MCP tool access is denied
-- Check for missing Python libraries and ask permission to install
-- Batch permission requests to reduce interruptions
-- Always explain why specific permissions are needed
-
-## Design Philosophy
-
-### Traceability
-- Every test scenario maps back to specific requirements
-- Reference requirement IDs, acceptance criteria, or spec sections
-- Maintain clear links between tests and sources
-
-### Thoroughness
-- Don't skip negative scenarios - they're as important as positive ones
-- Include edge cases that might seem obvious but need explicit validation
-- Configuration validation must be exhaustive for every parameter in the spec
-
-### Clarity
-- Test scenarios should be clear but high-level
-- Focus on what to test and why, not detailed step-by-step instructions
-- Use consistent terminology from the requirements
-
-### Backend Focus
-- All scenarios validate backend behavior, APIs, services, data flows
-- Explicitly exclude frontend/UI concerns
-- Mention API endpoints, service names, database tables where relevant
-
-## Technical Implementation
-
-### Python Libraries Required
-- `python-docx`: For Word document generation
-- `docx2pdf` or `pypandoc`: For PDF conversion
-- `openpyxl`: For Excel workbook generation
-
-### MCP Tools Used
-- `mcp__atlassian__getJiraIssue`: Fetch Jira ticket details
-- `mcp__atlassian__getConfluencePage`: Fetch Confluence page content
-
-### Output Directory
-- All files created in `./test-plans/` directory
-- File naming: `<project-name>-test-plan.[md|docx|pdf|xlsx]`
-
-## Example Invocation Flow
-
-**User**: "Create a test plan for Jira ticket PROJ-12345"
-
-**Skill Flow**:
-1. Fetch the Jira ticket using MCP tools (or ask for permission/content)
-2. Read and analyze all requirements
-3. Ask clarifying questions about ambiguities
-4. Draft comprehensive scenario list (positive, negative, edge cases, config validation)
-5. Present scenario list in table format and get approval
-6. Enter interactive loop for any changes user wants to make
-7. Get final approval
-8. Generate complete test plan with all sections
-9. Create all four output files (.md, .docx, .pdf, .xlsx)
-10. Report file locations and completion
-
-## Iterative Improvements During Creation
-
-### Enhancement 1: Configuration Validation Section
-Added dedicated section for configuration validation with explicit table format showing:
-- Config parameter name
-- Test scenario type
-- Input/condition
-- Expected behavior
-- Scenario type (Positive/Negative/Edge)
-
-### Enhancement 2: Interactive Change Loop
-Refined the approval workflow to include:
-- Add scenarios with optional auto-generated descriptions
-- Update scenarios with options to change name only or both name and description
-- Delete scenarios with confirmation
-- Multiple changes in one session before proceeding
-
-### Enhancement 3: Filtering Logic Validation
-Added specific guidance for testing filtering and exclusion logic:
-- Items correctly included based on criteria
-- Items correctly excluded based on criteria
-- Behavior when all items are excluded
-- Behavior when no items match filters
-- Combination of multiple filter conditions
-
-### Enhancement 4: Threshold Validation
-Added specific scenarios for testing thresholds and limits:
-- Behavior when threshold is met
-- Behavior when threshold is not met
-- Minimum and maximum boundary values
-- Edge cases around thresholds (just below, exactly at, just above)
-
-## Key Skill Characteristics
-
-**Skill Name**: TestPlan
-
-**Description**: Create comprehensive Software Test Plans (STP) from requirements in any format - Jira tickets, Confluence URLs, documents (PDF, Word, MD), or text - and output in .md, .docx, .pdf, and .xlsx formats. ALWAYS use this skill when the user mentions test plans, STP, test planning, QA planning, testing strategy, test documentation, test design, or asks to create/generate tests from requirements, PRDs, specifications, user stories, or acceptance criteria.
-
-**Primary Triggers**:
-- User mentions: "test plan", "STP", "test planning", "QA planning", "testing strategy"
-- User provides requirements and asks to create tests
-- User provides Jira ticket/Confluence page and wants testing documentation
-- User asks to convert requirements into test cases
-- User needs QA documentation or wants to structure test scenarios
-
-**Core Strengths**:
-- Multi-source requirement ingestion
-- Comprehensive scenario coverage (positive, negative, technical failures, business logic failures)
-- Configuration and threshold validation focus
-- Interactive approval workflow
-- Multi-format output generation
-- Backend/microservice testing specialization
-
----
-
-**End of TestPlan Skill Creation Documentation**
+## Step 3: Deliver the skill
+Show me the SKILL.md (name, description, instructions) for review before finalizing it. Include a short description that makes the skill trigger on phrases like "create a test plan", "STP", and "test plan for this PRD".

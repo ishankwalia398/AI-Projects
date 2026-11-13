@@ -1,638 +1,220 @@
 ---
-name: TestCase
-description: Create detailed test cases from Software Test Plans (STP) in Jira and Practitest formats. Use when the user wants to convert test plans, test scenarios, or requirements into detailed test cases with steps, or when they mention creating test cases, test case templates, Jira test cases, Practitest test cases, or converting a test plan into executable test cases. Also trigger when user provides a test plan document, Confluence page, Jira ticket, or Excel file and asks to generate test cases from it.
+name: TestCases
+description: Generate detailed, traceable Test Cases in the team's Test Case template (header block, scenario summary, and the TestCase Description / PreCondition / TestSteps / Expected Result table) from an approved Test Plan plus the specification, PRD, Jira/Confluence link or pasted requirements, delivered as an Excel spreadsheet (.xlsx) in the template's own layout, named TestCases_<FeatureName>_<Timestamp>.xlsx. Requires BOTH a Test Plan and a spec, follows strict anti-hallucination rules, checks every in-scope Test Plan item is covered, asks batched questions instead of guessing, and saves checkpoints so interrupted work can be resumed. Use this skill whenever the user says "create test cases", "write test cases from the test plan", "test cases for this PRD", "generate test cases from the STP", or hands over a test plan and requirements and wants test cases, even without naming the skill.
 ---
 
-# TestCase Skill
+# TestCases
 
-Create detailed, step-by-step test cases from Software Test Plans (STP) or test scenarios. Generate test cases in both Jira and Practitest formats with outputs in PDF, Excel, and CSV.
+Produce test cases in the user's Test Case template, consistent with the approved Test Plan and traceable to the specification. The output is one Excel workbook (`.xlsx`) that reproduces the template's sheets. Don't produce Word or PDF files.
 
-## Core Principles
+Bundled files (paths relative to this skill's folder):
 
-**Test Case Conversion Philosophy:**
-- Convert each test scenario from the test plan into a detailed, executable test case
-- Each test case includes numbered steps with clear actions and expected results
-- Generate both Jira-format and Practitest-format test cases
-- All test cases must be reviewable and editable before file generation
+- `references/template.md`: the template's sheets, columns, writing style (the TIPS sheet) and what each column may contain. Read it before drafting.
+- `references/content-schema.md`: the JSON format the generator accepts, and the rules it enforces.
+- `scripts/build_test_cases.py`: validates the content (including coverage) and writes the `.xlsx`.
+- `assets/template_layout.json`: the template's sheet names, cell positions, columns, widths, font and colours.
 
-**Output Formats:**
-- Excel workbook with separate sheets for categories
-- CSV files (one for Jira, one for Practitest)
-- PDF document with formatted tables
+## Anti-Hallucination Rules
+
+**Author:** Ishank Walia | **Role:** QA Lead | https://www.linkedin.com/in/ishankwalia/
+
+You are a QA assistant operating under strict verification rules.
+
+**Scope of knowledge.** Use ONLY information explicitly provided in: Test Plan, PRD, API documentation, logs, screenshots, test data, and user input (including fetched Jira/Confluence content).
+
+**Strict rules (mandatory)**
+1. Do NOT invent features, APIs, error codes, UI elements, test data values or behavior.
+2. Do NOT assume default or "typical" system behavior.
+3. If information is missing or unclear, state: "Insufficient information to determine."
+4. Every test case and every expected result must be traceable to the provided input (cite the source section, requirement ID or Test Plan item).
+5. If a detail is inferred, label it explicitly: "Inference (low confidence)".
+6. Output must be deterministic and repeatable.
+
+**Process (must follow in order)**
+1. Extract verifiable facts from the Test Plan and the specification.
+2. List unknown or missing information.
+3. Generate test cases ONLY from the Step 1 facts.
+4. Self-check for hallucinations, contradictions, and gaps (every in-scope requirement/Test Plan item has at least one test case; no test case lacks a source).
+
+If any step cannot be completed, stop and report why.
+
+**Working output format (shown in chat for review before the final files are generated):**
+- Verified Facts:
+- Missing / Unknown Information:
+- Generated Output:
+- Self-Validation Check:
+
+Do NOT put these four headings into the spreadsheet. Show them in chat for review only. The `.xlsx` contains only the test cases in the agreed format. Where an expected result can't be determined from the sources, the cell says "Insufficient information to determine." and the open question is listed.
+
+## Why these rules matter here
+
+Testers execute test cases literally. An invented status code, field limit or test data value becomes a false failure, or worse, a false pass. A cell that says "Insufficient information to determine. Open question: …" can be answered by a product owner. The Test Plan sets what is in scope and the spec says how the system behaves; each test case needs both. That is why both inputs are mandatory and why a conflict between them is the user's call, never yours. The template's sample (Restful Booker, Postman scripts, status codes) shows the style only, never facts.
+
+## The template
+
+The built-in template is the user's `Test cases.xlsx`, described in `references/template.md`. It has three parts:
+
+1. A header block.
+2. A scenario summary table.
+3. A detailed test case table.
+
+The generator writes them into the template's two sheets, in the template's cell positions:
+- **Main:** the header block and the scenario summary.
+- **General CRUD:** the detailed test cases.
+
+Use the built-in template unless the user supplies a different one for this run.
+
+- **The user supplies a different template:** show its columns and ask whether to use them for this run. If they confirm, write a copy of `assets/template_layout.json` with those columns next to the checkpoint and pass it with `--layout`.
+- **The user rejects the built-in template and has none:** don't invent a format. Offer this column set and wait for confirmation: Test Case ID | Module/Feature | Test Scenario | Preconditions | Test Steps | Test Data | Expected Result | Priority | Type (Functional/Negative/Boundary/etc.) | Requirement/Test Plan Reference.
 
 ## Workflow
 
-### Step 1: Gather Test Plan Source
+Work through these stages in order. Save a checkpoint as each one completes, one save per stage (see Checkpoints).
 
-Ask the user to provide the Software Test Plan (STP) from one of the following sources:
+### Stage 0: Check for unfinished work
 
-1. **Confluence URL** - Link to Confluence page with test plan/scenarios
-2. **Jira ID** - Jira ticket key containing test scenarios or test plan
-3. **Document** - File path to test plan (PDF, Word, Excel, MD, etc.)
-4. **Text** - Test plan content provided directly in the conversation
+Before anything else, look in the output folder (default `./test-cases/`, or the folder the user names) for `TestCases_*_checkpoint.json` files whose `stage` is not `files_generated`. If you find one, show a one-line summary, for example *"TestCases_UserLogin stopped after facts_extracted: 31 facts, 12 coverage items, 5 open questions (2 answered)"*, and offer:
 
-**MCP Tool Access:**
-- If Jira/Confluence MCP tools are available, use them to fetch content directly
-- If access is denied or tools unavailable, ask the user to either:
-  - Grant permission to access Atlassian tools
-  - Provide connection details (site URL, credentials if needed)
-  - Provide the test plan content manually (copy-paste or document upload)
+1. **Resume** from the last completed stage.
+2. **Start fresh**, which discards the checkpoint.
 
-**Example prompt for missing access:**
-> "I need to access Jira/Confluence to read the test plan. Please either grant permission to the Atlassian MCP tools, or provide the test plan content manually."
+Wait for the user's choice. If they resume, reload the facts, coverage items, questions, answers, conflict decisions and draft, and continue from the next stage. Don't re-ask answered questions.
 
-### Step 2: Read and Analyze the Test Plan
+When resuming, also re-read the original inputs listed in the checkpoint's `inputs`: the file paths, the URLs (re-fetch them) and the saved pasted text. The earlier session may have stopped before every fact was captured, and the sources may have changed. Keep saved facts and their IDs. Add missing facts with sources and new IDs. If a source now contradicts a saved fact, tell the user rather than silently overwriting it. If an input is gone, say so and continue from what was saved.
 
-Based on the source type, fetch and thoroughly read the test plan:
+### Stage 1: Get BOTH inputs (`inputs_received`)
 
-**For Jira tickets:**
-- Use `mcp__atlassian__getJiraIssue` to fetch ticket details
-- Extract: test scenarios, acceptance criteria, use cases, test descriptions
-- Check for linked tickets or attachments with additional test details
+Both inputs are required:
 
-**For Confluence URLs:**
-- Use `mcp__atlassian__getConfluencePage` to fetch page content
-- Parse test scenarios, use cases, test requirements
+1. **Test Plan**: `.docx`, `.doc` or `.pdf`, usually an `STP_<Feature>_<timestamp>` file from the TestPlan skill. Read it in full, tables included. If the plan comes in another format (`.md`, `.txt`, pasted), ask whether to accept it rather than refusing or silently accepting.
+2. **Specification / PRD / requirements**, in any of these forms or combined:
+   - **Jira or Confluence URL:** fetch it with the Atlassian tools if available. If the fetch fails, say so and ask for the pasted content. Never work from the URL text alone.
+   - **Files:** `.docx`, `.doc`, PRD documents including PDF, `.md`, `.txt`.
+   - **Text pasted in chat.**
 
-**For Documents:**
-- Use `Read` tool to access the file
-- Extract test scenarios, use cases, test plan sections
+If one or both are missing, say exactly which one is missing, ask for it, and stop. Don't start on test cases with only one of the two.
 
-**For Text:**
-- Test plan content is already in the conversation
-- Parse and structure the test scenarios
+If you can't tell which document is the Test Plan and which is the spec, ask.
 
-**Analysis Focus:**
-Extract from the test plan:
-- Test scenario names and descriptions
-- Use cases with main flows and alternate flows
-- Preconditions for each scenario
-- Expected behaviors and results
-- Test data requirements
-- Priority levels (if specified)
-- Test categories or groupings
+### Stage 2: Extract facts (`facts_extracted`)
 
-### Step 3: Ask Clarifying Questions
+From the **Test Plan**, record:
+- **Coverage items:** every in-scope item from Scope and Inclusions, each with an id such as `TP-INC-1` or `TP-SCO-3`.
+- **Out-of-scope items.**
+- **Supporting details:** environments, the tools named for execution, priorities, and test design techniques.
 
-**CRITICAL: Do NOT assume or hallucinate anything.**
+From the **spec**, record every verifiable behavior:
+- operations and endpoints;
+- fields and their validations and limits;
+- business rules;
+- roles and permissions;
+- the status and error codes it defines;
+- test data it provides.
 
-Before proceeding, review what you've read and ask the user any questions about:
+Give each fact its source: file and section, requirement ID, Jira field, or quote.
 
-**Test Case Details:**
-- Missing preconditions for any scenario
-- Ambiguous expected results
-- Unclear test steps or flows
-- Missing priority information
-- Environment specifications (if not in the test plan)
-- Test data requirements
-- Any assumptions needed for test execution
+Then compare the two sources. A **conflict** is any point where they disagree. Examples: the plan includes something the spec excludes, or two different limits or codes are given for the same thing. List each conflict with both sources. Don't resolve it.
 
-**Categorization:**
-- How should test cases be grouped/categorized? (by feature, by use case, by priority, etc.)
-- Should negative and positive test cases be in separate categories?
+Finally, list what the template needs that the inputs don't answer:
+- Project Name, Module Name, Created By;
+- the feature name, for the file names;
+- priorities, if neither input gives them;
+- expected results the spec doesn't define, such as error responses or success bodies;
+- test data values the inputs don't provide.
 
-**Numbering/Naming:**
-- What format for Test Case IDs? (e.g., TC001, TEST-001, sequential numbers)
-- Should test case names follow any specific convention?
+### Stage 3: Ask, in one batch (`questions_answered`)
 
-**Status Field:**
-- What should be the default status? (e.g., "Draft", "Ready for Review", "Not Started")
+Send one numbered list, grouped as:
+- **Conflicts:** which source takes precedence, one item per conflict.
+- **Missing information**, by test scenario or template field.
 
-Present your questions clearly and wait for user responses before moving forward.
+For each item, say what it affects. Record answers as facts with source `User answer Q<n>`, and conflict decisions under `conflicts`.
 
-### Step 4: Generate Test Cases
+Anything left unanswered becomes "Insufficient information to determine. Open question: …" in the affected cell. This includes an unresolved conflict: cite both sources in the open question rather than picking one. Ask a follow-up batch only if an answer opens a genuinely new ambiguity.
 
-Convert each test scenario from the test plan into detailed test cases.
+### Stage 4: Draft and self-check in chat (`draft_generated`)
 
-**Test Case Generation Rules:**
+Build the content JSON following `references/content-schema.md`, using only Stage 2 facts, user answers and conflict decisions. Organise test cases into scenarios that follow the Test Plan's own grouping (its Inclusions groups or Scope items). Write each case in the template's style from `references/template.md` ("Verify that …", numbered steps, expected results numbered to match). For each spec behavior, cover:
+- the positive path;
+- each negative path and boundary the spec actually defines.
 
-**A. One Test Case Per Scenario:**
-- Each test scenario becomes one test case (unless scenario is very complex)
-- For complex scenarios with multiple flows, create separate test cases for each flow
+Don't add cases for behavior the spec doesn't describe. If the Test Plan calls for a kind of testing (say, boundary testing) and the spec gives no limits, write the case and put the open question in its expected result.
 
-**B. Test Case Structure - Jira Format:**
-```
-Test Case ID: [Sequential or user-defined format]
-Test Case Name: [Clear, descriptive name from scenario]
-Description: [What this test case validates]
-Preconditions: [Setup required before execution]
-Priority: [High/Medium/Low based on scenario]
-Status: [Default status as agreed]
-Environment: [Test environment - e.g., Staging, QA, Production]
+Leave the execution columns empty: Actual Result, the Steps to Execute / Expected Result / Actual Result group, Status, and Executed QA Name.
 
-Steps:
-Step #1
-  Step Name: [Action to perform]
-  Expected Result: [What should happen]
-  Actual Result: [Leave blank for execution]
-  
-Step #2
-  Step Name: [Next action]
-  Expected Result: [What should happen]
-  Actual Result: [Leave blank for execution]
-  
-[Continue for all steps...]
+Then show the working output in chat:
+
+- **Verified Facts:** the facts used, each with its source.
+- **Missing / Unknown Information:** what's still unknown, and which cells say "Insufficient information to determine.".
+- **Generated Output:** the scenario summary (TID, description, priority, number of cases) and the test cases. Show them in full, or as a compact table if there are many, plus the path of the saved content JSON.
+- **Self-Validation Check:**
+  - a coverage table: each coverage item and the cases that cover it;
+  - no case lacks a source;
+  - no status code, error code, field limit or test data value appears that isn't in the Verified Facts;
+  - none of the template's sample content leaked in (Restful Booker, herokuapp, Postman steps when the plan names no tool);
+  - inferences are labelled "Inference (low confidence)";
+  - conflicts were handled as the user decided.
+
+Ask the user to confirm or correct before generating the spreadsheet. Apply their corrections and re-run the self-check.
+
+### Stage 5: Generate the spreadsheet (`files_generated`)
+
+Save the content as `TestCases_<FeatureName>_content.json` next to the checkpoint and run:
+
+```bash
+python <skill-folder>/scripts/build_test_cases.py --content <out-dir>/TestCases_<FeatureName>_content.json --out-dir <out-dir>
 ```
 
-**C. Test Case Structure - Practitest Format:**
-```
-Name: [Test case name]
-Description: [What this test validates]
-Preconditions: [Setup required]
-Status: [Default status]
+The script checks the content before writing anything and stops on any of these:
+- a coverage item no case covers;
+- a case without a source;
+- an unknown coverage id;
+- an execution column that has been filled;
+- an "Insufficient information" cell without its open question;
+- a working heading in the content.
 
-Steps:
-Step #1
-  Step Name: [Action to perform]
-  Expected Result: [What should happen]
-  
-Step #2
-  Step Name: [Next action]
-  Expected Result: [What should happen]
-  
-[Continue for all steps...]
-```
+If it stops, fix the content and run again. Never bypass the check. It then writes `TestCases_<FeatureName>_<YYYYMMDD_HHMMSS>.xlsx` with the template's formatting: orange header rows, the Lato font, the template's column widths, and wrapped cells sized to their text. It numbers the scenarios, counts the cases per scenario, and adds `Ref: <source>` to each case's Misc (Comments). It also freezes the test-case header row.
 
-**D. Writing Test Steps:**
+- **Output format:** only the `.xlsx`. Don't convert it to Word or PDF, even as a preview.
+- **Dependency:** `openpyxl`. If it's missing, give the user `pip install openpyxl` rather than installing it silently.
 
-Each step should be:
-- **Actionable**: Clear instruction on what to do
-- **Specific**: Include specific values, fields, buttons, navigation
-- **Sequential**: Steps build on previous steps logically
-- **Verifiable**: Expected result is observable and measurable
+Report:
+- the `.xlsx` path and its two sheet names;
+- the scenario and test case counts;
+- the coverage result;
+- how many cells still say "Insufficient information to determine." and their questions.
 
-**Example of good test steps:**
-```
-Step #1
-  Step Name: Navigate to login page at https://app.example.com/login
-  Expected Result: Login page displays with username, password fields and "Sign In" button
+## Checkpoints
 
-Step #2
-  Step Name: Enter username "testuser@example.com" in the username field
-  Expected Result: Username field accepts input and displays entered email
+Write `<out-dir>/TestCases_<FeatureName>_checkpoint.json` once for every stage, as soon as that stage completes. Do this even when two stages finish back to back, for example when the user answers at once. Never skip or combine stages: if the session dies between two stages, the checkpoint must still show the last stage that actually finished. `stage` always names the last fully completed stage. Until the feature name is known, use `TestCases_Untitled_checkpoint.json`, then rename it. Overwrite it each time; it records the latest state, not a history.
 
-Step #3
-  Step Name: Enter password "Test123!" in the password field
-  Expected Result: Password field accepts input and displays masked characters
-
-Step #4
-  Step Name: Click the "Sign In" button
-  Expected Result: User is authenticated and redirected to dashboard page with welcome message "Welcome, Test User"
+```json
+{
+  "feature_name": "UserLogin",
+  "stage": "inputs_received | facts_extracted | questions_answered | draft_generated | files_generated",
+  "updated_at": "2026-11-13T14:30:00",
+  "inputs": [{"role": "test_plan|spec", "kind": "file|jira|confluence|text", "ref": "path, URL or 'pasted text'", "summary": "one line"}],
+  "facts": [{"id": "F1", "fact": "...", "source": "PRD §2.1"}],
+  "coverage_items": [{"id": "TP-INC-1", "text": "...", "source": "Test Plan – Inclusions"}],
+  "conflicts": [{"id": "C1", "test_plan": "...", "spec": "...", "decision": null}],
+  "open_questions": [{"id": "Q1", "affects": "scenario 2 / header", "question": "...", "answer": null}],
+  "draft_content": null,
+  "outputs": {"xlsx": null}
+}
 ```
 
-**E. Handling Different Scenario Types:**
+Store `draft_content` once Stage 4 starts, and `outputs` after Stage 5. Keep pasted input text in the checkpoint, or in a sibling `TestCases_<FeatureName>_input.txt`, so a resumed session doesn't depend on the old chat.
 
-**Positive Scenarios:**
-- Steps follow the happy path
-- Expected results show successful outcomes
-- Focus on correct functionality
+Read and write the checkpoint and the content JSON as UTF-8, and keep non-ASCII characters as they are: in Python, `open(path, encoding="utf-8")` and `json.dump(..., ensure_ascii=False)`. The platform default encoding (cp1252 on Windows) garbles characters such as "§" or "–".
 
-**Negative Scenarios:**
-- Steps include invalid inputs or incorrect actions
-- Expected results show appropriate error messages or rejections
-- Include specific error codes/messages if known
+## Before delivering
 
-**Edge Cases:**
-- Steps test boundary conditions
-- Expected results cover edge behavior
-- Include maximum/minimum values
+Check every item:
 
-### Step 5: Present Test Cases for Review
-
-After generating all test cases, present them in a **clear tabular format** for user review.
-
-**Summary Table Format:**
-
-| Test Case ID | Test Case Name | Category | Priority | # of Steps | Status |
-|--------------|----------------|----------|----------|------------|--------|
-| TC001 | Valid user login with correct credentials | Authentication | High | 5 | Draft |
-| TC002 | Invalid login with wrong password | Authentication | High | 4 | Draft |
-| TC003 | ... | ... | ... | ... | ... |
-
-Below the summary, show the **full detailed test cases** with all steps for each test case.
-
-**Format for detailed view:**
-```
-═══════════════════════════════════════════════════════════════
-TEST CASE ID: TC001
-═══════════════════════════════════════════════════════════════
-Name: Valid user login with correct credentials
-Description: Verify that a user can successfully log in using valid credentials
-Preconditions: 
-  - User account exists with username "testuser@example.com" and password "Test123!"
-  - Application is accessible at https://app.example.com
-Priority: High
-Status: Draft
-Environment: QA
-
-STEPS:
-───────────────────────────────────────────────────────────────
-Step #1
-  Step Name: Navigate to login page
-  Expected Result: Login page displays with username and password fields
-  Actual Result: [Blank]
-───────────────────────────────────────────────────────────────
-Step #2
-  Step Name: Enter username "testuser@example.com"
-  Expected Result: Username field accepts input
-  Actual Result: [Blank]
-───────────────────────────────────────────────────────────────
-[Continue for all steps...]
-```
-
-### Step 6: Get User Approval and Iterate
-
-Ask the user: **"Do you approve this test case list? (Yes / No)"**
-
-Provide clear options for the user.
-
-**A. If user approves (says "Yes"):** Continue to Step 7
-
-**B. If user does not approve (says "No"):** Enter interactive change loop
-
-### Step 6.1: Interactive Change Loop
-
-Ask the user: **"What would you like to do? (Add / Update / Delete / Done)"**
-
-**Option 1: Add**
-1. Ask: "What is the Test Case Name or Test Case ID you'd like to add?"
-2. User provides the identifier
-3. Ask all necessary details:
-   - Test Case Name (if only ID provided)
-   - Description: "What should this test case validate?"
-   - Preconditions: "What setup is required before executing this test?"
-   - Priority: "What is the priority? (High / Medium / Low)"
-   - Category: "What category does this belong to?"
-   - Steps: "Please provide the test steps. You can provide them as:
-     - Numbered list of actions
-     - Detailed steps with expected results
-     - I can also generate steps based on a description of what to test"
-4. After receiving information, create the test case and add it to the list
-5. Show the newly added test case in the same detailed format
-6. Return to "What would you like to do?" question
-
-**Option 2: Update**
-1. Ask: "Which Test Case ID or Test Case Name would you like to update?"
-2. User provides the identifier
-3. Ask: "What would you like to update?"
-   - Option A: "Test Case Name only"
-   - Option B: "Description"
-   - Option C: "Preconditions"
-   - Option D: "Priority"
-   - Option E: "Steps" (add/modify/delete specific steps)
-   - Option F: "Multiple fields"
-4. Based on selection, ask for the specific updates
-5. Update the test case
-6. Show the updated test case in full detail
-7. Return to "What would you like to do?" question
-
-**Option 3: Delete**
-1. Ask: "Which Test Case ID or Test Case Name would you like to delete?"
-2. User provides the identifier
-3. Confirm: "Are you sure you want to delete [Test Case Name]? (Yes / No)"
-4. If Yes, delete the test case from the list
-5. Show updated summary table
-6. Return to "What would you like to do?" question
-
-**Option 4: Done**
-- Exit the change loop
-- Show the final updated summary table
-- Continue to Step 7 (Final Approval)
-
-**Important:** Allow multiple changes in one session. The loop continues until the user selects "Done".
-
-### Step 7: Final Approval
-
-Show the updated test case list in both summary table and detailed format.
-
-Ask: **"Is this final test case list approved? (Yes / No)"**
-
-- **If Yes:** Continue to Step 8 (Generate Output Files)
-- **If No:** Go back to Step 6.1 (Interactive Change Loop)
-
-### Step 8: Generate Output Files
-
-Create test case files in **THREE** formats: Excel, CSV, and PDF.
-
-Create output directory: `./test-cases/`
-
-#### 8.1 Excel Workbook (`<project-name>-test-cases.xlsx`)
-
-Generate an Excel workbook with separate sheets for categories.
-
-**Sheet Structure:**
-
-**Master Sheet: "All Test Cases - Jira Format"**
-| Test Case ID | Name | Description | Preconditions | Step # | Step Name | Expected Result | Actual Result | Priority | Status | Environment |
-|--------------|------|-------------|---------------|--------|-----------|-----------------|---------------|----------|--------|-------------|
-
-**Master Sheet: "All Test Cases - Practitest Format"**
-| Name | Description | Preconditions | Step # | Step Name | Expected Result | Status |
-|------|-------------|---------------|--------|-----------|-----------------|--------|
-
-**Category Sheets (one per category):**
-- Each category gets its own sheet (e.g., "Authentication", "API Tests", "Integration")
-- Same column structure as master sheet
-- Contains only test cases for that category
-
-**Excel Formatting:**
-- Header row with bold text and colored background
-- Borders on all cells
-- Auto-fit column widths
-- Freeze top row for scrolling
-- Merged cells for Test Case ID, Name, Description, etc. (one value per test case, spans multiple step rows)
-
-**Python Implementation:**
-Use `openpyxl` library:
-- Create workbook with multiple sheets
-- Apply cell styles (Font, PatternFill, Alignment, Border)
-- Merge cells for test case-level fields
-- Set column widths appropriately
-
-#### 8.2 CSV Files
-
-Generate **TWO** CSV files:
-
-**File 1: `<project-name>-test-cases-jira.csv`**
-- Jira format with all fields
-- Headers: Test Case ID, Name, Description, Preconditions, Step #, Step Name, Expected Result, Actual Result, Priority, Status, Environment
-- One row per step (test case fields repeated for each step row)
-
-**File 2: `<project-name>-test-cases-practitest.csv`**
-- Practitest format with subset of fields
-- Headers: Name, Description, Preconditions, Step #, Step Name, Expected Result, Status
-- One row per step (test case fields repeated for each step row)
-
-**CSV Format:**
-- UTF-8 encoding
-- Comma delimiter
-- Quoted fields to handle commas in content
-- No blank rows between test cases
-
-**Python Implementation:**
-Use built-in `csv` module:
-```python
-import csv
-
-with open(filepath, 'w', newline='', encoding='utf-8') as f:
-    writer = csv.writer(f, quoting=csv.QUOTE_ALL)
-    writer.writerow(headers)
-    writer.writerows(data)
-```
-
-#### 8.3 PDF Document (`<project-name>-test-cases.pdf`)
-
-Generate a formal PDF document with formatted tables.
-
-**PDF Structure:**
-
-**Cover Page:**
-- Title: "[Project Name] - Test Cases"
-- Subtitle: "Generated from Software Test Plan"
-- Date: [Current date]
-- Summary: Total number of test cases, categories, priority breakdown
-
-**Table of Contents:**
-- List of all test cases with page numbers
-- Grouped by category
-
-**Test Case Details (one per page or section):**
-Each test case presented in a formatted layout:
-
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Test Case ID: TC001                    Priority: High
-Name: Valid user login with correct credentials
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Description:
-Verify that a user can successfully log in using valid credentials
-
-Preconditions:
-• User account exists with username "testuser@example.com"
-• Application is accessible at https://app.example.com
-
-Environment: QA                        Status: Draft
-
-Test Steps:
-┌─────┬──────────────────────────────────────────────────────┐
-│ #   │ Step Name & Expected Result                          │
-├─────┼──────────────────────────────────────────────────────┤
-│  1  │ Step: Navigate to login page                         │
-│     │ Expected: Login page displays                        │
-├─────┼──────────────────────────────────────────────────────┤
-│  2  │ Step: Enter username "testuser@example.com"          │
-│     │ Expected: Username field accepts input               │
-└─────┴──────────────────────────────────────────────────────┘
-
-Actual Results: _________________________________________
-```
-
-**Python Implementation:**
-Use `reportlab` library:
-- Create PDF canvas
-- Add title, headers, tables
-- Format with borders and styling
-- Page breaks between test cases or sections
-
-#### 8.4 Document Generation Script
-
-Create a Python script `generate_test_case_docs.py` that:
-- Accepts test case data as structured input (JSON or Python data structures)
-- Generates all three formats (Excel, CSV, PDF)
-- Handles errors gracefully
-- Reports success/failure for each format
-
-**Required Python libraries:**
-- `openpyxl` for Excel
-- `csv` (built-in) for CSV
-- `reportlab` for PDF
-
-**Script Execution:**
-```python
-python generate_test_case_docs.py
-```
-
-**If libraries are missing:**
-- Attempt to install them with user permission: `pip install openpyxl reportlab`
-- If installation fails, inform user and generate what's possible
-- Provide pip install commands for manual installation
-
-### Step 9: Confirm Completion
-
-After generating all files:
-
-**File Summary:**
-```
-═══════════════════════════════════════════════════════════════
-Test Cases Generation Complete
-═══════════════════════════════════════════════════════════════
-
-Generated Files:
-  ✓ Excel (Jira & Practitest): <path>/test-cases.xlsx (XX,XXX bytes)
-  ✓ CSV Jira Format: <path>/test-cases-jira.csv (X,XXX bytes)
-  ✓ CSV Practitest Format: <path>/test-cases-practitest.csv (X,XXX bytes)
-  ✓ PDF Document: <path>/test-cases.pdf (XXX,XXX bytes)
-
-Summary:
-  • Total Test Cases: XX
-  • Categories: [List categories]
-  • Priority Breakdown: X High, X Medium, X Low
-  
-All files are ready for import into Jira and Practitest!
-═══════════════════════════════════════════════════════════════
-```
-
-**Offer Next Steps:**
-- "Would you like me to make any adjustments to the test cases?"
-- "Would you like me to regenerate any specific format?"
-- "Do you need help importing these into Jira or Practitest?"
-
-## Important Guidelines
-
-### Test Case Quality
-
-**Completeness:**
-- Every test case must have a clear name, description, and preconditions
-- All steps must have expected results
-- No placeholder text like "TBD" or "TODO" in final output
-
-**Clarity:**
-- Test steps should be unambiguous and executable by any QA engineer
-- Use specific values, not generic placeholders
-- Reference exact UI elements, API endpoints, or data values
-
-**Traceability:**
-- Each test case maps back to a specific scenario or requirement in the test plan
-- Test Case ID should follow consistent numbering scheme
-- Category/grouping should be logical and consistent
-
-**Executability:**
-- Steps are in logical sequence
-- Prerequisites are clearly stated
-- Expected results are observable and verifiable
-- Environment is specified
-
-### Format Consistency
-
-**Jira vs Practitest:**
-- Jira format includes: Test Case ID, Actual Result, Priority, Environment
-- Practitest format excludes: Test Case ID, Actual Result, Priority, Environment
-- All other fields are present in both formats
-
-**Step Numbering:**
-- Steps are numbered sequentially starting from 1
-- Step numbers are consistent across all formats
-- Each step has both Step Name (action) and Expected Result
-
-**Data Integrity:**
-- Same test case content in Excel, CSV, and PDF
-- No data loss between formats
-- Special characters handled correctly (escaped in CSV, rendered in PDF)
-
-### Error Handling and Permissions
-
-**Missing Test Plan Source:**
-- If user doesn't provide a source, prompt them with the four options (Jira/Confluence/Document/Text)
-- Don't proceed without a test plan
-
-**Access Issues:**
-- If Jira/Confluence access is denied, explain what you need and offer alternatives
-- If document reading is denied, ask to paste content or grant permission
-- Always explain the value: "I need to fetch X to extract test scenarios"
-
-**Missing Dependencies:**
-- If Python libraries are missing, list them and ask permission to install
-- Provide pip install commands if user prefers manual installation
-- If installation fails, generate what you can and inform user of limitations
-
-**Clarification Needed:**
-- If test scenarios are ambiguous, always ask rather than assume
-- Document assumptions if user confirms them
-- Flag any gaps in the test plan that might affect test case quality
-
-**Permission Strategy:**
-- Be specific about what you're accessing and why
-- Offer alternatives when permissions are denied
-- Batch permission requests when possible to reduce interruptions
-
-## Example Invocation
-
-**User:** "Create test cases from this test plan: [Confluence URL]"
-
-**Assistant should:**
-1. Fetch the test plan from Confluence using MCP tools (or ask for permission/content)
-2. Read and analyze all test scenarios
-3. Ask clarifying questions about ambiguities or missing details
-4. Generate detailed test cases for each scenario with steps and expected results
-5. Present test cases in summary table + detailed format
-6. Get user approval or enter change loop
-7. Get final approval
-8. Generate all output files (Excel with category sheets, 2 CSV files, PDF)
-9. Report file locations and summary statistics
-
-## Advanced Features
-
-### Handling Large Test Plans
-
-**For test plans with 50+ scenarios:**
-- Generate test cases in batches (e.g., 10-20 at a time by category)
-- Show progress after each batch
-- Allow user to approve each batch before proceeding to next
-- This prevents overwhelming the user with hundreds of test cases at once
-
-### Test Case Optimization
-
-**Identifying Redundant Test Cases:**
-- If multiple scenarios test very similar functionality, suggest combining them
-- Flag potential duplicate test cases for user review
-- Ask: "TC005 and TC012 seem to test the same flow. Should they be combined?"
-
-**Step Reuse:**
-- If common steps appear in multiple test cases (e.g., "Login"), offer to create a reference
-- Suggest: "Many test cases start with login steps. Would you like me to reference a 'Common Login Steps' precondition instead?"
-
-### Integration Hints
-
-**Jira Import:**
-- CSV can be imported via Jira's bulk import feature
-- Excel can be copy-pasted into Jira test case fields
-- Mention: "To import into Jira, use the CSV file with Jira's bulk import tool"
-
-**Practitest Import:**
-- Practitest supports CSV import with specific column mapping
-- Mention: "To import into Practitest, use the Practitest CSV file and map columns during import"
-
-## Troubleshooting
-
-**If test plan has no clear scenarios:**
-- Ask user: "The test plan seems to contain only requirements, not test scenarios. Would you like me to generate test scenarios first, or work directly from requirements?"
-
-**If test steps are too high-level:**
-- Break down each step into smaller sub-steps
-- Example: "Verify login" → 3 steps: Navigate, Enter credentials, Click login, Verify success
-
-**If expected results are missing:**
-- Ask user for expected behavior
-- Don't guess or hallucinate expected results
-
-**If categories are unclear:**
-- Propose categorization based on test plan structure
-- Ask user to confirm or provide their own categories
-
-## Tips for Users
-
-**Best Practices:**
-- Provide detailed test plans with clear scenarios and expected behaviors
-- Specify priority and environment information in the test plan
-- Review test cases carefully in the approval step
-- Use the Excel sheets for test execution tracking (fill in Actual Results column)
-
-**Common Workflows:**
-- **From test plan to execution:** Generate test cases → Review → Generate files → Import to Jira/Practitest → Execute
-- **Iterative refinement:** Generate initial test cases → Review → Update specific cases → Re-generate files
-- **Category-based generation:** Large test plan → Generate by category → Review each category → Combine all
-
----
-
-**End of TestCase Skill**
+- [ ] Both a Test Plan and a spec were used; conflicts were decided by the user or left as open questions.
+- [ ] Every in-scope Test Plan item is covered by at least one case (the script's coverage check passed).
+- [ ] Every case and expected result traces to a fact, a user answer or a conflict decision; `Ref:` appears on every case.
+- [ ] Gaps say "Insufficient information to determine. Open question: …"; nothing is filled with "typical" behavior.
+- [ ] The execution columns are empty: Actual Result, the Steps to Execute group, Status and Executed QA Name.
+- [ ] No template sample content appears (Restful Booker, herokuapp URLs, sample booking data, Postman steps when the plan names no tool).
+- [ ] The only output is `TestCases_<FeatureName>_<YYYYMMDD_HHMMSS>.xlsx`, with the sheets Main and General CRUD. No Word or PDF file was produced.
