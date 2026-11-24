@@ -40,7 +40,7 @@ LinkedIn - https://www.linkedin.com/in/ishankwalia/
 	✔ Using Vibe Coding/Promprt Engineering
 		- AI job Tracker
 		- Job Finder and Tracker 
-		- AI Global Career & Resume Suite
+		- AI Global Career & Profile Suite
 		- Postman to Playwright
 		- LinkedIn Content Generator
 	✔ Using RAG
