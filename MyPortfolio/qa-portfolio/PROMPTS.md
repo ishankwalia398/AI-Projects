@@ -17,7 +17,7 @@ This document contains all the prompts used to build the professional QA portfol
 @My_Info.md This is my information. Build me a QA portfolio website to showcase my skills — I'll share it with HRs and on LinkedIn for brand building; my main goal is to get a job. Highlight my projects and my GitHub repositories. Build it in React, and we'll push to Vercel. Also create a "brand camp" section showing my GitHub contribution calendar and daily-coding activity.
 ```
 
-**What it did:** Created a React portfolio with Vite, all sections (Hero, About, Skills, Projects, GitHub, Experience, Contact), integrated resume data, and set up for Vercel deployment.
+**What it did:** Created a React portfolio with Vite, all sections (Hero, About, Skills, Projects, GitHub, Experience, Contact), integrated profile data, and set up for Vercel deployment.
 
 ---
 
@@ -25,7 +25,7 @@ This document contains all the prompts used to build the professional QA portfol
 
 **Prompt:**
 ```
-@Ishank_Walia_Resume.pdf and @My_Info.md This is my information and @photo\ Add this image as the hero photo. And highlight my GitHub repositories and contribution calendar prominently — projects first, then GitHub, clearly visible." Build me a QA portfolio website to showcase my skills — I'll share it with HRs and on LinkedIn for brand building; my main goal is to get a job. Highlight my projects and my GitHub repositories. Build it in React, and we'll push to Vercel. Also create a "brand camp" section showing my GitHub contribution calendar and daily-coding activity.
+@Ishank_Walia_Profile.pdf and @My_Info.md This is my information and @photo\ Add this image as the hero photo. And highlight my GitHub repositories and contribution calendar prominently — projects first, then GitHub, clearly visible." Build me a QA portfolio website to showcase my skills — I'll share it with HRs and on LinkedIn for brand building; my main goal is to get a job. Highlight my projects and my GitHub repositories. Build it in React, and we'll push to Vercel. Also create a "brand camp" section showing my GitHub contribution calendar and daily-coding activity.
 ```
 
 **What it did:** Added professional photo, created GitHub activity section with contribution calendar, organized projects prominently.
@@ -214,7 +214,7 @@ also the fire icon in the contribution streak should be beside the heading of th
 
 These prompts can be used as a template for building similar portfolio websites. Key patterns:
 
-1. **Start with data sources** - Provide resume, info files, photos
+1. **Start with data sources** - Provide profile, info files, photos
 2. **Be specific about goals** - "to get a job", "share with HRs"
 3. **Reference examples** - Share screenshots or URLs for design inspiration
 4. **Iterate with screenshots** - Show what's broken with images

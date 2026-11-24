@@ -79,7 +79,7 @@ No additional environment variables or deployment settings are required for them
 If you want to add your deployed portfolio URL to:
 - LinkedIn profile (Featured section)
 - GitHub profile README
-- Resume
+- Profile
 
 ### Share on LinkedIn
 Use this template:

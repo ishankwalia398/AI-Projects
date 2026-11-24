@@ -62,7 +62,7 @@ Your professional QA portfolio website showcasing 14+ years of experience with m
 
 ## 📊 Key Highlights
 
-### Resume Data Integrated ✅
+### Profile Data Integrated ✅
 - DRM validation expertise (Widevine, FairPlay, PlayReady)
 - 30% DRM playback success increase
 - 60% production defect reduction
@@ -165,9 +165,9 @@ Check it out: [YOUR_VERCEL_URL]
 Open to new opportunities! 🎯
 ```
 
-### 4. Update Resume
+### 4. Update Profile
 Add portfolio URL to:
-- Resume header
+- Profile header
 - LinkedIn profile (Featured section)
 - GitHub profile README
 - Email signature
