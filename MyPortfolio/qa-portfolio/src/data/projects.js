@@ -96,7 +96,7 @@ const PROJECT_DETAILS = {
   },
   'Project_21_Career-Assistant': {
     name: 'Career Assistant',
-    description: 'React and FastAPI career workspace for profile ingestion, candidate management, job tracking and AI-generated documents.'
+    description: 'React and FastAPI career workspace for résumé ingestion, candidate profiles, job tracking and AI-generated documents.'
   }
 }
 
