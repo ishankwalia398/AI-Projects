@@ -51,7 +51,7 @@
   gap: 0.75rem;
 }
 
-.nav-resume {
+.nav-profile {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
@@ -66,7 +66,7 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.nav-resume:hover {
+.nav-profile:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 14px color-mix(in srgb, var(--accent-primary) 35%, transparent);
 }

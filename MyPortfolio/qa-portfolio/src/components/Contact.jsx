@@ -1,12 +1,12 @@
 import { FaGithub, FaLinkedin, FaEnvelope, FaFileDownload } from 'react-icons/fa'
-import { EMAIL, GITHUB_URL, GITHUB_USER, LINKEDIN_URL, RESUME_URL } from '../profile'
+import { EMAIL, GITHUB_URL, GITHUB_USER, LINKEDIN_URL, PROFILE_PDF_NAME, PROFILE_URL } from '../profile'
 import './Contact.css'
 
 const CONTACT_LINKS = [
   { label: 'Email', value: EMAIL, href: `mailto:${EMAIL}`, Icon: FaEnvelope },
   { label: 'LinkedIn', value: 'linkedin.com/in/ishankwalia', href: LINKEDIN_URL, Icon: FaLinkedin, external: true },
   { label: 'GitHub', value: `github.com/${GITHUB_USER}`, href: GITHUB_URL, Icon: FaGithub, external: true },
-  { label: 'Résumé', value: 'Download PDF', href: RESUME_URL, Icon: FaFileDownload, download: true }
+  { label: 'Profile', value: 'Download PDF', href: PROFILE_URL, Icon: FaFileDownload, download: PROFILE_PDF_NAME }
 ]
 
 function Contact() {
@@ -31,7 +31,7 @@ function Contact() {
               href={href}
               className="contact-link"
               {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-              {...(download ? { download: true } : {})}
+              {...(download ? { download } : {})}
             >
               <Icon className="contact-icon" aria-hidden="true" />
               <div>

@@ -1,5 +1,5 @@
 import { FaGithub, FaLinkedin, FaEnvelope, FaFileDownload } from 'react-icons/fa'
-import { EMAIL, GITHUB_URL, LINKEDIN_URL, RESUME_URL } from '../profile'
+import { EMAIL, GITHUB_URL, LINKEDIN_URL, PROFILE_PDF_NAME, PROFILE_URL } from '../profile'
 import './Hero.css'
 
 const STATS = [
@@ -38,8 +38,8 @@ function Hero() {
             ))}
           </div>
           <div className="hero-links">
-            <a href={RESUME_URL} download className="hero-link primary">
-              <FaFileDownload aria-hidden="true" /> Download Résumé
+            <a href={PROFILE_URL} download={PROFILE_PDF_NAME} className="hero-link primary">
+              <FaFileDownload aria-hidden="true" /> Download Profile
             </a>
             <a href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer" className="hero-link">
               <FaLinkedin aria-hidden="true" /> LinkedIn

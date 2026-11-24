@@ -1,6 +1,6 @@
-// Prints resume/resume.html to PDF with headless Chrome (or Edge) and copies it
+// Prints profile/profile.html to PDF with headless Chrome (or Edge) and copies it
 // to MyPortfolio/ and the portfolio's public/ folder.
-//   node resume/build-resume.mjs
+//   node profile/build-profile.mjs
 import { execFileSync } from 'node:child_process'
 import { copyFileSync, existsSync, mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -9,9 +9,9 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const portfolioRoot = path.resolve(here, '..')
-const source = path.join(here, 'resume.html')
-const output = path.join(portfolioRoot, 'Ishank_Walia_Resume.pdf')
-const publicCopy = path.join(portfolioRoot, 'qa-portfolio', 'public', 'Ishank_Walia_Resume.pdf')
+const source = path.join(here, 'profile.html')
+const output = path.join(portfolioRoot, 'Ishank_Walia_Profile.pdf')
+const publicCopy = path.join(portfolioRoot, 'qa-portfolio', 'public', 'Ishank_Walia_Profile.pdf')
 
 const browsers = [
   process.env.CHROME_PATH,
@@ -24,7 +24,7 @@ const browser = browsers.find(candidate => existsSync(candidate))
 if (!browser) throw new Error('Chrome or Edge not found; set CHROME_PATH.')
 
 // A throwaway profile so this works while the normal browser is open.
-const profile = mkdtempSync(path.join(tmpdir(), 'resume-chrome-'))
+const profile = mkdtempSync(path.join(tmpdir(), 'profile-chrome-'))
 try {
   execFileSync(browser, [
     '--headless=new',

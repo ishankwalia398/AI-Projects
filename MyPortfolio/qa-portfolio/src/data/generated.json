@@ -24,7 +24,7 @@
   "languages": [
     {
       "name": "TypeScript",
-      "percent": 45
+      "percent": 44
     },
     {
       "name": "Python",
@@ -32,7 +32,7 @@
     },
     {
       "name": "HTML",
-      "percent": 11
+      "percent": 12
     },
     {
       "name": "JavaScript",

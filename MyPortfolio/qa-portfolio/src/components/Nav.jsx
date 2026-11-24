@@ -1,6 +1,6 @@
 import { FaFileDownload } from 'react-icons/fa'
 import ThemePicker from './ThemePicker'
-import { RESUME_URL } from '../profile'
+import { PROFILE_PDF_NAME, PROFILE_URL } from '../profile'
 import './Nav.css'
 
 const LINKS = [
@@ -23,8 +23,8 @@ export default function Nav({ theme, onThemeChange }) {
         </ul>
         <div className="nav-actions">
           <ThemePicker theme={theme} onSelect={onThemeChange} />
-          <a href={RESUME_URL} download className="nav-resume">
-            <FaFileDownload aria-hidden="true" /> Résumé
+          <a href={PROFILE_URL} download={PROFILE_PDF_NAME} className="nav-profile">
+            <FaFileDownload aria-hidden="true" /> Profile
           </a>
         </div>
       </nav>
